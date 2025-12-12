@@ -568,6 +568,11 @@ legend.section-header {
     min-height: 400px;
 }
 
+.xml-preview .declaration {
+    color: #9ca3af;
+    font-style: italic;
+}
+
 .xml-preview .tag {
     color: #a5b4fc;
 }
@@ -582,6 +587,15 @@ legend.section-header {
 
 .xml-preview .comment {
     color: #6ee7b7;
+    font-style: italic;
+}
+
+.xml-preview .cdata {
+    color: #9ca3af;
+}
+
+.xml-preview .cdata-content {
+    color: #fdba74;
 }
 
 /* ============================================

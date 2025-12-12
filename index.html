@@ -1197,12 +1197,21 @@
 
         function highlightXml(xml) {
             return xml
+                // Escape HTML entities
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
+                // XML declaration <?xml ... ?>
+                .replace(/(&lt;\?xml[\s\S]*?\?&gt;)/g, '<span class="declaration">$1</span>')
+                // Comments <!-- ... -->
                 .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="comment">$1</span>')
-                .replace(/(&lt;\/?[\w:]+)/g, '<span class="tag">$1</span>')
-                .replace(/(\w+)=/g, '<span class="attr">$1</span>=')
+                // CDATA sections <![CDATA[ ... ]]>
+                .replace(/(&lt;!\[CDATA\[)([\s\S]*?)(\]\]&gt;)/g, '<span class="cdata">$1</span><span class="cdata-content">$2</span><span class="cdata">$3</span>')
+                // Opening and closing tags with namespace support
+                .replace(/(&lt;\/?)([\w][\w:-]*)/g, '$1<span class="tag">$2</span>')
+                // Attribute names (word characters and colons for namespaced attrs)
+                .replace(/([\w:-]+)=/g, '<span class="attr">$1</span>=')
+                // Attribute values in double quotes
                 .replace(/"([^"]*)"/g, '"<span class="value">$1</span>"');
         }
 
