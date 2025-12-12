@@ -81,7 +81,7 @@ flowchart TD
 
 - Copy XML to clipboard
 - Download XML file
-- Generate PowerShell deployment script
+- Generate PowerShell deployment script (with JSON logging)
 
 ### Quality of Life
 
@@ -158,12 +158,13 @@ flowchart LR
 
 ### PowerShell Script
 
-1. Click **Download PS1**
+1. Click **Download Deploy Script**
 2. Run as SYSTEM on target device:
    ```powershell
    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File "Apply-AssignedAccess.ps1"
    ```
-3. Reboot
+3. Review the JSON log file created in the script directory
+4. Reboot
 
 ### Provisioning Package (PPKG)
 
