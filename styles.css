@@ -870,6 +870,7 @@ footer span {
 
 /* Label with tooltip */
 label.with-tooltip {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 6px;

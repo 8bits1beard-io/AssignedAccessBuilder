@@ -137,12 +137,37 @@
                             <!-- Edge Configuration -->
                             <div id="edgeConfig" role="group" aria-label="Microsoft Edge settings">
                                 <div class="form-group">
+                                    <label for="edgeSourceType" class="with-tooltip">
+                                        Source
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Source" aria-describedby="edgeSourceType-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeSourceType-tooltip" role="tooltip"><strong>Web URL:</strong> Load a website (https://example.com). <strong>Local File:</strong> Load an HTML file from the device (C:\Kiosk\page.html).</span>
+                                    </label>
+                                    <select id="edgeSourceType" onchange="updateEdgeSourceUI(); updatePreview();" aria-describedby="edgeSourceType-tooltip">
+                                        <option value="url">Web URL</option>
+                                        <option value="file">Local File</option>
+                                    </select>
+                                </div>
+
+                                <div id="edgeUrlConfig" class="form-group">
                                     <label for="edgeUrl" class="with-tooltip">
                                         URL
                                         <button type="button" class="tooltip-icon" aria-label="Help for URL" aria-describedby="edgeUrl-tooltip">?</button>
-                                        <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The page Edge will load in kiosk mode. Web URL: https://example.com. Local file: file:///C:/Path/To/File.html. Use %20 for spaces in file paths.</span>
+                                        <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The web address Edge will load in kiosk mode. Include the full URL with https://.</span>
                                     </label>
-                                    <input type="url" id="edgeUrl" placeholder="https://example.com or file:///C:/path/to/file.html" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
+                                    <input type="url" id="edgeUrl" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
+                                </div>
+
+                                <div id="edgeFileConfig" class="form-group hidden" aria-hidden="true">
+                                    <label for="edgeFilePath" class="with-tooltip">
+                                        File Path
+                                        <button type="button" class="tooltip-icon" aria-label="Help for File Path" aria-describedby="edgeFilePath-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeFilePath-tooltip" role="tooltip">Full path to an HTML file on the local device. Use forward slashes. Spaces in the path will be automatically converted to %20.</span>
+                                    </label>
+                                    <input type="text" id="edgeFilePath" placeholder="C:/Kiosk/index.html" onchange="updatePreview()" aria-describedby="edgeFilePath-tooltip">
+                                    <p class="hint" style="margin-top: 6px;">
+                                        <strong>Tip:</strong> Use forward slashes (/) in the path. Spaces are converted automatically.<br>
+                                        Example: <code>C:/Program Files/Kiosk/page.html</code> → <code>file:///C:/Program%20Files/Kiosk/page.html</code>
+                                    </p>
                                 </div>
 
                                 <div class="form-group">
@@ -618,6 +643,37 @@
             win32Config.setAttribute('aria-hidden', appType !== 'win32');
         }
 
+        function updateEdgeSourceUI() {
+            const sourceType = document.getElementById('edgeSourceType').value;
+            const urlConfig = document.getElementById('edgeUrlConfig');
+            const fileConfig = document.getElementById('edgeFileConfig');
+
+            urlConfig.classList.toggle('hidden', sourceType !== 'url');
+            fileConfig.classList.toggle('hidden', sourceType !== 'file');
+
+            urlConfig.setAttribute('aria-hidden', sourceType !== 'url');
+            fileConfig.setAttribute('aria-hidden', sourceType !== 'file');
+        }
+
+        function getEdgeUrl() {
+            const sourceType = document.getElementById('edgeSourceType').value;
+            if (sourceType === 'file') {
+                let filePath = document.getElementById('edgeFilePath').value.trim();
+                if (!filePath) return 'file:///C:/Kiosk/index.html';
+                // Convert backslashes to forward slashes
+                filePath = filePath.replace(/\\/g, '/');
+                // Encode spaces and special characters in path
+                filePath = filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+                // Ensure it starts with file:///
+                if (!filePath.toLowerCase().startsWith('file:///')) {
+                    filePath = 'file:///' + filePath;
+                }
+                return filePath;
+            } else {
+                return document.getElementById('edgeUrl').value || 'https://www.microsoft.com';
+            }
+        }
+
         function updateBreakoutUI() {
             const enabled = document.getElementById('enableBreakout').checked;
             const breakoutConfig = document.getElementById('breakoutConfig');
@@ -958,7 +1014,7 @@
             let xml = '';
 
             if (appType === 'edge') {
-                const url = document.getElementById('edgeUrl').value || 'https://www.microsoft.com';
+                const url = getEdgeUrl();
                 const kioskType = document.getElementById('edgeKioskType').value;
                 const inPrivate = document.getElementById('edgeInPrivate').checked;
 
@@ -1075,9 +1131,17 @@
             if (state.mode === 'single') {
                 const appType = document.getElementById('appType').value;
                 if (appType === 'edge') {
-                    const url = document.getElementById('edgeUrl').value;
-                    if (!url) {
-                        errors.push('Edge URL is required');
+                    const sourceType = document.getElementById('edgeSourceType').value;
+                    if (sourceType === 'url') {
+                        const url = document.getElementById('edgeUrl').value;
+                        if (!url) {
+                            errors.push('Edge URL is required');
+                        }
+                    } else {
+                        const filePath = document.getElementById('edgeFilePath').value;
+                        if (!filePath) {
+                            errors.push('Edge file path is required');
+                        }
                     }
                 } else if (appType === 'uwp') {
                     const aumid = document.getElementById('uwpAumid').value;
@@ -1306,7 +1370,21 @@ catch {
                         // Parse Edge arguments
                         const urlMatch = classicArgs.match(/--kiosk\s+(\S+)/);
                         if (urlMatch) {
-                            document.getElementById('edgeUrl').value = urlMatch[1];
+                            const extractedUrl = urlMatch[1];
+                            // Check if it's a file:// URL
+                            if (extractedUrl.toLowerCase().startsWith('file:///')) {
+                                document.getElementById('edgeSourceType').value = 'file';
+                                // Decode the file path and remove file:/// prefix
+                                let filePath = extractedUrl.substring(8); // Remove 'file:///'
+                                filePath = decodeURIComponent(filePath);
+                                document.getElementById('edgeFilePath').value = filePath;
+                                document.getElementById('edgeUrl').value = '';
+                            } else {
+                                document.getElementById('edgeSourceType').value = 'url';
+                                document.getElementById('edgeUrl').value = extractedUrl;
+                                document.getElementById('edgeFilePath').value = '';
+                            }
+                            updateEdgeSourceUI();
                         }
 
                         document.getElementById('edgeKioskType').value =
@@ -1394,9 +1472,13 @@ catch {
                     generateGuid();
                     document.getElementById('displayName').value = '';
                     document.getElementById('appType').value = 'edge';
+                    document.getElementById('edgeSourceType').value = 'url';
                     document.getElementById('edgeUrl').value = '';
+                    document.getElementById('edgeFilePath').value = '';
                     document.getElementById('edgeKioskType').value = 'fullscreen';
                     document.getElementById('edgeInPrivate').checked = true;
+                    updateAppTypeUI();
+                    updateEdgeSourceUI();
                     break;
 
                 case 'edgeFullscreen':
@@ -1405,9 +1487,13 @@ catch {
                     generateGuid();
                     document.getElementById('displayName').value = 'Kiosk';
                     document.getElementById('appType').value = 'edge';
+                    document.getElementById('edgeSourceType').value = 'url';
                     document.getElementById('edgeUrl').value = 'https://www.microsoft.com';
+                    document.getElementById('edgeFilePath').value = '';
                     document.getElementById('edgeKioskType').value = 'fullscreen';
                     document.getElementById('edgeInPrivate').checked = true;
+                    updateAppTypeUI();
+                    updateEdgeSourceUI();
                     break;
 
                 case 'edgePublic':
@@ -1416,9 +1502,13 @@ catch {
                     generateGuid();
                     document.getElementById('displayName').value = 'Public Browsing';
                     document.getElementById('appType').value = 'edge';
+                    document.getElementById('edgeSourceType').value = 'url';
                     document.getElementById('edgeUrl').value = 'https://www.bing.com';
+                    document.getElementById('edgeFilePath').value = '';
                     document.getElementById('edgeKioskType').value = 'public-browsing';
                     document.getElementById('edgeInPrivate').checked = true;
+                    updateAppTypeUI();
+                    updateEdgeSourceUI();
                     break;
 
                 case 'multiApp':
