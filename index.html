@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AssignedAccess XML Builder - Windows 11 Kiosk Configuration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Skip Link for Keyboard Users -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header role="banner">
+        <h1>
+            <span class="logo" aria-hidden="true">AAB</span>
+            AssignedAccess XML Builder
+            <span class="subtitle">Windows 11 23H2+</span>
+        </h1>
+        <nav class="header-actions" aria-label="Main actions">
+            <button type="button" class="btn-secondary" onclick="loadPreset('blank')">New</button>
+            <button type="button" class="btn-secondary" onclick="importXml()">Import XML</button>
+            <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">
+                <span aria-hidden="true">&#9790;</span>
+            </button>
+        </nav>
+    </header>
+
+    <main id="main-content" class="container">
+        <!-- Configuration Panel -->
+        <section class="panel" aria-labelledby="config-heading">
+            <h2 id="config-heading" class="panel-header">
+                Configuration
+            </h2>
+            <div class="panel-content">
+                <!-- Presets -->
+                <div class="presets-bar" role="group" aria-label="Configuration presets">
+                    <span id="presets-label" style="align-self: center; margin-right: 10px;">Presets:</span>
+                    <button type="button" class="preset-btn" onclick="loadPreset('edgeFullscreen')">Edge Fullscreen</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('edgePublic')">Edge Public Browsing</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('multiApp')">Multi-App Kiosk</button>
+                </div>
+
+                <!-- Kiosk Mode -->
+                <fieldset class="section">
+                    <legend class="section-header">Kiosk Mode</legend>
+                    <div class="section-content">
+                        <div class="toggle-group" role="group" aria-label="Kiosk mode selection">
+                            <button type="button" id="modeSingle" class="active" onclick="setMode('single')" aria-pressed="true">Single-App</button>
+                            <button type="button" id="modeMulti" onclick="setMode('multi')" aria-pressed="false">Multi-App</button>
+                        </div>
+                        <p class="hint" style="margin-top: 10px;" id="kiosk-mode-hint">
+                            <strong>Single-App:</strong> Runs one app fullscreen (e.g., Edge kiosk)<br>
+                            <strong>Multi-App:</strong> Allows multiple apps with custom Start menu
+                        </p>
+                    </div>
+                </fieldset>
+
+                <!-- Profile Configuration -->
+                <fieldset class="section">
+                    <legend class="section-header">Profile</legend>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="profileId" class="with-tooltip">
+                                Profile GUID
+                                <button type="button" class="tooltip-icon" aria-label="Help for Profile GUID" aria-describedby="profileId-tooltip">?</button>
+                                <span class="tooltip-content" id="profileId-tooltip" role="tooltip">A unique identifier for this kiosk profile. Each profile needs its own GUID. Click "Generate" to create a random one. This ID links the profile configuration to the account that will use it.</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" id="profileId" placeholder="{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" onchange="updatePreview()" aria-describedby="profileId-tooltip">
+                                <button type="button" class="btn-secondary" onclick="generateGuid()">Generate</button>
+                                <button type="button" class="btn-secondary btn-small" onclick="copyToClipboard(document.getElementById('profileId').value)" aria-label="Copy Profile GUID to clipboard">
+                                    <span aria-hidden="true">&#128203;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Account Configuration -->
+                <fieldset class="section">
+                    <legend class="section-header">Account</legend>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label id="account-type-label" class="with-tooltip">
+                                Account Type
+                                <button type="button" class="tooltip-icon" aria-label="Help for Account Type" aria-describedby="accountType-tooltip">?</button>
+                                <span class="tooltip-content" id="accountType-tooltip" role="tooltip"><strong>Auto Logon:</strong> Windows creates and manages a local account automatically. Best for most kiosks - no password needed, auto-logs in at boot.<br><br><strong>Existing Account:</strong> Use a pre-created local, domain, or Azure AD account. Use this if you need specific permissions or domain integration.</span>
+                            </label>
+                            <div class="toggle-group" role="group" aria-labelledby="account-type-label">
+                                <button type="button" id="accountAuto" class="active" onclick="setAccountType('auto')" aria-pressed="true">Auto Logon (Managed)</button>
+                                <button type="button" id="accountExisting" onclick="setAccountType('existing')" aria-pressed="false">Existing Account</button>
+                            </div>
+                        </div>
+
+                        <div id="autoLogonConfig">
+                            <div class="form-group">
+                                <label for="displayName" class="with-tooltip">
+                                    Display Name
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Display Name" aria-describedby="displayName-tooltip">?</button>
+                                    <span class="tooltip-content" id="displayName-tooltip" role="tooltip">The friendly name shown on the Windows login screen. Windows will create a managed local account (typically "kioskUser0") that auto-logs in. This display name is just for identification.</span>
+                                </label>
+                                <input type="text" id="displayName" placeholder="e.g., Kiosk User" onchange="updatePreview()" aria-describedby="displayName-tooltip">
+                            </div>
+                        </div>
+
+                        <div id="existingAccountConfig" class="hidden" aria-hidden="true">
+                            <div class="form-group">
+                                <label for="accountName" class="with-tooltip">
+                                    Account Name
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Account Name" aria-describedby="accountName-tooltip">?</button>
+                                    <span class="tooltip-content" id="accountName-tooltip" role="tooltip">The username of an existing account. Formats: Local: KioskUser, Domain: DOMAIN\KioskUser, Azure AD: user@domain.com. The account must exist before the kiosk config is applied.</span>
+                                </label>
+                                <input type="text" id="accountName" placeholder="e.g., DOMAIN\\KioskUser or KioskUser" onchange="updatePreview()" aria-describedby="accountName-tooltip">
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <!-- Single-App Configuration -->
+                <div id="singleAppConfig">
+                    <fieldset class="section">
+                        <legend class="section-header">Single-App Settings</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="appType" class="with-tooltip">
+                                    Application Type
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Application Type" aria-describedby="appType-tooltip">?</button>
+                                    <span class="tooltip-content" id="appType-tooltip" role="tooltip"><strong>Edge Kiosk:</strong> Best for web apps and local HTML. Native kiosk support with idle timeout. <strong>UWP:</strong> Store apps with clean sandboxed integration. <strong>Win32:</strong> Traditional desktop apps. May have RestrictRun issues - use Edge or UWP when possible.</span>
+                                </label>
+                                <select id="appType" onchange="updateAppTypeUI(); updatePreview();" aria-describedby="appType-tooltip">
+                                    <option value="edge">Microsoft Edge (Kiosk Mode)</option>
+                                    <option value="uwp">UWP / Store App</option>
+                                    <option value="win32">Win32 Desktop App</option>
+                                </select>
+                            </div>
+
+                            <!-- Edge Configuration -->
+                            <div id="edgeConfig" role="group" aria-label="Microsoft Edge settings">
+                                <div class="form-group">
+                                    <label for="edgeUrl" class="with-tooltip">
+                                        URL
+                                        <button type="button" class="tooltip-icon" aria-label="Help for URL" aria-describedby="edgeUrl-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The page Edge will load in kiosk mode. Web URL: https://example.com. Local file: file:///C:/Path/To/File.html. Use %20 for spaces in file paths.</span>
+                                    </label>
+                                    <input type="url" id="edgeUrl" placeholder="https://example.com or file:///C:/path/to/file.html" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="edgeKioskType" class="with-tooltip">
+                                        Kiosk Type
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Type" aria-describedby="edgeKioskType-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeKioskType-tooltip" role="tooltip"><strong>Fullscreen:</strong> Shows only the webpage with no browser UI. Ideal for digital signage. <strong>Public Browsing:</strong> Shows address bar and navigation. Users can browse but sessions reset on idle.</span>
+                                    </label>
+                                    <select id="edgeKioskType" onchange="updatePreview()" aria-describedby="edgeKioskType-tooltip">
+                                        <option value="fullscreen">Fullscreen (Digital Signage)</option>
+                                        <option value="public-browsing">Public Browsing</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <span class="toggle-switch">
+                                            <input type="checkbox" id="edgeInPrivate" checked onchange="updatePreview()" aria-describedby="edgeInPrivate-tooltip">
+                                            <span class="toggle-slider" aria-hidden="true"></span>
+                                        </span>
+                                        <label for="edgeInPrivate" class="with-tooltip">
+                                            InPrivate Mode
+                                            <button type="button" class="tooltip-icon" aria-label="Help for InPrivate Mode" aria-describedby="edgeInPrivate-tooltip">?</button>
+                                            <span class="tooltip-content" id="edgeInPrivate-tooltip" role="tooltip">Runs Edge in InPrivate (incognito) mode. Browsing history, cookies, and form data are not saved between sessions. Highly recommended for public kiosks to protect user privacy.</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- UWP App Configuration -->
+                            <div id="uwpConfig" class="hidden" aria-hidden="true" role="group" aria-label="UWP App settings">
+                                <div class="form-group">
+                                    <label for="uwpAumid" class="with-tooltip">
+                                        App User Model ID (AUMID)
+                                        <button type="button" class="tooltip-icon" aria-label="Help for AUMID" aria-describedby="uwpAumid-tooltip">?</button>
+                                        <span class="tooltip-content" id="uwpAumid-tooltip" role="tooltip">The unique identifier for a UWP/Store app. Format: PackageName_PublisherId!AppId. To find an app's AUMID, run this in PowerShell: Get-StartApps | Format-Table Name, AppID</span>
+                                    </label>
+                                    <input type="text" id="uwpAumid" placeholder="e.g., Microsoft.WindowsCalculator_8wekyb3d8bbwe!App" onchange="updatePreview()" aria-describedby="uwpAumid-tooltip">
+                                </div>
+                            </div>
+
+                            <!-- Win32 App Configuration -->
+                            <div id="win32Config" class="hidden" aria-hidden="true" role="group" aria-label="Win32 App settings">
+                                <div class="form-group">
+                                    <label for="win32Path" class="with-tooltip">
+                                        Application Path
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Application Path" aria-describedby="win32Path-tooltip">?</button>
+                                        <span class="tooltip-content" id="win32Path-tooltip" role="tooltip">Full path to the .exe file. Warning: Win32 apps use DesktopAppPath which creates RestrictRun registry entries. This can cause "operation cancelled due to restrictions" errors. Consider using Edge Kiosk mode instead when possible.</span>
+                                    </label>
+                                    <input type="text" id="win32Path" placeholder="e.g., C:\Program Files\MyApp\app.exe" onchange="updatePreview()" aria-describedby="win32Path-tooltip">
+                                </div>
+                                <div class="form-group">
+                                    <label for="win32Args" class="with-tooltip">
+                                        Arguments (optional)
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Arguments" aria-describedby="win32Args-tooltip">?</button>
+                                        <span class="tooltip-content" id="win32Args-tooltip" role="tooltip">Command-line arguments passed to the application at launch. For example: --fullscreen or --kiosk</span>
+                                    </label>
+                                    <input type="text" id="win32Args" placeholder="e.g., --fullscreen" onchange="updatePreview()" aria-describedby="win32Args-tooltip">
+                                </div>
+                            </div>
+
+                            <!-- Breakout Sequence -->
+                            <div class="form-group" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" id="enableBreakout" onchange="updateBreakoutUI(); updatePreview()" aria-describedby="enableBreakout-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="enableBreakout" class="with-tooltip">
+                                        Enable Breakout Sequence
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Breakout Sequence" aria-describedby="enableBreakout-tooltip">?</button>
+                                        <span class="tooltip-content" id="enableBreakout-tooltip" role="tooltip">Allows technicians to exit kiosk mode using a key combination. Useful for troubleshooting without rebooting. The user will be taken to the Windows lock screen.</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="breakoutConfig" class="hidden" aria-hidden="true">
+                                <div class="form-group">
+                                    <label id="breakoutKey-label" class="with-tooltip">
+                                        Key Combination
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Key Combination" aria-describedby="breakoutKey-tooltip">?</button>
+                                        <span class="tooltip-content" id="breakoutKey-tooltip" role="tooltip">The key combination to exit kiosk mode. Choose modifier keys and a final key. Avoid common shortcuts like Ctrl+C or Ctrl+V. Something obscure like Ctrl+Alt+K works well.</span>
+                                    </label>
+                                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;" role="group" aria-labelledby="breakoutKey-label">
+                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                            <input type="checkbox" id="breakoutCtrl" checked onchange="updateBreakoutPreview(); updatePreview()"> Ctrl
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                            <input type="checkbox" id="breakoutAlt" checked onchange="updateBreakoutPreview(); updatePreview()"> Alt
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
+                                            <input type="checkbox" id="breakoutShift" onchange="updateBreakoutPreview(); updatePreview()"> Shift
+                                        </label>
+                                        <span aria-hidden="true">+</span>
+                                        <label for="breakoutFinalKey" class="sr-only">Final key</label>
+                                        <select id="breakoutFinalKey" onchange="updateBreakoutPreview(); updatePreview()" style="width: auto;">
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                            <option value="F">F</option>
+                                            <option value="G">G</option>
+                                            <option value="H">H</option>
+                                            <option value="I">I</option>
+                                            <option value="J">J</option>
+                                            <option value="K" selected>K</option>
+                                            <option value="L">L</option>
+                                            <option value="M">M</option>
+                                            <option value="N">N</option>
+                                            <option value="O">O</option>
+                                            <option value="P">P</option>
+                                            <option value="Q">Q</option>
+                                            <option value="R">R</option>
+                                            <option value="S">S</option>
+                                            <option value="T">T</option>
+                                            <option value="U">U</option>
+                                            <option value="V">V</option>
+                                            <option value="W">W</option>
+                                            <option value="X">X</option>
+                                            <option value="Y">Y</option>
+                                            <option value="Z">Z</option>
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="F1">F1</option>
+                                            <option value="F2">F2</option>
+                                            <option value="F3">F3</option>
+                                            <option value="F4">F4</option>
+                                            <option value="F5">F5</option>
+                                            <option value="F6">F6</option>
+                                            <option value="F7">F7</option>
+                                            <option value="F8">F8</option>
+                                            <option value="F9">F9</option>
+                                            <option value="F10">F10</option>
+                                            <option value="F11">F11</option>
+                                            <option value="F12">F12</option>
+                                        </select>
+                                    </div>
+                                    <p class="hint" style="margin-top: 8px;">
+                                        Current: <strong id="breakoutPreview" aria-live="polite">Ctrl+Alt+K</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- Multi-App Configuration -->
+                <div id="multiAppConfig" class="hidden" aria-hidden="true">
+                    <fieldset class="section">
+                        <legend class="section-header">Allowed Applications</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label id="addApp-label" class="with-tooltip">
+                                    Add Application
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Add Application" aria-describedby="addApp-tooltip">?</button>
+                                    <span class="tooltip-content" id="addApp-tooltip" role="tooltip">Add apps that users can access in multi-app kiosk mode. Path: Full path to .exe file for Win32 apps. AUMID: App User Model ID for UWP/Store apps. Run Get-StartApps in PowerShell to find these.</span>
+                                </label>
+                                <div class="input-group" role="group" aria-labelledby="addApp-label">
+                                    <label for="addAppType" class="sr-only">Application type</label>
+                                    <select id="addAppType" style="width: 150px;">
+                                        <option value="path">Path (.exe)</option>
+                                        <option value="aumid">AUMID (UWP)</option>
+                                    </select>
+                                    <label for="addAppValue" class="sr-only">Application path or AUMID</label>
+                                    <input type="text" id="addAppValue" placeholder="Path or AUMID">
+                                    <button type="button" class="btn-primary" onclick="addApp()">Add</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="commonApps-label" class="with-tooltip">
+                                    Common Apps
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Common Apps" aria-describedby="commonApps-tooltip">?</button>
+                                    <span class="tooltip-content" id="commonApps-tooltip" role="tooltip">Quick-add frequently needed apps. Edge includes all required components (msedge.exe, proxy, AUMID). On-Screen Keyboard is useful for touchscreen kiosks.</span>
+                                </label>
+                                <div role="group" aria-labelledby="commonApps-label">
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('edge')">Edge</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('edgeUpdate')">Edge Update</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('chrome')">Chrome</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('firefox')">Firefox</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('osk')">On-Screen Keyboard</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('volume')">Volume Control</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('settings')">Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('fileExplorer')">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('controlPanel')">Control Panel</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('printers')">Printers</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('cmd')">Command Prompt</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell')">PowerShell</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('terminal')">Windows Terminal</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('calculator')">Calculator</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('notepad')">Notepad</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('paint')">Paint</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('snipSketch')">Snipping Tool</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('stickyNotes')">Sticky Notes</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('photos')">Photos</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('camera')">Camera</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('movies')">Movies &amp; TV</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('teams')">Teams</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('zoom')">Zoom</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('word')">Word</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('excel')">Excel</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powerpoint')">PowerPoint</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('outlook')">Outlook</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('onenote')">OneNote</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="appList-label">Allowed Apps (<span id="appCount" aria-live="polite">0</span>)</label>
+                                <div class="app-list" id="appList" role="list" aria-labelledby="appList-label" aria-live="polite">
+                                    <div class="empty-list" role="listitem">No apps added yet</div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section">
+                        <legend class="section-header">Start Menu Pins</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="addPinPath" class="with-tooltip">
+                                    Add Pin
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Add Pin" aria-describedby="addPin-tooltip">?</button>
+                                    <span class="tooltip-content" id="addPin-tooltip" role="tooltip">Shortcuts pinned to the Start menu for easy access. Use the full path to a .lnk shortcut file. Environment variables like %ALLUSERSPROFILE% are supported.</span>
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" id="addPinPath" placeholder="Path to .lnk shortcut" aria-describedby="addPin-tooltip">
+                                    <button type="button" class="btn-primary" onclick="addPin()">Add</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="commonPins-label" class="with-tooltip">
+                                    Common Pins
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Common Pins" aria-describedby="commonPins-tooltip">?</button>
+                                    <span class="tooltip-content" id="commonPins-tooltip" role="tooltip">Quick-add common Start menu shortcuts. These use standard Windows shortcut locations. Make sure the corresponding app is also in your Allowed Applications list.</span>
+                                </label>
+                                <div role="group" aria-labelledby="commonPins-label">
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('edge')">Edge</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('chrome')">Chrome</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('firefox')">Firefox</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System &amp; Productivity:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('fileExplorer')">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('settings')">Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('printers')">Printers</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('cmd')">Command Prompt</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell')">PowerShell</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('terminal')">Windows Terminal</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('calculator')">Calculator</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('notepad')">Notepad</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('paint')">Paint</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('snipSketch')">Snipping Tool</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('photos')">Photos</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('camera')">Camera</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('teams')">Teams</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('zoom')">Zoom</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('word')">Word</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('excel')">Excel</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powerpoint')">PowerPoint</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('outlook')">Outlook</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('onenote')">OneNote</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="pinList-label">Pinned Shortcuts (<span id="pinCount" aria-live="polite">0</span>)</label>
+                                <div class="app-list" id="pinList" role="list" aria-labelledby="pinList-label" aria-live="polite">
+                                    <div class="empty-list" role="listitem">No pins added yet</div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section">
+                        <legend class="section-header">Taskbar &amp; File Explorer</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" id="showTaskbar" checked onchange="updatePreview()" aria-describedby="showTaskbar-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="showTaskbar" class="with-tooltip">
+                                        Show Taskbar
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Show Taskbar" aria-describedby="showTaskbar-tooltip">?</button>
+                                        <span class="tooltip-content" id="showTaskbar-tooltip" role="tooltip">When enabled, users see the Windows taskbar with Start button and running apps. Disable for a more locked-down experience where users can only access apps via the Start menu.</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fileExplorerAccess" class="with-tooltip">
+                                    File Explorer Access
+                                    <button type="button" class="tooltip-icon" aria-label="Help for File Explorer Access" aria-describedby="fileExplorerAccess-tooltip">?</button>
+                                    <span class="tooltip-content" id="fileExplorerAccess-tooltip" role="tooltip">No Access: File Explorer is completely blocked. Users cannot browse files. Downloads Only: Users can access the Downloads folder only. Useful if apps need to save/open files.</span>
+                                </label>
+                                <select id="fileExplorerAccess" onchange="updatePreview()" aria-describedby="fileExplorerAccess-tooltip">
+                                    <option value="none">No Access (Blocked)</option>
+                                    <option value="downloads">Downloads Folder Only</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Panel -->
+        <section class="panel" aria-labelledby="preview-heading">
+            <h2 id="preview-heading" class="panel-header">
+                <span>XML Preview</span>
+                <div class="export-actions" role="group" aria-label="Export options">
+                    <button type="button" class="btn-secondary btn-small" onclick="copyXml()">Copy XML</button>
+                    <button type="button" class="btn-primary btn-small" onclick="downloadXml()">Download XML</button>
+                    <button type="button" class="btn-success btn-small" onclick="downloadPowerShell()">Download PS1</button>
+                </div>
+            </h2>
+            <div class="panel-content preview-content">
+                <div id="validationStatus" role="status" aria-live="polite" aria-atomic="true"></div>
+                <pre class="xml-preview" id="xmlPreview" aria-label="Generated XML configuration" tabindex="0">
+                    <!-- XML will be rendered here -->
+                </pre>
+            </div>
+        </section>
+    </main>
+
+    <label for="importInput" class="sr-only">Import XML configuration file</label>
+    <input type="file" id="importInput" accept=".xml" style="display:none" onchange="handleImport(event)">
+
+    <footer role="contentinfo">
+        <p>
+            Created by <a href="https://www.linkedin.com/in/joshua-walderbach/" target="_blank" rel="noopener noreferrer">Joshua Walderbach</a>
+            <span aria-hidden="true">•</span>
+            Inspired by the work of <a href="https://www.linkedin.com/in/brandon-villines/" target="_blank" rel="noopener noreferrer">Brandon Villines</a>
+        </p>
+    </footer>
+
+    <script>
+        /* ============================================================================
+           State Management
+           ============================================================================ */
+        const state = {
+            mode: 'single',           // 'single' or 'multi'
+            accountType: 'auto',      // 'auto' or 'existing'
+            allowedApps: [],          // For multi-app mode
+            startPins: []             // For multi-app mode
+        };
+
+        /* ============================================================================
+           GUID Generator
+           ============================================================================ */
+        function generateGuid() {
+            const guid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            document.getElementById('profileId').value = '{' + guid + '}';
+            updatePreview();
+        }
+
+        /* ============================================================================
+           Theme Toggle
+           ============================================================================ */
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.querySelector('.theme-toggle').textContent = '☀️';
+            }
+        })();
+
+        /* ============================================================================
+           Mode Switching
+           ============================================================================ */
+        function setMode(mode) {
+            state.mode = mode;
+
+            const singleBtn = document.getElementById('modeSingle');
+            const multiBtn = document.getElementById('modeMulti');
+            const singleConfig = document.getElementById('singleAppConfig');
+            const multiConfig = document.getElementById('multiAppConfig');
+
+            singleBtn.classList.toggle('active', mode === 'single');
+            multiBtn.classList.toggle('active', mode === 'multi');
+            singleBtn.setAttribute('aria-pressed', mode === 'single');
+            multiBtn.setAttribute('aria-pressed', mode === 'multi');
+
+            singleConfig.classList.toggle('hidden', mode !== 'single');
+            multiConfig.classList.toggle('hidden', mode !== 'multi');
+            singleConfig.setAttribute('aria-hidden', mode !== 'single');
+            multiConfig.setAttribute('aria-hidden', mode !== 'multi');
+
+            updatePreview();
+        }
+
+        function setAccountType(type) {
+            state.accountType = type;
+
+            const autoBtn = document.getElementById('accountAuto');
+            const existingBtn = document.getElementById('accountExisting');
+            const autoConfig = document.getElementById('autoLogonConfig');
+            const existingConfig = document.getElementById('existingAccountConfig');
+
+            autoBtn.classList.toggle('active', type === 'auto');
+            existingBtn.classList.toggle('active', type === 'existing');
+            autoBtn.setAttribute('aria-pressed', type === 'auto');
+            existingBtn.setAttribute('aria-pressed', type === 'existing');
+
+            autoConfig.classList.toggle('hidden', type !== 'auto');
+            existingConfig.classList.toggle('hidden', type !== 'existing');
+            autoConfig.setAttribute('aria-hidden', type !== 'auto');
+            existingConfig.setAttribute('aria-hidden', type !== 'existing');
+
+            updatePreview();
+        }
+
+        function updateAppTypeUI() {
+            const appType = document.getElementById('appType').value;
+            const edgeConfig = document.getElementById('edgeConfig');
+            const uwpConfig = document.getElementById('uwpConfig');
+            const win32Config = document.getElementById('win32Config');
+
+            edgeConfig.classList.toggle('hidden', appType !== 'edge');
+            uwpConfig.classList.toggle('hidden', appType !== 'uwp');
+            win32Config.classList.toggle('hidden', appType !== 'win32');
+
+            edgeConfig.setAttribute('aria-hidden', appType !== 'edge');
+            uwpConfig.setAttribute('aria-hidden', appType !== 'uwp');
+            win32Config.setAttribute('aria-hidden', appType !== 'win32');
+        }
+
+        function updateBreakoutUI() {
+            const enabled = document.getElementById('enableBreakout').checked;
+            const breakoutConfig = document.getElementById('breakoutConfig');
+            breakoutConfig.classList.toggle('hidden', !enabled);
+            breakoutConfig.setAttribute('aria-hidden', !enabled);
+            updateBreakoutPreview();
+        }
+
+        function updateBreakoutPreview() {
+            const ctrl = document.getElementById('breakoutCtrl').checked;
+            const alt = document.getElementById('breakoutAlt').checked;
+            const shift = document.getElementById('breakoutShift').checked;
+            const key = document.getElementById('breakoutFinalKey').value;
+
+            let combo = [];
+            if (ctrl) combo.push('Ctrl');
+            if (alt) combo.push('Alt');
+            if (shift) combo.push('Shift');
+            combo.push(key);
+
+            document.getElementById('breakoutPreview').textContent = combo.join('+');
+        }
+
+        function getBreakoutSequence() {
+            if (!document.getElementById('enableBreakout').checked) return null;
+
+            const ctrl = document.getElementById('breakoutCtrl').checked;
+            const alt = document.getElementById('breakoutAlt').checked;
+            const shift = document.getElementById('breakoutShift').checked;
+            const key = document.getElementById('breakoutFinalKey').value;
+
+            // Build the key string in the format expected by AssignedAccess
+            let combo = [];
+            if (ctrl) combo.push('Ctrl');
+            if (alt) combo.push('Alt');
+            if (shift) combo.push('Shift');
+            combo.push(key);
+
+            return combo.join('+');
+        }
+
+        /* ============================================================================
+           App List Management (Multi-App Mode)
+           ============================================================================ */
+        function addApp() {
+            const type = document.getElementById('addAppType').value;
+            const value = document.getElementById('addAppValue').value.trim();
+
+            if (!value) return;
+
+            state.allowedApps.push({ type, value });
+            document.getElementById('addAppValue').value = '';
+            renderAppList();
+            updatePreview();
+        }
+
+        function addCommonApp(appKey) {
+            const commonApps = {
+                // Browsers - Edge
+                'edge': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' },
+                'edgeProxy': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge_proxy.exe' },
+                'edgeAumid': { type: 'aumid', value: 'Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App' },
+                'edgeUpdate': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft\\EdgeUpdate\\MicrosoftEdgeUpdate.exe' },
+                // Browsers - Chrome
+                'chrome': { type: 'path', value: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' },
+                'chrome86': { type: 'path', value: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe' },
+                // Browsers - Firefox
+                'firefox': { type: 'path', value: 'C:\\Program Files\\Mozilla Firefox\\firefox.exe' },
+                'firefox86': { type: 'path', value: 'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe' },
+                // System Utilities
+                'osk': { type: 'path', value: 'C:\\Windows\\System32\\osk.exe' },
+                'volume': { type: 'path', value: 'C:\\Windows\\System32\\sndvol.exe' },
+                'settings': { type: 'aumid', value: 'windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel' },
+                'fileExplorer': { type: 'path', value: 'C:\\Windows\\explorer.exe' },
+                'controlPanel': { type: 'path', value: 'C:\\Windows\\System32\\control.exe' },
+                'printers': { type: 'path', value: 'C:\\Windows\\System32\\control.exe' },  // Opens with 'printers' argument
+                'printersFolder': { type: 'path', value: 'shell:::{2227A280-3AEA-1069-A2DE-08002B30309D}' },
+                'printui': { type: 'path', value: 'C:\\Windows\\System32\\rundll32.exe' },  // For printui.dll
+                'cmd': { type: 'path', value: 'C:\\Windows\\System32\\cmd.exe' },
+                'powershell': { type: 'path', value: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' },
+                'powershell7': { type: 'path', value: 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' },
+                'terminal': { type: 'aumid', value: 'Microsoft.WindowsTerminal_8wekyb3d8bbwe!App' },
+                // Productivity
+                'calculator': { type: 'aumid', value: 'Microsoft.WindowsCalculator_8wekyb3d8bbwe!App' },
+                'notepad': { type: 'path', value: 'C:\\Windows\\System32\\notepad.exe' },
+                'paint': { type: 'aumid', value: 'Microsoft.Paint_8wekyb3d8bbwe!App' },
+                'snipSketch': { type: 'aumid', value: 'Microsoft.ScreenSketch_8wekyb3d8bbwe!App' },
+                'stickyNotes': { type: 'aumid', value: 'Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe!App' },
+                // Media & Communication
+                'photos': { type: 'aumid', value: 'Microsoft.Windows.Photos_8wekyb3d8bbwe!App' },
+                'camera': { type: 'aumid', value: 'Microsoft.WindowsCamera_8wekyb3d8bbwe!App' },
+                'movies': { type: 'aumid', value: 'Microsoft.ZuneVideo_8wekyb3d8bbwe!Microsoft.ZuneVideo' },
+                'teams': { type: 'aumid', value: 'MSTeams_8wekyb3d8bbwe!MSTeams' },
+                'teamsClassic': { type: 'path', value: 'C:\\Program Files\\Microsoft\\Teams\\current\\Teams.exe' },
+                'zoom': { type: 'path', value: 'C:\\Program Files\\Zoom\\bin\\Zoom.exe' },
+                'zoomUser': { type: 'path', value: '%APPDATA%\\Zoom\\bin\\Zoom.exe' },
+                // Microsoft Office (Microsoft 365)
+                'word': { type: 'path', value: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE' },
+                'excel': { type: 'path', value: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE' },
+                'powerpoint': { type: 'path', value: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE' },
+                'outlook': { type: 'path', value: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE' },
+                'onenote': { type: 'aumid', value: 'Microsoft.Office.OneNote_8wekyb3d8bbwe!microsoft.onenoteim' },
+                // Office 32-bit paths
+                'word86': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\WINWORD.EXE' },
+                'excel86': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\EXCEL.EXE' },
+                'powerpoint86': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\POWERPNT.EXE' },
+                'outlook86': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE' }
+            };
+
+            // Handle apps that need multiple components or both 32/64-bit paths
+            if (appKey === 'edge') {
+                // Add all Edge components
+                if (!state.allowedApps.find(a => a.value === commonApps.edge.value)) {
+                    state.allowedApps.push(commonApps.edge);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.edgeProxy.value)) {
+                    state.allowedApps.push(commonApps.edgeProxy);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.edgeAumid.value)) {
+                    state.allowedApps.push(commonApps.edgeAumid);
+                }
+            } else if (appKey === 'chrome') {
+                // Add both 64-bit and 32-bit Chrome paths
+                if (!state.allowedApps.find(a => a.value === commonApps.chrome.value)) {
+                    state.allowedApps.push(commonApps.chrome);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.chrome86.value)) {
+                    state.allowedApps.push(commonApps.chrome86);
+                }
+            } else if (appKey === 'firefox') {
+                // Add both 64-bit and 32-bit Firefox paths
+                if (!state.allowedApps.find(a => a.value === commonApps.firefox.value)) {
+                    state.allowedApps.push(commonApps.firefox);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.firefox86.value)) {
+                    state.allowedApps.push(commonApps.firefox86);
+                }
+            } else if (appKey === 'teams') {
+                // Add both new Teams and classic Teams
+                if (!state.allowedApps.find(a => a.value === commonApps.teams.value)) {
+                    state.allowedApps.push(commonApps.teams);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.teamsClassic.value)) {
+                    state.allowedApps.push(commonApps.teamsClassic);
+                }
+            } else if (appKey === 'zoom') {
+                // Add both system and user Zoom paths
+                if (!state.allowedApps.find(a => a.value === commonApps.zoom.value)) {
+                    state.allowedApps.push(commonApps.zoom);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.zoomUser.value)) {
+                    state.allowedApps.push(commonApps.zoomUser);
+                }
+            } else if (appKey === 'word' || appKey === 'excel' || appKey === 'powerpoint' || appKey === 'outlook') {
+                // Add both 64-bit and 32-bit Office paths
+                const app64 = commonApps[appKey];
+                const app86 = commonApps[appKey + '86'];
+                if (!state.allowedApps.find(a => a.value === app64.value)) {
+                    state.allowedApps.push(app64);
+                }
+                if (!state.allowedApps.find(a => a.value === app86.value)) {
+                    state.allowedApps.push(app86);
+                }
+            } else if (appKey === 'powershell') {
+                // Add both Windows PowerShell and PowerShell 7
+                if (!state.allowedApps.find(a => a.value === commonApps.powershell.value)) {
+                    state.allowedApps.push(commonApps.powershell);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.powershell7.value)) {
+                    state.allowedApps.push(commonApps.powershell7);
+                }
+            } else if (appKey === 'printers') {
+                // Add control panel, rundll32 for printui, and explorer for shell folder
+                if (!state.allowedApps.find(a => a.value === commonApps.printers.value)) {
+                    state.allowedApps.push(commonApps.printers);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.printui.value)) {
+                    state.allowedApps.push(commonApps.printui);
+                }
+                if (!state.allowedApps.find(a => a.value === commonApps.fileExplorer.value)) {
+                    state.allowedApps.push(commonApps.fileExplorer);
+                }
+            } else {
+                const app = commonApps[appKey];
+                if (app && !state.allowedApps.find(a => a.value === app.value)) {
+                    state.allowedApps.push(app);
+                }
+            }
+
+            renderAppList();
+            updatePreview();
+        }
+
+        function removeApp(index) {
+            state.allowedApps.splice(index, 1);
+            renderAppList();
+            updatePreview();
+        }
+
+        function renderAppList() {
+            const list = document.getElementById('appList');
+            const count = document.getElementById('appCount');
+
+            count.textContent = state.allowedApps.length;
+
+            if (state.allowedApps.length === 0) {
+                list.innerHTML = '<div class="empty-list" role="listitem">No apps added yet</div>';
+                return;
+            }
+
+            list.innerHTML = state.allowedApps.map((app, i) => `
+                <div class="app-item" role="listitem">
+                    <span title="${escapeXml(app.value)}"><span aria-hidden="true">${app.type === 'aumid' ? '📦 ' : '📄 '}</span>${truncate(app.value, 60)}</span>
+                    <button type="button" class="remove-btn" onclick="removeApp(${i})" aria-label="Remove ${truncate(app.value, 30)}">
+                        <span aria-hidden="true">✕</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        /* ============================================================================
+           Start Pins Management (Multi-App Mode)
+           ============================================================================ */
+        function addPin() {
+            const value = document.getElementById('addPinPath').value.trim();
+            if (!value) return;
+
+            state.startPins.push(value);
+            document.getElementById('addPinPath').value = '';
+            renderPinList();
+            updatePreview();
+        }
+
+        function addCommonPin(pinKey) {
+            const commonPins = {
+                // Browsers
+                'edge': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk',
+                'chrome': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Google Chrome.lnk',
+                'firefox': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Firefox.lnk',
+                // System & Productivity
+                'fileExplorer': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\File Explorer.lnk',
+                'settings': 'ms-settings:',
+                'printers': 'ms-settings:printers',
+                'cmd': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Command Prompt.lnk',
+                'powershell': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell.lnk',
+                'terminal': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Windows Terminal.lnk',
+                'calculator': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Calculator.lnk',
+                'notepad': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Notepad.lnk',
+                'paint': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Paint.lnk',
+                'snipSketch': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Snipping Tool.lnk',
+                // Media & Communication
+                'photos': 'microsoft.windows.photos:',
+                'camera': 'microsoft.windows.camera:',
+                'teams': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Teams.lnk',
+                'zoom': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Zoom\\Zoom.lnk',
+                // Microsoft Office
+                'word': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Word.lnk',
+                'excel': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk',
+                'powerpoint': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk',
+                'outlook': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk',
+                'onenote': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\OneNote.lnk'
+            };
+
+            const pin = commonPins[pinKey];
+            if (pin && !state.startPins.includes(pin)) {
+                state.startPins.push(pin);
+                renderPinList();
+                updatePreview();
+            }
+        }
+
+        function removePin(index) {
+            state.startPins.splice(index, 1);
+            renderPinList();
+            updatePreview();
+        }
+
+        function renderPinList() {
+            const list = document.getElementById('pinList');
+            const count = document.getElementById('pinCount');
+
+            count.textContent = state.startPins.length;
+
+            if (state.startPins.length === 0) {
+                list.innerHTML = '<div class="empty-list" role="listitem">No pins added yet</div>';
+                return;
+            }
+
+            list.innerHTML = state.startPins.map((pin, i) => `
+                <div class="app-item" role="listitem">
+                    <span title="${escapeXml(pin)}"><span aria-hidden="true">🔗 </span>${truncate(pin, 55)}</span>
+                    <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${truncate(pin, 30)}">
+                        <span aria-hidden="true">✕</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        /* ============================================================================
+           XML Generation
+           ============================================================================ */
+        function generateXml() {
+            const profileId = document.getElementById('profileId').value || '{00000000-0000-0000-0000-000000000000}';
+
+            let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
+            xml += `<AssignedAccessConfiguration\n`;
+            xml += `    xmlns="http://schemas.microsoft.com/AssignedAccess/2017/config"\n`;
+            xml += `    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201901/config"\n`;
+            xml += `    xmlns:v4="http://schemas.microsoft.com/AssignedAccess/2021/config"\n`;
+            xml += `    xmlns:v5="http://schemas.microsoft.com/AssignedAccess/2022/config">\n`;
+
+            xml += `    <Profiles>\n`;
+            xml += `        <Profile Id="${profileId}">\n`;
+
+            if (state.mode === 'single') {
+                xml += generateSingleAppProfile();
+            } else {
+                xml += generateMultiAppProfile();
+            }
+
+            xml += `        </Profile>\n`;
+            xml += `    </Profiles>\n`;
+
+            xml += `    <Configs>\n`;
+            xml += `        <Config>\n`;
+            xml += generateAccountConfig();
+            xml += `            <DefaultProfile Id="${profileId}"/>\n`;
+            xml += `        </Config>\n`;
+            xml += `    </Configs>\n`;
+
+            xml += `</AssignedAccessConfiguration>`;
+
+            return xml;
+        }
+
+        function generateSingleAppProfile() {
+            const appType = document.getElementById('appType').value;
+            let xml = '';
+
+            if (appType === 'edge') {
+                const url = document.getElementById('edgeUrl').value || 'https://www.microsoft.com';
+                const kioskType = document.getElementById('edgeKioskType').value;
+                const inPrivate = document.getElementById('edgeInPrivate').checked;
+
+                let args = `--kiosk ${url} --edge-kiosk-type=${kioskType}`;
+                if (inPrivate) args += ' --inprivate';
+
+                xml += `            <KioskModeApp AppUserModelId="MSEdge" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
+            } else if (appType === 'uwp') {
+                const aumid = document.getElementById('uwpAumid').value;
+                xml += `            <KioskModeApp AppUserModelId="${escapeXml(aumid)}"/>\n`;
+            } else if (appType === 'win32') {
+                const path = document.getElementById('win32Path').value;
+                const args = document.getElementById('win32Args').value;
+
+                if (args) {
+                    xml += `            <KioskModeApp v4:ClassicAppPath="${escapeXml(path)}" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
+                } else {
+                    xml += `            <KioskModeApp v4:ClassicAppPath="${escapeXml(path)}"/>\n`;
+                }
+            }
+
+            // Add breakout sequence if enabled
+            const breakoutSequence = getBreakoutSequence();
+            if (breakoutSequence) {
+                xml += `            <v4:BreakoutSequence Key="${escapeXml(breakoutSequence)}"/>\n`;
+            }
+
+            return xml;
+        }
+
+        function generateMultiAppProfile() {
+            let xml = '';
+
+            // AllAppsList
+            xml += `            <AllAppsList>\n`;
+            xml += `                <AllowedApps>\n`;
+
+            for (const app of state.allowedApps) {
+                if (app.type === 'aumid') {
+                    xml += `                    <App AppUserModelId="${escapeXml(app.value)}"/>\n`;
+                } else {
+                    xml += `                    <App DesktopAppPath="${escapeXml(app.value)}"/>\n`;
+                }
+            }
+
+            xml += `                </AllowedApps>\n`;
+            xml += `            </AllAppsList>\n`;
+
+            // File Explorer Restrictions
+            const fileAccess = document.getElementById('fileExplorerAccess').value;
+            if (fileAccess === 'downloads') {
+                xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
+                xml += `                <rs5:AllowedNamespace Name="Downloads"/>\n`;
+                xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
+            }
+
+            // Start Pins (Windows 11)
+            if (state.startPins.length > 0) {
+                const pinsJson = {
+                    pinnedList: state.startPins.map(p => ({ desktopAppLink: p }))
+                };
+                xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
+            }
+
+            // Taskbar
+            const showTaskbar = document.getElementById('showTaskbar').checked;
+            xml += `            <Taskbar ShowTaskbar="${showTaskbar}"/>\n`;
+
+            return xml;
+        }
+
+        function generateAccountConfig() {
+            let xml = '';
+
+            if (state.accountType === 'auto') {
+                const displayName = document.getElementById('displayName').value || 'Kiosk';
+                xml += `            <AutoLogonAccount rs5:DisplayName="${escapeXml(displayName)}"/>\n`;
+            } else {
+                const accountName = document.getElementById('accountName').value;
+                xml += `            <Account>${escapeXml(accountName)}</Account>\n`;
+            }
+
+            return xml;
+        }
+
+        /* ============================================================================
+           Validation
+           ============================================================================ */
+        function validate() {
+            const errors = [];
+
+            // Profile ID
+            const profileId = document.getElementById('profileId').value;
+            if (!profileId) {
+                errors.push('Profile GUID is required');
+            } else if (!/^\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}$/i.test(profileId)) {
+                errors.push('Profile GUID format is invalid');
+            }
+
+            // Account
+            if (state.accountType === 'auto') {
+                const displayName = document.getElementById('displayName').value;
+                if (!displayName) {
+                    errors.push('Display Name is required for auto-logon account');
+                }
+            } else {
+                const accountName = document.getElementById('accountName').value;
+                if (!accountName) {
+                    errors.push('Account Name is required');
+                }
+            }
+
+            // Single-app mode
+            if (state.mode === 'single') {
+                const appType = document.getElementById('appType').value;
+                if (appType === 'edge') {
+                    const url = document.getElementById('edgeUrl').value;
+                    if (!url) {
+                        errors.push('Edge URL is required');
+                    }
+                } else if (appType === 'uwp') {
+                    const aumid = document.getElementById('uwpAumid').value;
+                    if (!aumid) {
+                        errors.push('UWP App AUMID is required');
+                    }
+                } else if (appType === 'win32') {
+                    const path = document.getElementById('win32Path').value;
+                    if (!path) {
+                        errors.push('Win32 Application Path is required');
+                    }
+                }
+            }
+
+            // Multi-app mode
+            if (state.mode === 'multi') {
+                if (state.allowedApps.length === 0) {
+                    errors.push('At least one allowed app is required for multi-app mode');
+                }
+            }
+
+            return errors;
+        }
+
+        function showValidation() {
+            const errors = validate();
+            const statusDiv = document.getElementById('validationStatus');
+
+            if (errors.length === 0) {
+                statusDiv.innerHTML = '<div class="status success">✓ Configuration is valid</div>';
+            } else {
+                statusDiv.innerHTML = `<div class="status error">
+                    <strong>Validation Errors:</strong>
+                    <ul style="margin: 5px 0 0 20px;">${errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                </div>`;
+            }
+
+            return errors.length === 0;
+        }
+
+        /* ============================================================================
+           Preview & Syntax Highlighting
+           ============================================================================ */
+        function updatePreview() {
+            const xml = generateXml();
+            const highlighted = highlightXml(xml);
+            document.getElementById('xmlPreview').innerHTML = highlighted;
+            showValidation();
+        }
+
+        function highlightXml(xml) {
+            return xml
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="comment">$1</span>')
+                .replace(/(&lt;\/?[\w:]+)/g, '<span class="tag">$1</span>')
+                .replace(/(\w+)=/g, '<span class="attr">$1</span>=')
+                .replace(/"([^"]*)"/g, '"<span class="value">$1</span>"');
+        }
+
+        /* ============================================================================
+           Export Functions
+           ============================================================================ */
+        function copyXml() {
+            if (!showValidation()) {
+                if (!confirm('Configuration has errors. Copy anyway?')) return;
+            }
+
+            const xml = generateXml();
+            copyToClipboard(xml);
+            alert('XML copied to clipboard!');
+        }
+
+        function downloadXml() {
+            if (!showValidation()) {
+                if (!confirm('Configuration has errors. Download anyway?')) return;
+            }
+
+            const xml = generateXml();
+            downloadFile(xml, 'AssignedAccessConfig.xml', 'application/xml');
+        }
+
+        function downloadPowerShell() {
+            if (!showValidation()) {
+                if (!confirm('Configuration has errors. Download anyway?')) return;
+            }
+
+            const xml = generateXml();
+            const escapedXml = xml.replace(/'/g, "''");
+
+            const ps1 = `#Requires -RunAsAdministrator
+<#
+.SYNOPSIS
+    Applies AssignedAccess (Kiosk) configuration to the local device.
+.DESCRIPTION
+    This script must be run as SYSTEM. Use PsExec:
+    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File "Apply-AssignedAccess.ps1"
+.NOTES
+    Generated by AssignedAccess XML Builder
+    Reboot required after applying.
+#>
+
+$ErrorActionPreference = "Stop"
+
+# AssignedAccess Configuration XML
+$xml = @'
+${xml}
+'@
+
+Write-Host "Applying AssignedAccess configuration..." -ForegroundColor Cyan
+
+try {
+    # Get the MDM_AssignedAccess WMI object
+    $obj = Get-CimInstance -Namespace "root\\cimv2\\mdm\\dmmap" -ClassName "MDM_AssignedAccess" -ErrorAction Stop
+
+    if ($null -eq $obj) {
+        Write-Host "Creating MDM_AssignedAccess instance..." -ForegroundColor Yellow
+        $obj = New-CimInstance -Namespace "root\\cimv2\\mdm\\dmmap" -ClassName "MDM_AssignedAccess" -ErrorAction Stop
+    }
+
+    # HTML encode the XML and apply
+    $encodedXml = [System.Net.WebUtility]::HtmlEncode($xml)
+    $obj.Configuration = $encodedXml
+    Set-CimInstance -CimInstance $obj -ErrorAction Stop
+
+    Write-Host ""
+    Write-Host "SUCCESS: AssignedAccess configuration applied!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "A REBOOT IS REQUIRED for changes to take effect." -ForegroundColor Yellow
+    Write-Host ""
+
+    $reboot = Read-Host "Reboot now? (Y/N)"
+    if ($reboot -eq 'Y' -or $reboot -eq 'y') {
+        Restart-Computer -Force
+    }
+}
+catch {
+    Write-Host ""
+    Write-Host "ERROR: Failed to apply configuration" -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Make sure you are running as SYSTEM (use PsExec -s)" -ForegroundColor Yellow
+    exit 1
+}
+`;
+
+            downloadFile(ps1, 'Apply-AssignedAccess.ps1', 'text/plain');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            });
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /* ============================================================================
+           Import XML
+           ============================================================================ */
+        function importXml() {
+            document.getElementById('importInput').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    parseAndLoadXml(e.target.result);
+                    alert('XML imported successfully!');
+                } catch (err) {
+                    alert('Failed to parse XML: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function parseAndLoadXml(xmlString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(xmlString, 'text/xml');
+
+            // Profile ID
+            const profile = doc.querySelector('Profile');
+            if (profile) {
+                document.getElementById('profileId').value = profile.getAttribute('Id') || '';
+            }
+
+            // Check for KioskModeApp (single-app) or AllAppsList (multi-app)
+            const kioskModeApp = doc.querySelector('KioskModeApp');
+            const allAppsList = doc.querySelector('AllAppsList');
+
+            if (kioskModeApp && !allAppsList) {
+                // Single-app mode
+                setMode('single');
+
+                const aumid = kioskModeApp.getAttribute('AppUserModelId');
+                const classicArgs = kioskModeApp.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/2021/config', 'ClassicAppArguments') ||
+                                   kioskModeApp.getAttribute('v4:ClassicAppArguments');
+
+                if (aumid === 'MSEdge' || (aumid && aumid.includes('Edge'))) {
+                    document.getElementById('appType').value = 'edge';
+                    updateAppTypeUI();
+
+                    if (classicArgs) {
+                        // Parse Edge arguments
+                        const urlMatch = classicArgs.match(/--kiosk\s+(\S+)/);
+                        if (urlMatch) {
+                            document.getElementById('edgeUrl').value = urlMatch[1];
+                        }
+
+                        document.getElementById('edgeKioskType').value =
+                            classicArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
+
+                        document.getElementById('edgeInPrivate').checked = classicArgs.includes('--inprivate');
+                    }
+                } else if (aumid) {
+                    document.getElementById('appType').value = 'uwp';
+                    updateAppTypeUI();
+                    document.getElementById('uwpAumid').value = aumid;
+                }
+            } else if (allAppsList) {
+                // Multi-app mode
+                setMode('multi');
+
+                state.allowedApps = [];
+                const apps = allAppsList.querySelectorAll('App');
+                apps.forEach(app => {
+                    const aumid = app.getAttribute('AppUserModelId');
+                    const path = app.getAttribute('DesktopAppPath');
+                    if (aumid) {
+                        state.allowedApps.push({ type: 'aumid', value: aumid });
+                    } else if (path) {
+                        state.allowedApps.push({ type: 'path', value: path });
+                    }
+                });
+                renderAppList();
+
+                // Start Pins
+                state.startPins = [];
+                const startPins = doc.querySelector('StartPins');
+                if (startPins) {
+                    try {
+                        const pinsJson = JSON.parse(startPins.textContent);
+                        if (pinsJson.pinnedList) {
+                            pinsJson.pinnedList.forEach(pin => {
+                                if (pin.desktopAppLink) {
+                                    state.startPins.push(pin.desktopAppLink);
+                                }
+                            });
+                        }
+                    } catch (e) {}
+                }
+                renderPinList();
+
+                // Taskbar
+                const taskbar = doc.querySelector('Taskbar');
+                if (taskbar) {
+                    document.getElementById('showTaskbar').checked =
+                        taskbar.getAttribute('ShowTaskbar') === 'true';
+                }
+            }
+
+            // Account
+            const autoLogon = doc.querySelector('AutoLogonAccount');
+            const account = doc.querySelector('Config > Account');
+
+            if (autoLogon) {
+                setAccountType('auto');
+                const displayName = autoLogon.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/201901/config', 'DisplayName') ||
+                                   autoLogon.getAttribute('rs5:DisplayName') ||
+                                   autoLogon.getAttribute('DisplayName');
+                document.getElementById('displayName').value = displayName || '';
+            } else if (account) {
+                setAccountType('existing');
+                document.getElementById('accountName').value = account.textContent || '';
+            }
+
+            updatePreview();
+        }
+
+        /* ============================================================================
+           Presets
+           ============================================================================ */
+        function loadPreset(preset) {
+            // Reset state
+            state.allowedApps = [];
+            state.startPins = [];
+
+            switch (preset) {
+                case 'blank':
+                    setMode('single');
+                    setAccountType('auto');
+                    generateGuid();
+                    document.getElementById('displayName').value = '';
+                    document.getElementById('appType').value = 'edge';
+                    document.getElementById('edgeUrl').value = '';
+                    document.getElementById('edgeKioskType').value = 'fullscreen';
+                    document.getElementById('edgeInPrivate').checked = true;
+                    break;
+
+                case 'edgeFullscreen':
+                    setMode('single');
+                    setAccountType('auto');
+                    generateGuid();
+                    document.getElementById('displayName').value = 'Kiosk';
+                    document.getElementById('appType').value = 'edge';
+                    document.getElementById('edgeUrl').value = 'https://www.microsoft.com';
+                    document.getElementById('edgeKioskType').value = 'fullscreen';
+                    document.getElementById('edgeInPrivate').checked = true;
+                    break;
+
+                case 'edgePublic':
+                    setMode('single');
+                    setAccountType('auto');
+                    generateGuid();
+                    document.getElementById('displayName').value = 'Public Browsing';
+                    document.getElementById('appType').value = 'edge';
+                    document.getElementById('edgeUrl').value = 'https://www.bing.com';
+                    document.getElementById('edgeKioskType').value = 'public-browsing';
+                    document.getElementById('edgeInPrivate').checked = true;
+                    break;
+
+                case 'multiApp':
+                    setMode('multi');
+                    setAccountType('auto');
+                    generateGuid();
+                    document.getElementById('displayName').value = 'Multi-App Kiosk';
+                    addCommonApp('edge');
+                    addCommonApp('osk');
+                    addCommonApp('calculator');
+                    document.getElementById('showTaskbar').checked = true;
+                    document.getElementById('fileExplorerAccess').value = 'downloads';
+                    break;
+
+            }
+
+            updateAppTypeUI();
+            renderAppList();
+            renderPinList();
+            updatePreview();
+        }
+
+        /* ============================================================================
+           Utility Functions
+           ============================================================================ */
+        function escapeXml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        function truncate(str, len) {
+            if (str.length <= len) return str;
+            return str.substring(0, len - 3) + '...';
+        }
+
+        /* ============================================================================
+           Initialize
+           ============================================================================ */
+        document.addEventListener('DOMContentLoaded', () => {
+            generateGuid();
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
