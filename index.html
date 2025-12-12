@@ -1196,7 +1196,7 @@
         }
 
         function highlightXml(xml) {
-            return xml
+            let highlighted = xml
                 // Escape HTML entities
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
@@ -1213,6 +1213,12 @@
                 .replace(/([\w:-]+)=/g, '<span class="attr">$1</span>=')
                 // Attribute values in double quotes
                 .replace(/"([^"]*)"/g, '"<span class="value">$1</span>"');
+
+            // Add line numbers
+            const lines = highlighted.split('\n');
+            return lines.map((line, i) =>
+                `<span class="line"><span class="line-number">${i + 1}</span>${line}</span>`
+            ).join('\n');
         }
 
         /* ============================================================================

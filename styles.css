@@ -598,6 +598,22 @@ legend.section-header {
     color: #fdba74;
 }
 
+.xml-preview .line {
+    display: block;
+}
+
+.xml-preview .line-number {
+    display: inline-block;
+    width: 3em;
+    padding-right: 1em;
+    margin-right: 1em;
+    text-align: right;
+    color: #4b5563;
+    border-right: 1px solid #374151;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 /* ============================================
    Status Messages
    ============================================ */
