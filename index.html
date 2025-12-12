@@ -138,9 +138,9 @@
                             <div id="edgeConfig" role="group" aria-label="Microsoft Edge settings">
                                 <div class="form-group">
                                     <label for="edgeSourceType" class="with-tooltip">
-                                        Source
-                                        <button type="button" class="tooltip-icon" aria-label="Help for Source" aria-describedby="edgeSourceType-tooltip">?</button>
-                                        <span class="tooltip-content" id="edgeSourceType-tooltip" role="tooltip"><strong>Web URL:</strong> Load a website (https://example.com). <strong>Local File:</strong> Load an HTML file from the device (C:\Kiosk\page.html).</span>
+                                        Load From
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Load From" aria-describedby="edgeSourceType-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeSourceType-tooltip" role="tooltip">Choose where Edge loads content from. <strong>Web URL:</strong> A website (https://example.com). <strong>Local File:</strong> An HTML file on the device (C:\Kiosk\page.html).</span>
                                     </label>
                                     <select id="edgeSourceType" onchange="updateEdgeSourceUI(); updatePreview();" aria-describedby="edgeSourceType-tooltip">
                                         <option value="url">Web URL</option>
