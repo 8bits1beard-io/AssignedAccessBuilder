@@ -3,42 +3,37 @@
    ============================================ */
 
 /* ============================================
-   CSS Variables & Theme
+   CSS Variables & Theme (Indigo + Neutral Gray)
    ============================================ */
 :root {
-    /* Brand Colors */
-    --brand-blue: #0071CE;
-    --brand-blue-dark: #004C91;
-    --brand-yellow: #FFC220;
-    --brand-yellow-dark: #E5AD1C;
-
-    /* Theme Colors */
-    --bg-primary: #f5f7fa;
+    /* Theme Colors - Light Mode */
+    --bg-primary: #f9fafb;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #e8ecf1;
-    --text-primary: #041E42;
-    --text-secondary: #46474A;
-    --accent: #0071CE;
-    --accent-hover: #004C91;
-    --success: #1AAB40;
-    --warning: #FFC220;
-    --error: #DE1C24;
-    --border: #CBCDD0;
-    --code-bg: #041E42;
-    --code-text: #e0e6ed;
+    --bg-tertiary: #f3f4f6;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border: #e5e7eb;
+    --code-bg: #1f2937;
+    --code-text: #f9fafb;
 }
 
 [data-theme="dark"] {
-    --bg-primary: #041E42;
-    --bg-secondary: #0A2D5A;
-    --bg-tertiary: #113D6E;
-    --text-primary: #ffffff;
-    --text-secondary: #B0C4DE;
-    --accent: #3B9AE1;
-    --accent-hover: #5AAFE8;
-    --border: #1E4A7A;
-    --code-bg: #020F21;
-    --code-text: #e0e6ed;
+    /* Theme Colors - Dark Mode */
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --border: #374151;
+    --code-bg: #030712;
+    --code-text: #f9fafb;
 }
 
 /* ============================================
@@ -61,7 +56,7 @@
 
 .skip-link:focus {
     top: 0;
-    outline: 3px solid var(--brand-yellow);
+    outline: 3px solid var(--accent);
     outline-offset: 2px;
 }
 
@@ -144,7 +139,7 @@ header h1 {
 }
 
 header h1 .logo {
-    background: var(--brand-blue);
+    background: var(--accent);
     color: white;
     padding: 6px 10px;
     border-radius: 4px;
@@ -321,16 +316,16 @@ button:active {
 }
 
 .btn-success:hover {
-    background: #158F35;
+    background: #059669;
 }
 
 .btn-warning {
-    background: var(--brand-yellow);
-    color: var(--brand-blue-dark);
+    background: var(--warning);
+    color: #111827;
 }
 
 .btn-warning:hover {
-    background: var(--brand-yellow-dark);
+    background: #d97706;
 }
 
 .btn-small {
@@ -538,7 +533,7 @@ legend.section-header {
 }
 
 .presets-bar .preset-btn {
-    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-dark) 100%);
+    background: var(--accent);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -547,7 +542,7 @@ legend.section-header {
 }
 
 .presets-bar .preset-btn:hover {
-    background: linear-gradient(135deg, var(--brand-blue-dark) 0%, #003A70 100%);
+    background: var(--accent-hover);
 }
 
 /* ============================================
@@ -574,19 +569,19 @@ legend.section-header {
 }
 
 .xml-preview .tag {
-    color: #4FC3F7;
+    color: #a5b4fc;
 }
 
 .xml-preview .attr {
-    color: #81D4FA;
+    color: #c4b5fd;
 }
 
 .xml-preview .value {
-    color: var(--brand-yellow);
+    color: #fbbf24;
 }
 
 .xml-preview .comment {
-    color: #81C784;
+    color: #6ee7b7;
 }
 
 /* ============================================
@@ -600,21 +595,21 @@ legend.section-header {
 }
 
 .status.success {
-    background: rgba(26, 171, 64, 0.1);
+    background: rgba(16, 185, 129, 0.1);
     border: 1px solid var(--success);
     color: var(--success);
 }
 
 .status.error {
-    background: rgba(222, 28, 36, 0.1);
+    background: rgba(239, 68, 68, 0.1);
     border: 1px solid var(--error);
     color: var(--error);
 }
 
 .status.warning {
-    background: rgba(255, 194, 32, 0.15);
+    background: rgba(245, 158, 11, 0.1);
     border: 1px solid var(--warning);
-    color: #996700;
+    color: #b45309;
 }
 
 [data-theme="dark"] .status.warning {
@@ -747,12 +742,12 @@ footer span {
 /* ============================================
    Accent Colors
    ============================================ */
-.yellow-accent {
-    color: var(--brand-yellow);
+.accent-warning {
+    color: var(--warning);
 }
 
-.blue-accent {
-    color: var(--brand-blue);
+.accent-primary {
+    color: var(--accent);
 }
 
 /* ============================================
