@@ -66,6 +66,8 @@ flowchart TD
 ### Application Support
 
 - Microsoft Edge kiosk (fullscreen or public browsing)
+  - Web URLs or local HTML files
+  - Automatic space encoding for file paths
 - UWP/Store apps via AUMID
 - Win32 desktop applications
 - 50+ presets (browsers, Office, system utilities)
@@ -112,7 +114,9 @@ Deploy to any web server for team access. No backend required—entirely client-
 
 1. Select **Single-App** mode
 2. Choose **Microsoft Edge (Kiosk Mode)**
-3. Enter the target URL
+3. Select source type:
+   - **Web URL** — Enter a website address (e.g., `https://example.com`)
+   - **Local File** — Enter a file path (e.g., `C:/Kiosk/index.html`). Spaces are encoded automatically.
 4. Select kiosk type:
    - **Fullscreen** — No browser UI (digital signage)
    - **Public Browsing** — Address bar and navigation visible
