@@ -32,8 +32,8 @@
     --accent: #818cf8;
     --accent-hover: #a5b4fc;
     --border: #374151;
-    --code-bg: #030712;
-    --code-text: #f9fafb;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
 }
 
 /* ============================================
@@ -569,12 +569,12 @@ legend.section-header {
 }
 
 .xml-preview .declaration {
-    color: #9ca3af;
+    color: #6b7280;
     font-style: italic;
 }
 
 .xml-preview .tag {
-    color: #a5b4fc;
+    color: #7dd3fc;
 }
 
 .xml-preview .attr {
@@ -582,36 +582,20 @@ legend.section-header {
 }
 
 .xml-preview .value {
-    color: #fbbf24;
+    color: #86efac;
 }
 
 .xml-preview .comment {
-    color: #6ee7b7;
+    color: #6b7280;
     font-style: italic;
 }
 
 .xml-preview .cdata {
-    color: #9ca3af;
+    color: #6b7280;
 }
 
 .xml-preview .cdata-content {
-    color: #fdba74;
-}
-
-.xml-preview .line {
-    display: block;
-}
-
-.xml-preview .line-number {
-    display: inline-block;
-    width: 3em;
-    padding-right: 1em;
-    margin-right: 1em;
-    text-align: right;
-    color: #4b5563;
-    border-right: 1px solid #374151;
-    user-select: none;
-    -webkit-user-select: none;
+    color: #fcd34d;
 }
 
 /* ============================================
