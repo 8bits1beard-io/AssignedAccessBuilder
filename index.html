@@ -1396,6 +1396,45 @@ catch {
                     document.getElementById('appType').value = 'uwp';
                     updateAppTypeUI();
                     document.getElementById('uwpAumid').value = aumid;
+                } else {
+                    // Win32 app - check for ClassicAppPath
+                    const classicAppPath = kioskModeApp.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/2021/config', 'ClassicAppPath') ||
+                                          kioskModeApp.getAttribute('v4:ClassicAppPath');
+                    if (classicAppPath) {
+                        document.getElementById('appType').value = 'win32';
+                        updateAppTypeUI();
+                        document.getElementById('win32Path').value = classicAppPath;
+                        document.getElementById('win32Args').value = classicArgs || '';
+                    }
+                }
+
+                // Import BreakoutSequence if present
+                const breakoutSequence = doc.querySelector('[Key]');
+                const breakoutKey = breakoutSequence ? breakoutSequence.getAttribute('Key') : null;
+                if (breakoutKey) {
+                    document.getElementById('enableBreakout').checked = true;
+                    updateBreakoutUI();
+
+                    // Parse the key combination (e.g., "Ctrl+Alt+K")
+                    const parts = breakoutKey.split('+');
+                    const finalKey = parts[parts.length - 1].toUpperCase();
+
+                    document.getElementById('breakoutCtrl').checked = breakoutKey.toLowerCase().includes('ctrl');
+                    document.getElementById('breakoutAlt').checked = breakoutKey.toLowerCase().includes('alt');
+                    document.getElementById('breakoutShift').checked = breakoutKey.toLowerCase().includes('shift');
+
+                    // Set the final key if it's a valid option
+                    const finalKeySelect = document.getElementById('breakoutFinalKey');
+                    for (let option of finalKeySelect.options) {
+                        if (option.value === finalKey) {
+                            finalKeySelect.value = finalKey;
+                            break;
+                        }
+                    }
+                    updateBreakoutPreview();
+                } else {
+                    document.getElementById('enableBreakout').checked = false;
+                    updateBreakoutUI();
                 }
             } else if (allAppsList) {
                 // Multi-app mode
@@ -1427,7 +1466,9 @@ catch {
                                 }
                             });
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.warn('Failed to parse StartPins JSON:', e.message);
+                    }
                 }
                 renderPinList();
 
@@ -1437,11 +1478,20 @@ catch {
                     document.getElementById('showTaskbar').checked =
                         taskbar.getAttribute('ShowTaskbar') === 'true';
                 }
+
+                // File Explorer restrictions
+                const fileExplorerRestrictions = doc.querySelector('FileExplorerNamespaceRestrictions');
+                if (fileExplorerRestrictions) {
+                    const downloads = fileExplorerRestrictions.querySelector('AllowedNamespace[Name="Downloads"]');
+                    document.getElementById('fileExplorerAccess').value = downloads ? 'downloads' : 'none';
+                } else {
+                    document.getElementById('fileExplorerAccess').value = 'none';
+                }
             }
 
             // Account
             const autoLogon = doc.querySelector('AutoLogonAccount');
-            const account = doc.querySelector('Config > Account');
+            const account = doc.querySelector('Config Account');
 
             if (autoLogon) {
                 setAccountType('auto');
