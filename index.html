@@ -154,7 +154,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for URL" aria-describedby="edgeUrl-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The web address Edge will load in kiosk mode. Include the full URL with https://. You can also use file:/// URLs directly (use %20 for spaces in paths).</span>
                                     </label>
-                                    <input type="url" id="edgeUrl" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
+                                    <input type="text" id="edgeUrl" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
                                 </div>
 
                                 <div id="edgeFileConfig" class="form-group hidden" aria-hidden="true">
@@ -883,14 +883,14 @@
             count.textContent = state.allowedApps.length;
 
             if (state.allowedApps.length === 0) {
-                list.innerHTML = '<div class="empty-list" role="listitem">No apps added yet</div>';
+                list.innerHTML = '<div class="empty-list" role="status">No apps added yet</div>';
                 return;
             }
 
             list.innerHTML = state.allowedApps.map((app, i) => `
                 <div class="app-item" role="listitem">
-                    <span title="${escapeXml(app.value)}"><span aria-hidden="true">${app.type === 'aumid' ? '📦 ' : '📄 '}</span>${truncate(app.value, 60)}</span>
-                    <button type="button" class="remove-btn" onclick="removeApp(${i})" aria-label="Remove ${truncate(app.value, 30)}">
+                    <span title="${escapeXml(app.value)}"><span aria-hidden="true">${app.type === 'aumid' ? '📦 ' : '📄 '}</span>${escapeXml(truncate(app.value, 60))}</span>
+                    <button type="button" class="remove-btn" onclick="removeApp(${i})" aria-label="Remove ${escapeXml(truncate(app.value, 30))}">
                         <span aria-hidden="true">✕</span>
                     </button>
                 </div>
@@ -961,14 +961,14 @@
             count.textContent = state.startPins.length;
 
             if (state.startPins.length === 0) {
-                list.innerHTML = '<div class="empty-list" role="listitem">No pins added yet</div>';
+                list.innerHTML = '<div class="empty-list" role="status">No pins added yet</div>';
                 return;
             }
 
             list.innerHTML = state.startPins.map((pin, i) => `
                 <div class="app-item" role="listitem">
-                    <span title="${escapeXml(pin)}"><span aria-hidden="true">🔗 </span>${truncate(pin, 55)}</span>
-                    <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${truncate(pin, 30)}">
+                    <span title="${escapeXml(pin)}"><span aria-hidden="true">🔗 </span>${escapeXml(truncate(pin, 55))}</span>
+                    <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${escapeXml(truncate(pin, 30))}">
                         <span aria-hidden="true">✕</span>
                     </button>
                 </div>
@@ -1480,8 +1480,9 @@ catch {
                     }
                 }
 
-                // Import BreakoutSequence if present
-                const breakoutSequence = doc.querySelector('[Key]');
+                // Import BreakoutSequence if present (handle namespace prefix)
+                const breakoutSequence = doc.querySelector('BreakoutSequence, [*|BreakoutSequence]') ||
+                                        Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'BreakoutSequence');
                 const breakoutKey = breakoutSequence ? breakoutSequence.getAttribute('Key') : null;
                 if (breakoutKey) {
                     document.getElementById('enableBreakout').checked = true;
@@ -1525,9 +1526,10 @@ catch {
                 });
                 renderAppList();
 
-                // Start Pins
+                // Start Pins (handle namespace prefix v5:StartPins)
                 state.startPins = [];
-                const startPins = doc.querySelector('StartPins');
+                const startPins = doc.querySelector('StartPins') ||
+                                 Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'StartPins');
                 if (startPins) {
                     try {
                         const pinsJson = JSON.parse(startPins.textContent);
@@ -1544,17 +1546,20 @@ catch {
                 }
                 renderPinList();
 
-                // Taskbar
-                const taskbar = doc.querySelector('Taskbar');
+                // Taskbar (handle namespace prefix v4:Taskbar)
+                const taskbar = doc.querySelector('Taskbar') ||
+                               Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'Taskbar');
                 if (taskbar) {
                     document.getElementById('showTaskbar').checked =
                         taskbar.getAttribute('ShowTaskbar') === 'true';
                 }
 
-                // File Explorer restrictions
-                const fileExplorerRestrictions = doc.querySelector('FileExplorerNamespaceRestrictions');
+                // File Explorer restrictions (handle namespace prefix rs5:FileExplorerNamespaceRestrictions)
+                const fileExplorerRestrictions = doc.querySelector('FileExplorerNamespaceRestrictions') ||
+                                                Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'FileExplorerNamespaceRestrictions');
                 if (fileExplorerRestrictions) {
-                    const downloads = fileExplorerRestrictions.querySelector('AllowedNamespace[Name="Downloads"]');
+                    const downloads = fileExplorerRestrictions.querySelector('AllowedNamespace[Name="Downloads"]') ||
+                                     Array.from(fileExplorerRestrictions.querySelectorAll('*')).find(el => el.localName === 'AllowedNamespace' && el.getAttribute('Name') === 'Downloads');
                     document.getElementById('fileExplorerAccess').value = downloads ? 'downloads' : 'none';
                 } else {
                     document.getElementById('fileExplorerAccess').value = 'none';
