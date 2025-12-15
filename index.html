@@ -933,10 +933,16 @@
             // Clear all options except "None"
             select.innerHTML = '<option value="">None (show Start menu)</option>';
 
-            // Add allowed apps as options (skip helper executables)
+            // Add allowed apps as options (skip helper executables and Edge exe paths)
             state.allowedApps.forEach((app, index) => {
                 // Skip helper executables - they shouldn't be auto-launched
                 if (isHelperExecutable(app.value)) {
+                    return;
+                }
+
+                // Skip Edge exe paths - only show AUMID version for Edge auto-launch
+                // Edge kiosk mode works best when launched via AUMID, not exe path
+                if (isEdgeApp(app.value) && app.type !== 'aumid') {
                     return;
                 }
 
@@ -948,11 +954,7 @@
                     displayName = '...' + displayName.slice(-47);
                 }
                 if (isEdgeApp(app.value)) {
-                    if (app.type === 'aumid') {
-                        displayName = 'Microsoft Edge';
-                    } else {
-                        displayName = 'Microsoft Edge (exe)';
-                    }
+                    displayName = 'Microsoft Edge';
                 }
                 option.textContent = displayName;
                 select.appendChild(option);
