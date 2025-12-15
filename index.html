@@ -916,6 +916,16 @@
             }
         }
 
+        function isHelperExecutable(value) {
+            if (!value) return false;
+            const lowerValue = value.toLowerCase();
+            // Filter out helper executables that shouldn't be auto-launched
+            return lowerValue.includes('_proxy.exe') ||
+                   lowerValue.includes('edgeupdate') ||
+                   lowerValue.includes('update.exe') ||
+                   lowerValue.includes('crashhandler');
+        }
+
         function updateAutoLaunchSelector() {
             const select = document.getElementById('autoLaunchApp');
             const currentValue = select.value;
@@ -923,8 +933,13 @@
             // Clear all options except "None"
             select.innerHTML = '<option value="">None (show Start menu)</option>';
 
-            // Add all allowed apps as options
+            // Add allowed apps as options (skip helper executables)
             state.allowedApps.forEach((app, index) => {
+                // Skip helper executables - they shouldn't be auto-launched
+                if (isHelperExecutable(app.value)) {
+                    return;
+                }
+
                 const option = document.createElement('option');
                 option.value = index;
                 // Create a friendly display name
@@ -933,9 +948,10 @@
                     displayName = '...' + displayName.slice(-47);
                 }
                 if (isEdgeApp(app.value)) {
-                    displayName = 'Microsoft Edge';
-                    if (app.type === 'path') {
-                        displayName += ' (exe)';
+                    if (app.type === 'aumid') {
+                        displayName = 'Microsoft Edge';
+                    } else {
+                        displayName = 'Microsoft Edge (exe)';
                     }
                 }
                 option.textContent = displayName;
