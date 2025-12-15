@@ -478,14 +478,40 @@
                         <legend class="section-header">Start Menu Pins</legend>
                         <div class="section-content">
                             <div class="form-group">
-                                <label for="addPinPath" class="with-tooltip">
-                                    Add Pin
-                                    <button type="button" class="tooltip-icon" aria-label="Help for Add Pin" aria-describedby="addPin-tooltip">?</button>
-                                    <span class="tooltip-content" id="addPin-tooltip" role="tooltip">Shortcuts pinned to the Start menu for easy access. Use the full path to a .lnk shortcut file. Environment variables like %ALLUSERSPROFILE% are supported.</span>
+                                <label class="with-tooltip">
+                                    Add Custom Shortcut
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Add Shortcut" aria-describedby="addShortcut-tooltip">?</button>
+                                    <span class="tooltip-content" id="addShortcut-tooltip" role="tooltip">Create shortcuts that will be pinned to the Start menu. The deployment script will create these .lnk files automatically.</span>
                                 </label>
-                                <div class="input-group">
-                                    <input type="text" id="addPinPath" placeholder="Path to .lnk shortcut" aria-describedby="addPin-tooltip">
-                                    <button type="button" class="btn-primary" onclick="addPin()">Add</button>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="pinName" style="font-size: 0.75rem; color: var(--text-secondary);">Shortcut Name *</label>
+                                            <input type="text" id="pinName" placeholder="e.g., Microsoft Edge" style="width: 100%;">
+                                        </div>
+                                        <div style="flex: 2;">
+                                            <label for="pinTarget" style="font-size: 0.75rem; color: var(--text-secondary);">Target Path *</label>
+                                            <input type="text" id="pinTarget" placeholder="e.g., C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="pinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments (optional)</label>
+                                        <input type="text" id="pinArgs" placeholder="e.g., --kiosk https://example.com --edge-kiosk-type=fullscreen" style="width: 100%;">
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="pinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory (optional)</label>
+                                            <input type="text" id="pinWorkingDir" placeholder="e.g., C:\Program Files (x86)\Microsoft\Edge\Application" style="width: 100%;">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label for="pinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional)</label>
+                                            <input type="text" id="pinIconPath" placeholder="e.g., C:\path\to\icon.ico" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
+                                        Note: If icon path is specified, you are responsible for ensuring the icon file exists at that path.
+                                    </div>
+                                    <button type="button" class="btn-primary" onclick="addPin()" style="align-self: flex-start;">Add Shortcut</button>
                                 </div>
                             </div>
 
@@ -493,7 +519,7 @@
                                 <label id="commonPins-label" class="with-tooltip">
                                     Common Pins
                                     <button type="button" class="tooltip-icon" aria-label="Help for Common Pins" aria-describedby="commonPins-tooltip">?</button>
-                                    <span class="tooltip-content" id="commonPins-tooltip" role="tooltip">Quick-add common Start menu shortcuts. These use standard Windows shortcut locations. Make sure the corresponding app is also in your Allowed Applications list.</span>
+                                    <span class="tooltip-content" id="commonPins-tooltip" role="tooltip">Quick-add common shortcuts with pre-configured targets. Make sure the corresponding app is also in your Allowed Applications list.</span>
                                 </label>
                                 <div role="group" aria-labelledby="commonPins-label">
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
@@ -505,30 +531,16 @@
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('osk')">On-Screen Keyboard</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('volume')">Volume Control</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('settings')">Settings</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('fileExplorer')">File Explorer</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('controlPanel')">Control Panel</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('fileExplorer')">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('soundSettings')">Sound Settings</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('printers')">Printers</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('cmd')">Command Prompt</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell')">PowerShell</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('terminal')">Windows Terminal</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('calculator')">Calculator</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('notepad')">Notepad</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('paint')">Paint</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('snipSketch')">Snipping Tool</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('stickyNotes')">Sticky Notes</button>
-                                    </div>
-                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('photos')">Photos</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('camera')">Camera</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('movies')">Movies &amp; TV</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('teams')">Teams</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('zoom')">Zoom</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
@@ -536,7 +548,6 @@
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('excel')">Excel</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powerpoint')">PowerPoint</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('outlook')">Outlook</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('onenote')">OneNote</button>
                                     </div>
                                 </div>
                             </div>
@@ -677,7 +688,7 @@
             mode: 'single',           // 'single' or 'multi'
             accountType: 'auto',      // 'auto' or 'existing'
             allowedApps: [],          // For multi-app mode
-            startPins: [],            // For multi-app mode
+            startPins: [],            // For multi-app mode: array of {name, target, args, workingDir, iconPath}
             autoLaunchApp: null,      // Index into allowedApps array, or null (for multi-app)
             multiAppEdgeConfig: {     // Edge kiosk config for multi-app mode
                 url: '',
@@ -1204,11 +1215,38 @@
            Start Pins Management (Multi-App Mode)
            ============================================================================ */
         function addPin() {
-            const value = document.getElementById('addPinPath').value.trim();
-            if (!value) return;
+            const name = document.getElementById('pinName').value.trim();
+            const target = document.getElementById('pinTarget').value.trim();
+            const args = document.getElementById('pinArgs').value.trim();
+            const workingDir = document.getElementById('pinWorkingDir').value.trim();
+            const iconPath = document.getElementById('pinIconPath').value.trim();
 
-            state.startPins.push(value);
-            document.getElementById('addPinPath').value = '';
+            if (!name || !target) {
+                alert('Shortcut Name and Target Path are required.');
+                return;
+            }
+
+            // Check if a pin with the same name already exists
+            if (state.startPins.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+                alert('A shortcut with this name already exists.');
+                return;
+            }
+
+            state.startPins.push({
+                name: name,
+                target: target,
+                args: args,
+                workingDir: workingDir,
+                iconPath: iconPath
+            });
+
+            // Clear the form
+            document.getElementById('pinName').value = '';
+            document.getElementById('pinTarget').value = '';
+            document.getElementById('pinArgs').value = '';
+            document.getElementById('pinWorkingDir').value = '';
+            document.getElementById('pinIconPath').value = '';
+
             renderPinList();
             updatePreview();
         }
@@ -1216,42 +1254,119 @@
         function addCommonPin(pinKey) {
             const commonPins = {
                 // Browsers
-                'edge': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk',
-                'chrome': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Google Chrome.lnk',
-                'firefox': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Firefox.lnk',
+                'edge': {
+                    name: 'Microsoft Edge',
+                    target: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'chrome': {
+                    name: 'Google Chrome',
+                    target: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'firefox': {
+                    name: 'Mozilla Firefox',
+                    target: 'C:\\Program Files\\Mozilla Firefox\\firefox.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
                 // System Utilities
-                'osk': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\On-Screen Keyboard.lnk',
-                'volume': 'ms-settings:sound',
-                'settings': 'ms-settings:',
-                'fileExplorer': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\File Explorer.lnk',
-                'controlPanel': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Control Panel.lnk',
-                'printers': 'ms-settings:printers',
-                'cmd': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Command Prompt.lnk',
-                'powershell': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell.lnk',
-                'terminal': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Windows Terminal.lnk',
+                'osk': {
+                    name: 'On-Screen Keyboard',
+                    target: 'C:\\Windows\\System32\\osk.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'controlPanel': {
+                    name: 'Control Panel',
+                    target: 'C:\\Windows\\System32\\control.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'fileExplorer': {
+                    name: 'File Explorer',
+                    target: 'C:\\Windows\\explorer.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'soundSettings': {
+                    name: 'Sound Settings',
+                    target: 'C:\\Windows\\explorer.exe',
+                    args: 'ms-settings:sound',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'printers': {
+                    name: 'Printers & Scanners',
+                    target: 'C:\\Windows\\explorer.exe',
+                    args: 'ms-settings:printers',
+                    workingDir: '',
+                    iconPath: ''
+                },
                 // Productivity
-                'calculator': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Calculator.lnk',
-                'notepad': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Notepad.lnk',
-                'paint': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Paint.lnk',
-                'snipSketch': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Snipping Tool.lnk',
-                'stickyNotes': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Sticky Notes.lnk',
-                // Media & Communication
-                'photos': 'microsoft.windows.photos:',
-                'camera': 'microsoft.windows.camera:',
-                'movies': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Films & TV.lnk',
-                'teams': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Teams.lnk',
-                'zoom': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Zoom\\Zoom.lnk',
+                'cmd': {
+                    name: 'Command Prompt',
+                    target: 'C:\\Windows\\System32\\cmd.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'powershell': {
+                    name: 'Windows PowerShell',
+                    target: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'notepad': {
+                    name: 'Notepad',
+                    target: 'C:\\Windows\\System32\\notepad.exe',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
                 // Microsoft Office
-                'word': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Word.lnk',
-                'excel': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Excel.lnk',
-                'powerpoint': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\PowerPoint.lnk',
-                'outlook': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Outlook.lnk',
-                'onenote': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\OneNote.lnk'
+                'word': {
+                    name: 'Microsoft Word',
+                    target: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'excel': {
+                    name: 'Microsoft Excel',
+                    target: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'powerpoint': {
+                    name: 'Microsoft PowerPoint',
+                    target: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                },
+                'outlook': {
+                    name: 'Microsoft Outlook',
+                    target: 'C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE',
+                    args: '',
+                    workingDir: '',
+                    iconPath: ''
+                }
             };
 
             const pin = commonPins[pinKey];
-            if (pin && !state.startPins.includes(pin)) {
-                state.startPins.push(pin);
+            if (pin && !state.startPins.find(p => p.name.toLowerCase() === pin.name.toLowerCase())) {
+                state.startPins.push({ ...pin });
                 renderPinList();
                 updatePreview();
             }
@@ -1274,14 +1389,22 @@
                 return;
             }
 
-            list.innerHTML = state.startPins.map((pin, i) => `
-                <div class="app-item" role="listitem">
-                    <span title="${escapeXml(pin)}"><span aria-hidden="true">🔗 </span>${escapeXml(truncate(pin, 55))}</span>
-                    <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${escapeXml(truncate(pin, 30))}">
+            list.innerHTML = state.startPins.map((pin, i) => {
+                const displayTarget = pin.target ? truncate(pin.target, 40) : '(no target - click to edit)';
+                const hasArgs = pin.args ? ` (${truncate(pin.args, 20)})` : '';
+                const missingTarget = !pin.target;
+                const warningStyle = missingTarget ? 'color: var(--error-color, #e74c3c);' : 'color: var(--text-secondary);';
+                return `
+                <div class="app-item" role="listitem" style="${missingTarget ? 'border-left: 3px solid var(--error-color, #e74c3c);' : ''}">
+                    <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+                        <span style="font-weight: 500;">${escapeXml(pin.name)}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
+                        <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(pin.target || 'No target specified')}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
+                    </div>
+                    <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${escapeXml(pin.name)}">
                         <span aria-hidden="true">✕</span>
                     </button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         /* ============================================================================
@@ -1405,9 +1528,12 @@
             }
 
             // Start Pins (Windows 11)
+            // Shortcuts will be created by the deployment script in C:\ProgramData\KioskShortcuts\
             if (state.startPins.length > 0) {
                 const pinsJson = {
-                    pinnedList: state.startPins.map(p => ({ desktopAppLink: p }))
+                    pinnedList: state.startPins.map(p => ({
+                        desktopAppLink: `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
+                    }))
                 };
                 xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
             }
@@ -1494,6 +1620,12 @@
                 if (state.allowedApps.length === 0) {
                     errors.push('At least one allowed app is required for multi-app mode');
                 }
+
+                // Check for shortcuts missing target paths
+                const missingTargets = state.startPins.filter(p => !p.target);
+                if (missingTargets.length > 0) {
+                    errors.push(`${missingTargets.length} shortcut(s) missing target path: ${missingTargets.map(p => p.name).join(', ')}`);
+                }
             }
 
             return errors;
@@ -1574,6 +1706,15 @@
 
             const xml = generateXml();
 
+            // Generate shortcuts JSON for PowerShell
+            const shortcutsJson = JSON.stringify(state.startPins.map(p => ({
+                Name: p.name,
+                TargetPath: p.target,
+                Arguments: p.args || '',
+                WorkingDirectory: p.workingDir || '',
+                IconLocation: p.iconPath || ''
+            })), null, 4).replace(/"/g, "'");
+
             const ps1 = `#Requires -RunAsAdministrator
 <#
 .SYNOPSIS
@@ -1631,6 +1772,45 @@ function Save-Log {
     $log | ConvertTo-Json -Depth 10 | Out-File -FilePath $logFile -Encoding UTF8
     Write-Host ""
     Write-Host "Log saved to: $logFile" -ForegroundColor Gray
+}
+
+# Start Menu Shortcuts to create
+$shortcuts = ${shortcutsJson}
+
+# Function to create shortcuts
+function New-Shortcut {
+    param(
+        [string]$Name,
+        [string]$TargetPath,
+        [string]$Arguments,
+        [string]$WorkingDirectory,
+        [string]$IconLocation
+    )
+
+    $shortcutDir = "C:\\ProgramData\\KioskShortcuts"
+    if (-not (Test-Path $shortcutDir)) {
+        New-Item -ItemType Directory -Path $shortcutDir -Force | Out-Null
+    }
+
+    $shortcutPath = Join-Path $shortcutDir "$Name.lnk"
+
+    $WshShell = New-Object -ComObject WScript.Shell
+    $shortcut = $WshShell.CreateShortcut($shortcutPath)
+    $shortcut.TargetPath = $TargetPath
+
+    if ($Arguments) {
+        $shortcut.Arguments = $Arguments
+    }
+    if ($WorkingDirectory) {
+        $shortcut.WorkingDirectory = $WorkingDirectory
+    }
+    if ($IconLocation) {
+        $shortcut.IconLocation = $IconLocation
+    }
+
+    $shortcut.Save()
+
+    return $shortcutPath
 }
 
 # AssignedAccess Configuration XML
@@ -1701,6 +1881,24 @@ Write-Host ""
 
 try {
     Write-Log -Action "Starting deployment" -Status "Info" -Message "Target: $env:COMPUTERNAME"
+
+    # Create Start Menu shortcuts
+    if ($shortcuts.Count -gt 0) {
+        Write-Log -Action "Creating Start Menu shortcuts" -Status "Info" -Message "$($shortcuts.Count) shortcut(s) to create"
+        Write-Host ""
+        foreach ($sc in $shortcuts) {
+            try {
+                $path = New-Shortcut -Name $sc.Name -TargetPath $sc.TargetPath -Arguments $sc.Arguments -WorkingDirectory $sc.WorkingDirectory -IconLocation $sc.IconLocation
+                Write-Log -Action "Created shortcut" -Status "Success" -Message $path
+                Write-Host "[OK] Created: $($sc.Name)" -ForegroundColor Green
+            }
+            catch {
+                Write-Log -Action "Failed to create shortcut" -Status "Warning" -Message "$($sc.Name): $($_.Exception.Message)"
+                Write-Host "[WARN] Failed to create: $($sc.Name) - $($_.Exception.Message)" -ForegroundColor Yellow
+            }
+        }
+        Write-Host ""
+    }
 
     # HTML encode the XML and apply
     Write-Log -Action "Encoding XML configuration" -Status "Info"
@@ -1955,6 +2153,8 @@ catch {
                 }
 
                 // Start Pins (handle namespace prefix v5:StartPins)
+                // Note: Imported shortcuts will only have names extracted from paths
+                // User will need to verify/update target paths if importing older configs
                 state.startPins = [];
                 const startPins = doc.querySelector('StartPins') ||
                                  Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'StartPins');
@@ -1964,9 +2164,29 @@ catch {
                         if (pinsJson.pinnedList) {
                             pinsJson.pinnedList.forEach(pin => {
                                 if (pin.desktopAppLink) {
-                                    state.startPins.push(pin.desktopAppLink);
+                                    // Try to extract name from path (e.g., C:\ProgramData\KioskShortcuts\Name.lnk)
+                                    const path = pin.desktopAppLink;
+                                    let name = path;
+
+                                    // Extract filename without extension
+                                    const match = path.match(/([^\\\/]+)\.lnk$/i);
+                                    if (match) {
+                                        name = match[1];
+                                    }
+
+                                    // Create a basic shortcut object - user may need to update target
+                                    state.startPins.push({
+                                        name: name,
+                                        target: '', // Unknown from XML, user needs to set
+                                        args: '',
+                                        workingDir: '',
+                                        iconPath: ''
+                                    });
                                 }
                             });
+                        }
+                        if (state.startPins.length > 0 && state.startPins.some(p => !p.target)) {
+                            console.warn('Imported shortcuts need target paths configured');
                         }
                     } catch (e) {
                         console.warn('Failed to parse StartPins JSON:', e.message);
