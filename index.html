@@ -1808,14 +1808,14 @@
 
             const xml = generateXml();
 
-            // Generate shortcuts JSON for PowerShell
+            // Generate shortcuts JSON for PowerShell (keep proper JSON format for ConvertFrom-Json)
             const shortcutsJson = JSON.stringify(state.startPins.map(p => ({
-                Name: p.name,
-                TargetPath: p.target,
+                Name: p.name || '',
+                TargetPath: p.target || '',
                 Arguments: p.args || '',
                 WorkingDirectory: p.workingDir || '',
                 IconLocation: p.iconPath || ''
-            })), null, 4).replace(/"/g, "'");
+            })), null, 4);
 
             const ps1 = `#Requires -RunAsAdministrator
 <#
@@ -1876,8 +1876,26 @@ function Save-Log {
     Write-Host "Log saved to: $logFile" -ForegroundColor Gray
 }
 
-# Start Menu Shortcuts to create
-$shortcuts = ${shortcutsJson}
+# Start Menu Shortcuts to create (JSON parsed at runtime)
+$shortcutsJson = @'
+${shortcutsJson}
+'@
+$shortcuts = @()
+if ($shortcutsJson.Trim() -ne '[]' -and $shortcutsJson.Trim() -ne '') {
+    try {
+        $parsed = $shortcutsJson | ConvertFrom-Json
+        # Ensure it's always an array (single object needs wrapping)
+        if ($null -ne $parsed) {
+            if ($parsed -is [System.Array]) {
+                $shortcuts = $parsed
+            } else {
+                $shortcuts = @($parsed)
+            }
+        }
+    } catch {
+        Write-Host "[WARN] Failed to parse shortcuts JSON: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+}
 
 # Function to create shortcuts
 function New-Shortcut {
@@ -1989,6 +2007,12 @@ try {
         Write-Log -Action "Creating Start Menu shortcuts" -Status "Info" -Message "$($shortcuts.Count) shortcut(s) to create"
         Write-Host ""
         foreach ($sc in $shortcuts) {
+            # Skip shortcuts with empty name or target
+            if ([string]::IsNullOrWhiteSpace($sc.Name) -or [string]::IsNullOrWhiteSpace($sc.TargetPath)) {
+                Write-Log -Action "Skipped shortcut" -Status "Warning" -Message "Missing name or target path"
+                Write-Host "[WARN] Skipped shortcut with missing name or target" -ForegroundColor Yellow
+                continue
+            }
             try {
                 $path = New-Shortcut -Name $sc.Name -TargetPath $sc.TargetPath -Arguments $sc.Arguments -WorkingDirectory $sc.WorkingDirectory -IconLocation $sc.IconLocation
                 Write-Log -Action "Created shortcut" -Status "Success" -Message $path
