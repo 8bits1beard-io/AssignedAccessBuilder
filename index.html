@@ -19,6 +19,7 @@
         <nav class="header-actions" aria-label="Main actions">
             <button type="button" class="btn-secondary" onclick="loadPreset('blank')">New</button>
             <button type="button" class="btn-secondary" onclick="importXml()">Import XML</button>
+            <button type="button" class="btn-secondary" onclick="showDeployHelp()">Deploy Guide</button>
             <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode" title="Toggle light mode">
                 <span aria-hidden="true">&#9728;</span>
             </button>
@@ -613,6 +614,61 @@
         </p>
     </footer>
 
+    <!-- Deploy Guide Modal -->
+    <div id="deployModal" class="modal hidden" role="dialog" aria-labelledby="deployModalTitle" aria-modal="true">
+        <div class="modal-backdrop" onclick="hideDeployHelp()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="deployModalTitle">Deploy to Intune via OMA-URI</h2>
+                <button type="button" class="modal-close" onclick="hideDeployHelp()" aria-label="Close dialog">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3>Steps to Create Custom CSP Policy</h3>
+
+                <h4>1. Navigate to Intune</h4>
+                <ul>
+                    <li>Go to <a href="https://intune.microsoft.com" target="_blank" rel="noopener noreferrer">Microsoft Intune admin center</a></li>
+                    <li>Select <strong>Devices</strong> → <strong>Configuration profiles</strong></li>
+                </ul>
+
+                <h4>2. Create Profile</h4>
+                <ul>
+                    <li>Click <strong>+ Create profile</strong></li>
+                    <li>Platform: <strong>Windows 10 and later</strong></li>
+                    <li>Profile type: <strong>Templates</strong> → <strong>Custom</strong></li>
+                    <li>Click <strong>Create</strong></li>
+                </ul>
+
+                <h4>3. Configure OMA-URI Setting</h4>
+                <ul>
+                    <li>Name the profile (e.g., "Kiosk Configuration")</li>
+                    <li>Click <strong>Add</strong> under OMA-URI Settings</li>
+                    <li>Fill in the following:</li>
+                </ul>
+                <table class="oma-uri-table">
+                    <tr><th>Field</th><th>Value</th></tr>
+                    <tr><td><strong>Name</strong></td><td>AssignedAccess Configuration</td></tr>
+                    <tr><td><strong>OMA-URI</strong></td><td><code>./Vendor/MSFT/AssignedAccess/Configuration</code></td></tr>
+                    <tr><td><strong>Data type</strong></td><td>String</td></tr>
+                    <tr><td><strong>Value</strong></td><td><em>(Paste your XML here)</em></td></tr>
+                </table>
+
+                <h4>4. Assign &amp; Deploy</h4>
+                <ul>
+                    <li>Assign to a device group</li>
+                    <li>Device will reboot to apply kiosk mode</li>
+                </ul>
+
+                <h3>Important Notes</h3>
+                <ul>
+                    <li>Device must be Azure AD joined or Hybrid Azure AD joined</li>
+                    <li>User account must exist on the device before policy applies</li>
+                    <li>Test on a single device before broad deployment</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <script>
         /* ============================================================================
            State Management
@@ -666,6 +722,32 @@
                 document.querySelector('.theme-toggle').textContent = '☀️';
             }
         })();
+
+        /* ============================================================================
+           Deploy Guide Modal
+           ============================================================================ */
+        function showDeployHelp() {
+            const modal = document.getElementById('deployModal');
+            modal.classList.remove('hidden');
+            modal.querySelector('.modal-close').focus();
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideDeployHelp() {
+            const modal = document.getElementById('deployModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('deployModal');
+                if (!modal.classList.contains('hidden')) {
+                    hideDeployHelp();
+                }
+            }
+        });
 
         /* ============================================================================
            Mode Switching
