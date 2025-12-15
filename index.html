@@ -32,9 +32,21 @@
             <h2 id="config-heading" class="panel-header">
                 Configuration
             </h2>
-            <div class="panel-content">
-                <!-- Kiosk Mode -->
-                <fieldset class="section">
+            <div class="panel-content with-tabs">
+                <!-- Tab Navigation -->
+                <nav class="tab-nav" role="tablist" aria-label="Configuration sections">
+                    <button type="button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" onclick="switchTab('setup')">Setup</button>
+                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
+                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
+                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
+                </nav>
+
+                <!-- Tab Panels -->
+                <div class="tab-panels">
+                    <!-- Setup Tab -->
+                    <div class="tab-content active" role="tabpanel" id="tab-setup" aria-labelledby="tab-btn-setup">
+                        <!-- Kiosk Mode -->
+                        <fieldset class="section">
                     <legend class="section-header">Kiosk Mode</legend>
                     <div class="section-content">
                         <div class="toggle-group" role="group" aria-label="Kiosk mode selection">
@@ -108,7 +120,11 @@
                         </div>
                     </div>
                 </fieldset>
+                    </div>
+                    <!-- End Setup Tab -->
 
+                    <!-- Application Tab -->
+                    <div class="tab-content" role="tabpanel" id="tab-application" aria-labelledby="tab-btn-application">
                 <!-- Single-App Configuration -->
                 <div id="singleAppConfig">
                     <fieldset class="section">
@@ -359,7 +375,6 @@
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('settings')">Settings</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('fileExplorer')">File Explorer</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('controlPanel')">Control Panel</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('printers')">Printers</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('cmd')">Command Prompt</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell')">PowerShell</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('terminal')">Windows Terminal</button>
@@ -473,7 +488,12 @@
                             </div>
                         </div>
                     </fieldset>
+                </div>
+                    </div>
+                    <!-- End Application Tab -->
 
+                    <!-- Start Menu Tab (Multi-App only) -->
+                    <div class="tab-content" role="tabpanel" id="tab-startmenu" aria-labelledby="tab-btn-startmenu">
                     <fieldset class="section">
                         <legend class="section-header">Start Menu Pins</legend>
                         <div class="section-content">
@@ -560,7 +580,11 @@
                             </div>
                         </div>
                     </fieldset>
+                    </div>
+                    <!-- End Start Menu Tab -->
 
+                    <!-- System Tab (Multi-App only) -->
+                    <div class="tab-content" role="tabpanel" id="tab-system" aria-labelledby="tab-btn-system">
                     <fieldset class="section">
                         <legend class="section-header">Taskbar &amp; File Explorer</legend>
                         <div class="section-content">
@@ -591,7 +615,11 @@
                             </div>
                         </div>
                     </fieldset>
+                    </div>
+                    <!-- End System Tab -->
+
                 </div>
+                <!-- End tab-panels -->
             </div>
         </section>
 
@@ -761,6 +789,42 @@
         });
 
         /* ============================================================================
+           Tab Navigation
+           ============================================================================ */
+        function switchTab(tabId) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const isActive = btn.id === `tab-btn-${tabId}`;
+                btn.classList.toggle('active', isActive);
+                btn.setAttribute('aria-selected', isActive);
+            });
+
+            // Update tab panels
+            document.querySelectorAll('.tab-content').forEach(panel => {
+                const isActive = panel.id === `tab-${tabId}`;
+                panel.classList.toggle('active', isActive);
+            });
+        }
+
+        function updateTabVisibility() {
+            const isMultiApp = state.mode === 'multi';
+            const startMenuTab = document.getElementById('tab-btn-startmenu');
+            const systemTab = document.getElementById('tab-btn-system');
+
+            // Show/hide tabs based on mode
+            startMenuTab.classList.toggle('hidden', !isMultiApp);
+            systemTab.classList.toggle('hidden', !isMultiApp);
+
+            // If switching to single mode and currently on a multi-only tab, switch to Application tab
+            if (!isMultiApp) {
+                const activeTab = document.querySelector('.tab-btn.active');
+                if (activeTab && (activeTab.id === 'tab-btn-startmenu' || activeTab.id === 'tab-btn-system')) {
+                    switchTab('application');
+                }
+            }
+        }
+
+        /* ============================================================================
            Mode Switching
            ============================================================================ */
         function setMode(mode) {
@@ -780,6 +844,9 @@
             multiConfig.classList.toggle('hidden', mode !== 'multi');
             singleConfig.setAttribute('aria-hidden', mode !== 'single');
             multiConfig.setAttribute('aria-hidden', mode !== 'multi');
+
+            // Update tab visibility based on mode
+            updateTabVisibility();
 
             // Update auto-launch selector when switching to multi mode
             if (mode === 'multi') {
@@ -1056,9 +1123,6 @@
                 'settings': { type: 'aumid', value: 'windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel' },
                 'fileExplorer': { type: 'path', value: 'C:\\Windows\\explorer.exe' },
                 'controlPanel': { type: 'path', value: 'C:\\Windows\\System32\\control.exe' },
-                'printers': { type: 'path', value: 'C:\\Windows\\System32\\control.exe' },  // Opens with 'printers' argument
-                'printersFolder': { type: 'path', value: 'shell:::{2227A280-3AEA-1069-A2DE-08002B30309D}' },
-                'printui': { type: 'path', value: 'C:\\Windows\\System32\\rundll32.exe' },  // For printui.dll
                 'cmd': { type: 'path', value: 'C:\\Windows\\System32\\cmd.exe' },
                 'powershell': { type: 'path', value: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' },
                 'powershell7': { type: 'path', value: 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' },
@@ -1151,17 +1215,6 @@
                 }
                 if (!state.allowedApps.find(a => a.value === commonApps.powershell7.value)) {
                     state.allowedApps.push(commonApps.powershell7);
-                }
-            } else if (appKey === 'printers') {
-                // Add control panel, rundll32 for printui, and explorer for shell folder
-                if (!state.allowedApps.find(a => a.value === commonApps.printers.value)) {
-                    state.allowedApps.push(commonApps.printers);
-                }
-                if (!state.allowedApps.find(a => a.value === commonApps.printui.value)) {
-                    state.allowedApps.push(commonApps.printui);
-                }
-                if (!state.allowedApps.find(a => a.value === commonApps.fileExplorer.value)) {
-                    state.allowedApps.push(commonApps.fileExplorer);
                 }
             } else {
                 const app = commonApps[appKey];
@@ -2339,6 +2392,7 @@ catch {
            ============================================================================ */
         document.addEventListener('DOMContentLoaded', () => {
             generateGuid();
+            updateTabVisibility();
             updatePreview();
         });
     </script>
