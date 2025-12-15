@@ -2388,12 +2388,50 @@ catch {
         }
 
         /* ============================================================================
+           Tooltip Positioning
+           ============================================================================ */
+        function positionTooltip(tooltipIcon) {
+            const tooltip = tooltipIcon.nextElementSibling;
+            if (!tooltip || !tooltip.classList.contains('tooltip-content')) return;
+
+            const iconRect = tooltipIcon.getBoundingClientRect();
+            const tooltipWidth = 320; // matches CSS width
+            const padding = 10;
+
+            // Position below the icon
+            let top = iconRect.bottom + 8;
+            let left = iconRect.left + (iconRect.width / 2) - (tooltipWidth / 2);
+
+            // Keep within viewport bounds
+            if (left < padding) {
+                left = padding;
+            } else if (left + tooltipWidth > window.innerWidth - padding) {
+                left = window.innerWidth - tooltipWidth - padding;
+            }
+
+            // If tooltip would go below viewport, position above instead
+            const tooltipHeight = tooltip.offsetHeight || 150;
+            if (top + tooltipHeight > window.innerHeight - padding) {
+                top = iconRect.top - tooltipHeight - 8;
+            }
+
+            tooltip.style.top = `${top}px`;
+            tooltip.style.left = `${left}px`;
+        }
+
+        /* ============================================================================
            Initialize
            ============================================================================ */
         document.addEventListener('DOMContentLoaded', () => {
             generateGuid();
             updateTabVisibility();
             updatePreview();
+
+            // Add tooltip positioning on hover/focus
+            document.querySelectorAll('.tooltip-icon').forEach(icon => {
+                icon.addEventListener('mouseenter', () => positionTooltip(icon));
+                icon.addEventListener('focus', () => positionTooltip(icon));
+            });
         });
     </script>
 </body>
