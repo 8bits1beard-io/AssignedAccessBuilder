@@ -488,6 +488,20 @@
                             </div>
                         </div>
                     </fieldset>
+
+                    <fieldset class="section hidden" id="win32ArgsConfig" aria-hidden="true">
+                        <legend class="section-header">Win32 App Arguments</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="win32AutoLaunchArgs" class="with-tooltip">
+                                    Launch Arguments
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Launch Arguments" aria-describedby="win32Args-tooltip">?</button>
+                                    <span class="tooltip-content" id="win32Args-tooltip" role="tooltip">Optional command-line arguments to pass to the Win32 application when it auto-launches. Example: --fullscreen or /silent</span>
+                                </label>
+                                <input type="text" id="win32AutoLaunchArgs" placeholder="--fullscreen /silent" onchange="updatePreview()" aria-describedby="win32Args-tooltip">
+                            </div>
+                        </div>
+                    </fieldset>
                 </div>
                     </div>
                     <!-- End Application Tab -->
@@ -606,11 +620,14 @@
                                 <label for="fileExplorerAccess" class="with-tooltip">
                                     File Explorer Access
                                     <button type="button" class="tooltip-icon" aria-label="Help for File Explorer Access" aria-describedby="fileExplorerAccess-tooltip">?</button>
-                                    <span class="tooltip-content" id="fileExplorerAccess-tooltip" role="tooltip">No Access: File Explorer is completely blocked. Users cannot browse files. Downloads Only: Users can access the Downloads folder only. Useful if apps need to save/open files.</span>
+                                    <span class="tooltip-content" id="fileExplorerAccess-tooltip" role="tooltip">No Access: File Explorer is blocked. Downloads Only: Access to Downloads folder. Removable Drives: Access to USB drives. Downloads + Removable: Both options. No Restriction: Full file system access.</span>
                                 </label>
                                 <select id="fileExplorerAccess" onchange="updatePreview()" aria-describedby="fileExplorerAccess-tooltip">
                                     <option value="none">No Access (Blocked)</option>
                                     <option value="downloads">Downloads Folder Only</option>
+                                    <option value="removable">Removable Drives Only</option>
+                                    <option value="downloads-removable">Downloads + Removable Drives</option>
+                                    <option value="all">No Restriction (All Locations)</option>
                                 </select>
                             </div>
                         </div>
@@ -1064,16 +1081,28 @@
 
         function updateMultiAppEdgeUI() {
             const edgeConfig = document.getElementById('multiAppEdgeConfig');
+            const win32ArgsConfig = document.getElementById('win32ArgsConfig');
 
             // Show Edge config only if an Edge app is selected for auto-launch
+            // Show Win32 args config if a non-Edge Win32 app is selected for auto-launch
             let showEdgeConfig = false;
+            let showWin32Args = false;
+
             if (state.autoLaunchApp !== null && state.allowedApps[state.autoLaunchApp]) {
                 const app = state.allowedApps[state.autoLaunchApp];
-                showEdgeConfig = isEdgeApp(app.value);
+                if (isEdgeApp(app.value)) {
+                    showEdgeConfig = true;
+                } else if (app.type === 'path') {
+                    // Win32 app (not Edge)
+                    showWin32Args = true;
+                }
             }
 
             edgeConfig.classList.toggle('hidden', !showEdgeConfig);
             edgeConfig.setAttribute('aria-hidden', !showEdgeConfig);
+
+            win32ArgsConfig.classList.toggle('hidden', !showWin32Args);
+            win32ArgsConfig.setAttribute('aria-hidden', !showWin32Args);
         }
 
         function updateMultiEdgeSourceUI() {
@@ -1470,6 +1499,7 @@
             xml += `<AssignedAccessConfiguration\n`;
             xml += `    xmlns="http://schemas.microsoft.com/AssignedAccess/2017/config"\n`;
             xml += `    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201901/config"\n`;
+            xml += `    xmlns:v3="http://schemas.microsoft.com/AssignedAccess/2020/config"\n`;
             xml += `    xmlns:v4="http://schemas.microsoft.com/AssignedAccess/2021/config"\n`;
             xml += `    xmlns:v5="http://schemas.microsoft.com/AssignedAccess/2022/config">\n`;
 
@@ -1563,6 +1593,12 @@
                         if (inPrivate) args += ' --inprivate';
 
                         attrs += ` rs5:AutoLaunchArguments="${escapeXml(args)}"`;
+                    } else if (app.type === 'path') {
+                        // Non-Edge Win32 app - add arguments if specified
+                        const win32Args = document.getElementById('win32AutoLaunchArgs').value.trim();
+                        if (win32Args) {
+                            attrs += ` rs5:AutoLaunchArguments="${escapeXml(win32Args)}"`;
+                        }
                     }
                 }
 
@@ -1577,6 +1613,19 @@
             if (fileAccess === 'downloads') {
                 xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
                 xml += `                <rs5:AllowedNamespace Name="Downloads"/>\n`;
+                xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
+            } else if (fileAccess === 'removable') {
+                xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
+                xml += `                <v3:AllowRemovableDrives/>\n`;
+                xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
+            } else if (fileAccess === 'downloads-removable') {
+                xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
+                xml += `                <rs5:AllowedNamespace Name="Downloads"/>\n`;
+                xml += `                <v3:AllowRemovableDrives/>\n`;
+                xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
+            } else if (fileAccess === 'all') {
+                xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
+                xml += `                <v3:NoRestriction/>\n`;
                 xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
             }
 
@@ -2167,32 +2216,40 @@ catch {
                     if (autoLaunch === 'true') {
                         state.autoLaunchApp = appIndex;
 
-                        // Parse AutoLaunchArguments for Edge config
+                        // Parse AutoLaunchArguments
                         const autoLaunchArgs = app.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/201901/config', 'AutoLaunchArguments') ||
                                               app.getAttribute('rs5:AutoLaunchArguments');
                         if (autoLaunchArgs) {
-                            // Parse Edge arguments
-                            const urlMatch = autoLaunchArgs.match(/--kiosk\s+(\S+)/);
-                            if (urlMatch) {
-                                const extractedUrl = urlMatch[1];
-                                if (extractedUrl.toLowerCase().startsWith('file:///')) {
-                                    document.getElementById('multiEdgeSourceType').value = 'file';
-                                    let filePath = extractedUrl.substring(8);
-                                    filePath = decodeURIComponent(filePath);
-                                    document.getElementById('multiEdgeFilePath').value = filePath;
-                                    document.getElementById('multiEdgeUrl').value = '';
-                                } else {
-                                    document.getElementById('multiEdgeSourceType').value = 'url';
-                                    document.getElementById('multiEdgeUrl').value = extractedUrl;
-                                    document.getElementById('multiEdgeFilePath').value = '';
+                            const currentAppPath = path || aumid;
+                            const isEdge = isEdgeApp(currentAppPath);
+
+                            if (isEdge) {
+                                // Parse Edge arguments
+                                const urlMatch = autoLaunchArgs.match(/--kiosk\s+(\S+)/);
+                                if (urlMatch) {
+                                    const extractedUrl = urlMatch[1];
+                                    if (extractedUrl.toLowerCase().startsWith('file:///')) {
+                                        document.getElementById('multiEdgeSourceType').value = 'file';
+                                        let filePath = extractedUrl.substring(8);
+                                        filePath = decodeURIComponent(filePath);
+                                        document.getElementById('multiEdgeFilePath').value = filePath;
+                                        document.getElementById('multiEdgeUrl').value = '';
+                                    } else {
+                                        document.getElementById('multiEdgeSourceType').value = 'url';
+                                        document.getElementById('multiEdgeUrl').value = extractedUrl;
+                                        document.getElementById('multiEdgeFilePath').value = '';
+                                    }
+                                    updateMultiEdgeSourceUI();
                                 }
-                                updateMultiEdgeSourceUI();
+
+                                document.getElementById('multiEdgeKioskType').value =
+                                    autoLaunchArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
+
+                                document.getElementById('multiEdgeInPrivate').checked = autoLaunchArgs.includes('--inprivate');
+                            } else if (path) {
+                                // Non-Edge Win32 app - populate win32 args field
+                                document.getElementById('win32AutoLaunchArgs').value = autoLaunchArgs;
                             }
-
-                            document.getElementById('multiEdgeKioskType').value =
-                                autoLaunchArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
-
-                            document.getElementById('multiEdgeInPrivate').checked = autoLaunchArgs.includes('--inprivate');
                         }
                     }
                     appIndex++;
@@ -2261,7 +2318,22 @@ catch {
                 if (fileExplorerRestrictions) {
                     const downloads = fileExplorerRestrictions.querySelector('AllowedNamespace[Name="Downloads"]') ||
                                      Array.from(fileExplorerRestrictions.querySelectorAll('*')).find(el => el.localName === 'AllowedNamespace' && el.getAttribute('Name') === 'Downloads');
-                    document.getElementById('fileExplorerAccess').value = downloads ? 'downloads' : 'none';
+                    const removable = fileExplorerRestrictions.querySelector('AllowRemovableDrives') ||
+                                     Array.from(fileExplorerRestrictions.querySelectorAll('*')).find(el => el.localName === 'AllowRemovableDrives');
+                    const noRestriction = fileExplorerRestrictions.querySelector('NoRestriction') ||
+                                         Array.from(fileExplorerRestrictions.querySelectorAll('*')).find(el => el.localName === 'NoRestriction');
+
+                    if (noRestriction) {
+                        document.getElementById('fileExplorerAccess').value = 'all';
+                    } else if (downloads && removable) {
+                        document.getElementById('fileExplorerAccess').value = 'downloads-removable';
+                    } else if (downloads) {
+                        document.getElementById('fileExplorerAccess').value = 'downloads';
+                    } else if (removable) {
+                        document.getElementById('fileExplorerAccess').value = 'removable';
+                    } else {
+                        document.getElementById('fileExplorerAccess').value = 'none';
+                    }
                 } else {
                     document.getElementById('fileExplorerAccess').value = 'none';
                 }
@@ -2300,6 +2372,7 @@ catch {
             document.getElementById('multiEdgeFilePath').value = '';
             document.getElementById('multiEdgeKioskType').value = 'fullscreen';
             document.getElementById('multiEdgeInPrivate').checked = true;
+            document.getElementById('win32AutoLaunchArgs').value = '';
             updateMultiEdgeSourceUI();
 
             switch (preset) {
