@@ -510,10 +510,16 @@
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('firefox')">Firefox</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System &amp; Productivity:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('fileExplorer')">File Explorer</button>
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('osk')">On-Screen Keyboard</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('volume')">Volume Control</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('settings')">Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('fileExplorer')">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('controlPanel')">Control Panel</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('printers')">Printers</button>
+                                    </div>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('cmd')">Command Prompt</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell')">PowerShell</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('terminal')">Windows Terminal</button>
@@ -521,11 +527,13 @@
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('notepad')">Notepad</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('paint')">Paint</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('snipSketch')">Snipping Tool</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('stickyNotes')">Sticky Notes</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('photos')">Photos</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('camera')">Camera</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('movies')">Movies &amp; TV</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('teams')">Teams</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('zoom')">Zoom</button>
                                     </div>
@@ -1119,20 +1127,26 @@
                 'edge': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk',
                 'chrome': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Google Chrome.lnk',
                 'firefox': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Firefox.lnk',
-                // System & Productivity
-                'fileExplorer': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\File Explorer.lnk',
+                // System Utilities
+                'osk': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessibility\\On-Screen Keyboard.lnk',
+                'volume': 'ms-settings:sound',
                 'settings': 'ms-settings:',
+                'fileExplorer': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\File Explorer.lnk',
+                'controlPanel': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Control Panel.lnk',
                 'printers': 'ms-settings:printers',
                 'cmd': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\System Tools\\Command Prompt.lnk',
                 'powershell': '%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Windows PowerShell\\Windows PowerShell.lnk',
                 'terminal': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Windows Terminal.lnk',
+                // Productivity
                 'calculator': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Calculator.lnk',
                 'notepad': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Notepad.lnk',
                 'paint': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Accessories\\Paint.lnk',
                 'snipSketch': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Snipping Tool.lnk',
+                'stickyNotes': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Sticky Notes.lnk',
                 // Media & Communication
                 'photos': 'microsoft.windows.photos:',
                 'camera': 'microsoft.windows.camera:',
+                'movies': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Films & TV.lnk',
                 'teams': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Teams.lnk',
                 'zoom': '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Zoom\\Zoom.lnk',
                 // Microsoft Office
