@@ -1243,7 +1243,6 @@
             }
 
             const xml = generateXml();
-            const escapedXml = xml.replace(/'/g, "''");
 
             const ps1 = `#Requires -RunAsAdministrator
 <#
@@ -1266,8 +1265,14 @@ $log = @{
     startTime = (Get-Date).ToString("o")
     computerName = $env:COMPUTERNAME
     userName = $env:USERNAME
+    windowsVersion = [System.Environment]::OSVersion.Version.ToString()
+    windowsBuild = (Get-ItemProperty "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion").DisplayVersion
+    windowsEdition = $null
+    executionContext = $null
+    preFlightPassed = $false
     steps = @()
     success = $false
+    xmlLength = $null
     endTime = $null
 }
 
@@ -1308,24 +1313,70 @@ Write-Host "AssignedAccess Deploy Script" -ForegroundColor Cyan
 Write-Host "============================" -ForegroundColor Cyan
 Write-Host ""
 
+# Pre-flight checks
+Write-Host "Running pre-flight checks..." -ForegroundColor Cyan
+Write-Host ""
+
+# Check 1: Windows Edition
+$edition = (Get-WindowsEdition -Online).Edition
+$log.windowsEdition = $edition
+$supportedEditions = @("Enterprise", "Education", "IoTEnterprise", "IoTEnterpriseS", "ServerRdsh")
+$isSupported = $supportedEditions | Where-Object { $edition -like "*$_*" }
+if (-not $isSupported) {
+    Write-Log -Action "Windows Edition Check" -Status "Error" -Message "Unsupported edition: $edition"
+    Save-Log
+    Write-Host "[FAILED] Windows Edition Check" -ForegroundColor Red
+    Write-Host "    Current edition: $edition" -ForegroundColor Gray
+    Write-Host "    AssignedAccess requires Enterprise, Education, or IoT Enterprise edition." -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+Write-Log -Action "Windows Edition Check" -Status "Success" -Message $edition
+Write-Host "[OK] Windows Edition: $edition" -ForegroundColor Green
+
+# Check 2: Running as SYSTEM
+$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+$log.executionContext = $currentUser
+if ($currentUser -ne "NT AUTHORITY\\SYSTEM") {
+    Write-Log -Action "SYSTEM Context Check" -Status "Error" -Message "Running as: $currentUser"
+    Save-Log
+    Write-Host "[FAILED] SYSTEM Context Check" -ForegroundColor Red
+    Write-Host "    Current user: $currentUser" -ForegroundColor Gray
+    Write-Host "    This script must run as SYSTEM. Use:" -ForegroundColor Yellow
+    Write-Host "    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+Write-Log -Action "SYSTEM Context Check" -Status "Success"
+Write-Host "[OK] Running as SYSTEM" -ForegroundColor Green
+
+# Check 3: MDM_AssignedAccess WMI instance exists
+$obj = Get-CimInstance -Namespace "root\\cimv2\\mdm\\dmmap" -ClassName "MDM_AssignedAccess" -ErrorAction SilentlyContinue
+if ($null -eq $obj) {
+    Write-Log -Action "MDM_AssignedAccess WMI Check" -Status "Error" -Message "WMI instance not found"
+    Save-Log
+    Write-Host "[FAILED] MDM_AssignedAccess WMI Check" -ForegroundColor Red
+    Write-Host "    The MDM_AssignedAccess WMI class is not available on this system." -ForegroundColor Gray
+    Write-Host "    This may indicate an unsupported Windows configuration or WMI corruption." -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+Write-Log -Action "MDM_AssignedAccess WMI Check" -Status "Success"
+Write-Host "[OK] MDM_AssignedAccess WMI instance found" -ForegroundColor Green
+
+$log.preFlightPassed = $true
+Write-Host ""
+Write-Host "All pre-flight checks passed. Proceeding with deployment..." -ForegroundColor Green
+Write-Host ""
+
 try {
     Write-Log -Action "Starting deployment" -Status "Info" -Message "Target: $env:COMPUTERNAME"
 
-    # Get the MDM_AssignedAccess WMI object
-    Write-Log -Action "Connecting to MDM_AssignedAccess WMI" -Status "Info"
-    $obj = Get-CimInstance -Namespace "root\\cimv2\\mdm\\dmmap" -ClassName "MDM_AssignedAccess" -ErrorAction Stop
-    Write-Log -Action "Connected to WMI namespace" -Status "Success"
-
-    if ($null -eq $obj) {
-        Write-Log -Action "Creating MDM_AssignedAccess instance" -Status "Warning" -Message "Instance did not exist"
-        $obj = New-CimInstance -Namespace "root\\cimv2\\mdm\\dmmap" -ClassName "MDM_AssignedAccess" -ErrorAction Stop
-        Write-Log -Action "Created MDM_AssignedAccess instance" -Status "Success"
-    }
-
     # HTML encode the XML and apply
     Write-Log -Action "Encoding XML configuration" -Status "Info"
+    $log.xmlLength = $xml.Length
     $encodedXml = [System.Net.WebUtility]::HtmlEncode($xml)
-    Write-Log -Action "XML encoded" -Status "Success" -Message "Length: $($encodedXml.Length) characters"
+    Write-Log -Action "XML encoded" -Status "Success" -Message "Original: $($xml.Length) chars, Encoded: $($encodedXml.Length) chars"
 
     Write-Log -Action "Applying configuration" -Status "Info"
     $obj.Configuration = $encodedXml
@@ -1356,7 +1407,10 @@ catch {
     Write-Host "ERROR: Failed to apply configuration" -ForegroundColor Red
     Write-Host $_.Exception.Message -ForegroundColor Red
     Write-Host ""
-    Write-Host "Make sure you are running as SYSTEM (use PsExec -s)" -ForegroundColor Yellow
+    Write-Host "Check the log file for details. Common causes:" -ForegroundColor Yellow
+    Write-Host "  - Invalid XML configuration" -ForegroundColor Yellow
+    Write-Host "  - Referenced user account does not exist" -ForegroundColor Yellow
+    Write-Host "  - Referenced app is not installed" -ForegroundColor Yellow
     exit 1
 }
 `;
