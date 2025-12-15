@@ -408,6 +408,80 @@
                     </fieldset>
 
                     <fieldset class="section">
+                        <legend class="section-header">Auto-Launch Configuration</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="autoLaunchApp" class="with-tooltip">
+                                    Launch on Startup
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Auto-Launch" aria-describedby="autoLaunch-tooltip">?</button>
+                                    <span class="tooltip-content" id="autoLaunch-tooltip" role="tooltip">Automatically launch this app when the kiosk user signs in. The app will start immediately, providing a single-app experience while still allowing access to other whitelisted apps.</span>
+                                </label>
+                                <select id="autoLaunchApp" onchange="updateAutoLaunchSelection(); updatePreview();" aria-describedby="autoLaunch-tooltip">
+                                    <option value="">None (show Start menu)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section hidden" id="multiAppEdgeConfig" aria-hidden="true">
+                        <legend class="section-header">Edge Kiosk Settings</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label for="multiEdgeSourceType" class="with-tooltip">
+                                    URL Source
+                                    <button type="button" class="tooltip-icon" aria-label="Help for URL Source" aria-describedby="multiEdgeSource-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeSource-tooltip" role="tooltip">Choose whether Edge should open a web URL or a local HTML file when auto-launched.</span>
+                                </label>
+                                <select id="multiEdgeSourceType" onchange="updateMultiEdgeSourceUI(); updatePreview();" aria-describedby="multiEdgeSource-tooltip">
+                                    <option value="url">Web URL</option>
+                                    <option value="file">Local File (file:// URL)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="multiEdgeUrlGroup">
+                                <label for="multiEdgeUrl" class="with-tooltip">
+                                    Kiosk URL
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Kiosk URL" aria-describedby="multiEdgeUrl-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeUrl-tooltip" role="tooltip">The URL that Edge will open in kiosk mode. This is your landing page where you can provide links to whitelisted utilities.</span>
+                                </label>
+                                <input type="text" id="multiEdgeUrl" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="multiEdgeUrl-tooltip">
+                            </div>
+
+                            <div class="form-group hidden" id="multiEdgeFileGroup" aria-hidden="true">
+                                <label for="multiEdgeFilePath" class="with-tooltip">
+                                    Local File Path
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Local File Path" aria-describedby="multiEdgeFile-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeFile-tooltip" role="tooltip">Path to a local HTML file (e.g., C:\Kiosk\index.html). The path will be converted to a file:// URL.</span>
+                                </label>
+                                <input type="text" id="multiEdgeFilePath" placeholder="C:\Kiosk\index.html" onchange="updatePreview()" aria-describedby="multiEdgeFile-tooltip">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="multiEdgeKioskType" class="with-tooltip">
+                                    Kiosk Mode Type
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Mode Type" aria-describedby="multiEdgeKiosk-tooltip">?</button>
+                                    <span class="tooltip-content" id="multiEdgeKiosk-tooltip" role="tooltip">Fullscreen: No browser UI, just the web content. Public Browsing: Shows address bar and navigation for controlled browsing.</span>
+                                </label>
+                                <select id="multiEdgeKioskType" onchange="updatePreview()" aria-describedby="multiEdgeKiosk-tooltip">
+                                    <option value="fullscreen">Fullscreen (no browser UI)</option>
+                                    <option value="public-browsing">Public Browsing (with navigation)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-group">
+                                    <input type="checkbox" id="multiEdgeInPrivate" checked onchange="updatePreview()">
+                                    <span class="with-tooltip">
+                                        InPrivate Mode
+                                        <button type="button" class="tooltip-icon" aria-label="Help for InPrivate Mode" aria-describedby="multiEdgeInPrivate-tooltip">?</button>
+                                        <span class="tooltip-content" id="multiEdgeInPrivate-tooltip" role="tooltip">Run Edge in InPrivate mode to prevent storing browsing history, cookies, and cached data between sessions.</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="section">
                         <legend class="section-header">Start Menu Pins</legend>
                         <div class="section-content">
                             <div class="form-group">
@@ -547,7 +621,14 @@
             mode: 'single',           // 'single' or 'multi'
             accountType: 'auto',      // 'auto' or 'existing'
             allowedApps: [],          // For multi-app mode
-            startPins: []             // For multi-app mode
+            startPins: [],            // For multi-app mode
+            autoLaunchApp: null,      // Index into allowedApps array, or null (for multi-app)
+            multiAppEdgeConfig: {     // Edge kiosk config for multi-app mode
+                url: '',
+                sourceType: 'url',    // 'url' or 'file'
+                kioskType: 'fullscreen',
+                inPrivate: true
+            }
         };
 
         /* ============================================================================
@@ -606,6 +687,11 @@
             multiConfig.classList.toggle('hidden', mode !== 'multi');
             singleConfig.setAttribute('aria-hidden', mode !== 'single');
             multiConfig.setAttribute('aria-hidden', mode !== 'multi');
+
+            // Update auto-launch selector when switching to multi mode
+            if (mode === 'multi') {
+                updateAutoLaunchSelector();
+            }
 
             updatePreview();
         }
@@ -719,6 +805,112 @@
         }
 
         /* ============================================================================
+           Multi-App Auto-Launch Functions
+           ============================================================================ */
+        function isEdgeApp(value) {
+            if (!value) return false;
+            const lowerValue = value.toLowerCase();
+            return lowerValue.includes('msedge') ||
+                   lowerValue.includes('microsoftedge') ||
+                   lowerValue.includes('edge\\application');
+        }
+
+        function getMultiAppEdgeUrl() {
+            const sourceType = document.getElementById('multiEdgeSourceType').value;
+            if (sourceType === 'file') {
+                let filePath = document.getElementById('multiEdgeFilePath').value.trim();
+                if (!filePath) return 'file:///C:/Kiosk/index.html';
+                // Convert backslashes to forward slashes
+                filePath = filePath.replace(/\\/g, '/');
+                // Encode spaces and special characters in path
+                filePath = filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+                // Ensure it starts with file:///
+                if (!filePath.toLowerCase().startsWith('file:///')) {
+                    filePath = 'file:///' + filePath;
+                }
+                return filePath;
+            } else {
+                return document.getElementById('multiEdgeUrl').value || 'https://www.microsoft.com';
+            }
+        }
+
+        function updateAutoLaunchSelector() {
+            const select = document.getElementById('autoLaunchApp');
+            const currentValue = select.value;
+
+            // Clear all options except "None"
+            select.innerHTML = '<option value="">None (show Start menu)</option>';
+
+            // Add all allowed apps as options
+            state.allowedApps.forEach((app, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                // Create a friendly display name
+                let displayName = app.value;
+                if (displayName.length > 50) {
+                    displayName = '...' + displayName.slice(-47);
+                }
+                if (isEdgeApp(app.value)) {
+                    displayName = 'Microsoft Edge';
+                    if (app.type === 'path') {
+                        displayName += ' (exe)';
+                    }
+                }
+                option.textContent = displayName;
+                select.appendChild(option);
+            });
+
+            // Restore selection if still valid
+            if (currentValue !== '' && state.allowedApps[parseInt(currentValue)]) {
+                select.value = currentValue;
+            } else {
+                select.value = '';
+                state.autoLaunchApp = null;
+            }
+
+            updateMultiAppEdgeUI();
+        }
+
+        function updateAutoLaunchSelection() {
+            const select = document.getElementById('autoLaunchApp');
+            const value = select.value;
+
+            if (value === '') {
+                state.autoLaunchApp = null;
+            } else {
+                state.autoLaunchApp = parseInt(value);
+            }
+
+            updateMultiAppEdgeUI();
+        }
+
+        function updateMultiAppEdgeUI() {
+            const edgeConfig = document.getElementById('multiAppEdgeConfig');
+
+            // Show Edge config only if an Edge app is selected for auto-launch
+            let showEdgeConfig = false;
+            if (state.autoLaunchApp !== null && state.allowedApps[state.autoLaunchApp]) {
+                const app = state.allowedApps[state.autoLaunchApp];
+                showEdgeConfig = isEdgeApp(app.value);
+            }
+
+            edgeConfig.classList.toggle('hidden', !showEdgeConfig);
+            edgeConfig.setAttribute('aria-hidden', !showEdgeConfig);
+        }
+
+        function updateMultiEdgeSourceUI() {
+            const sourceType = document.getElementById('multiEdgeSourceType').value;
+            const urlGroup = document.getElementById('multiEdgeUrlGroup');
+            const fileGroup = document.getElementById('multiEdgeFileGroup');
+
+            urlGroup.classList.toggle('hidden', sourceType !== 'url');
+            fileGroup.classList.toggle('hidden', sourceType !== 'file');
+
+            urlGroup.setAttribute('aria-hidden', sourceType !== 'url');
+            fileGroup.setAttribute('aria-hidden', sourceType !== 'file');
+        }
+
+        /* ============================================================================
            App List Management (Multi-App Mode)
            ============================================================================ */
         function addApp() {
@@ -730,6 +922,7 @@
             state.allowedApps.push({ type, value });
             document.getElementById('addAppValue').value = '';
             renderAppList();
+            updateAutoLaunchSelector();
             updatePreview();
         }
 
@@ -867,12 +1060,22 @@
             }
 
             renderAppList();
+            updateAutoLaunchSelector();
             updatePreview();
         }
 
         function removeApp(index) {
+            // If we're removing the auto-launch app, reset the selection
+            if (state.autoLaunchApp === index) {
+                state.autoLaunchApp = null;
+            } else if (state.autoLaunchApp !== null && state.autoLaunchApp > index) {
+                // Adjust index if we removed an app before the auto-launch app
+                state.autoLaunchApp--;
+            }
+
             state.allowedApps.splice(index, 1);
             renderAppList();
+            updateAutoLaunchSelector();
             updatePreview();
         }
 
@@ -1055,13 +1258,34 @@
             xml += `            <AllAppsList>\n`;
             xml += `                <AllowedApps>\n`;
 
-            for (const app of state.allowedApps) {
-                if (app.type === 'aumid') {
-                    xml += `                    <App AppUserModelId="${escapeXml(app.value)}"/>\n`;
-                } else {
-                    xml += `                    <App DesktopAppPath="${escapeXml(app.value)}"/>\n`;
+            state.allowedApps.forEach((app, index) => {
+                const isAutoLaunch = state.autoLaunchApp === index;
+                const isEdge = isEdgeApp(app.value);
+
+                // Build base attribute
+                let attrs = app.type === 'aumid'
+                    ? `AppUserModelId="${escapeXml(app.value)}"`
+                    : `DesktopAppPath="${escapeXml(app.value)}"`;
+
+                // Add AutoLaunch attributes if this is the auto-launch app
+                if (isAutoLaunch) {
+                    attrs += ` rs5:AutoLaunch="true"`;
+
+                    // If Edge is auto-launched, add kiosk arguments
+                    if (isEdge) {
+                        const url = getMultiAppEdgeUrl();
+                        const kioskType = document.getElementById('multiEdgeKioskType').value;
+                        const inPrivate = document.getElementById('multiEdgeInPrivate').checked;
+
+                        let args = `--kiosk ${url} --edge-kiosk-type=${kioskType}`;
+                        if (inPrivate) args += ' --inprivate';
+
+                        attrs += ` rs5:AutoLaunchArguments="${escapeXml(args)}"`;
+                    }
                 }
-            }
+
+                xml += `                    <App ${attrs}/>\n`;
+            });
 
             xml += `                </AllowedApps>\n`;
             xml += `            </AllAppsList>\n`;
@@ -1343,7 +1567,7 @@ if ($currentUser -ne "NT AUTHORITY\\SYSTEM") {
     Write-Host "[FAILED] SYSTEM Context Check" -ForegroundColor Red
     Write-Host "    Current user: $currentUser" -ForegroundColor Gray
     Write-Host "    This script must run as SYSTEM. Use:" -ForegroundColor Yellow
-    Write-Host "    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -ForegroundColor Yellow
+    Write-Host "    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File \`"$PSCommandPath\`"" -ForegroundColor Yellow
     Write-Host ""
     exit 1
 }
@@ -1568,7 +1792,9 @@ catch {
                 setMode('multi');
 
                 state.allowedApps = [];
+                state.autoLaunchApp = null;
                 const apps = allAppsList.querySelectorAll('App');
+                let appIndex = 0;
                 apps.forEach(app => {
                     const aumid = app.getAttribute('AppUserModelId');
                     const path = app.getAttribute('DesktopAppPath');
@@ -1577,8 +1803,50 @@ catch {
                     } else if (path) {
                         state.allowedApps.push({ type: 'path', value: path });
                     }
+
+                    // Check for AutoLaunch attribute (rs5 namespace)
+                    const autoLaunch = app.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/201901/config', 'AutoLaunch') ||
+                                      app.getAttribute('rs5:AutoLaunch');
+                    if (autoLaunch === 'true') {
+                        state.autoLaunchApp = appIndex;
+
+                        // Parse AutoLaunchArguments for Edge config
+                        const autoLaunchArgs = app.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/201901/config', 'AutoLaunchArguments') ||
+                                              app.getAttribute('rs5:AutoLaunchArguments');
+                        if (autoLaunchArgs) {
+                            // Parse Edge arguments
+                            const urlMatch = autoLaunchArgs.match(/--kiosk\s+(\S+)/);
+                            if (urlMatch) {
+                                const extractedUrl = urlMatch[1];
+                                if (extractedUrl.toLowerCase().startsWith('file:///')) {
+                                    document.getElementById('multiEdgeSourceType').value = 'file';
+                                    let filePath = extractedUrl.substring(8);
+                                    filePath = decodeURIComponent(filePath);
+                                    document.getElementById('multiEdgeFilePath').value = filePath;
+                                    document.getElementById('multiEdgeUrl').value = '';
+                                } else {
+                                    document.getElementById('multiEdgeSourceType').value = 'url';
+                                    document.getElementById('multiEdgeUrl').value = extractedUrl;
+                                    document.getElementById('multiEdgeFilePath').value = '';
+                                }
+                                updateMultiEdgeSourceUI();
+                            }
+
+                            document.getElementById('multiEdgeKioskType').value =
+                                autoLaunchArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
+
+                            document.getElementById('multiEdgeInPrivate').checked = autoLaunchArgs.includes('--inprivate');
+                        }
+                    }
+                    appIndex++;
                 });
                 renderAppList();
+                updateAutoLaunchSelector();
+                // Restore auto-launch selection after selector is populated
+                if (state.autoLaunchApp !== null) {
+                    document.getElementById('autoLaunchApp').value = state.autoLaunchApp;
+                    updateMultiAppEdgeUI();
+                }
 
                 // Start Pins (handle namespace prefix v5:StartPins)
                 state.startPins = [];
@@ -1645,6 +1913,15 @@ catch {
             // Reset state
             state.allowedApps = [];
             state.startPins = [];
+            state.autoLaunchApp = null;
+
+            // Reset multi-app Edge config
+            document.getElementById('multiEdgeSourceType').value = 'url';
+            document.getElementById('multiEdgeUrl').value = '';
+            document.getElementById('multiEdgeFilePath').value = '';
+            document.getElementById('multiEdgeKioskType').value = 'fullscreen';
+            document.getElementById('multiEdgeInPrivate').checked = true;
+            updateMultiEdgeSourceUI();
 
             switch (preset) {
                 case 'blank':
@@ -1709,6 +1986,7 @@ catch {
             updateAppTypeUI();
             renderAppList();
             renderPinList();
+            updateAutoLaunchSelector();
             updatePreview();
         }
 
