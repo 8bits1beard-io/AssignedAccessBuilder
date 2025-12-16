@@ -51,7 +51,7 @@
             "iconPath": ""
         },
         "printers": {
-            "name": "Printers & Scanners",
+            "name": "Printers",
             "target": "C:\\Windows\\explorer.exe",
             "args": "ms-settings:printers",
             "workingDir": "",
