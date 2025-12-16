@@ -1066,7 +1066,7 @@ Write-Host ""
 # Check 1: Windows Edition
 $edition = (Get-WindowsEdition -Online).Edition
 $log.windowsEdition = $edition
-$supportedEditions = @("Enterprise", "Education", "IoTEnterprise", "IoTEnterpriseS", "ServerRdsh")
+$supportedEditions = @("Pro", "Enterprise", "Education", "IoTEnterprise", "IoTEnterpriseS", "ServerRdsh")
 $isSupported = $supportedEditions | Where-Object { $edition -like "*$_*" }
 if (-not $isSupported) {
     Write-Log -Action "Windows Edition Check" -Status "Error" -Message "Unsupported edition: $edition"
