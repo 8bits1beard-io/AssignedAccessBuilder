@@ -67,8 +67,11 @@
         },
         "printers": {
             "name": "Printers",
-            "pinType": "packagedAppId",
-            "packagedAppId": "windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\control.exe",
+            "args": "printers",
+            "workingDir": "",
+            "iconPath": ""
         },
         "cmd": {
             "name": "Command Prompt",
