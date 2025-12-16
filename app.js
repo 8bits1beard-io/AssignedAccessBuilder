@@ -25,12 +25,12 @@ async function loadPresets() {
    State Management
    ============================================================================ */
 const state = {
-    mode: 'single',           // 'single' or 'multi'
-    accountType: 'auto',      // 'auto' or 'existing'
-    allowedApps: [],          // For multi-app mode
-    startPins: [],            // For multi-app mode: array of {name, target, args, workingDir, iconPath}
-    autoLaunchApp: null,      // Index into allowedApps array, or null (for multi-app)
-    multiAppEdgeConfig: {     // Edge kiosk config for multi-app mode
+    mode: 'single',           // 'single', 'multi', or 'restricted'
+    accountType: 'auto',      // 'auto', 'existing', 'group', or 'global'
+    allowedApps: [],          // For multi-app and restricted modes
+    startPins: [],            // For multi-app and restricted modes: array of {name, target, args, workingDir, iconPath}
+    autoLaunchApp: null,      // Index into allowedApps array, or null (for multi-app/restricted)
+    multiAppEdgeConfig: {     // Edge kiosk config for multi-app/restricted mode
         url: '',
         sourceType: 'url',    // 'url' or 'file'
         kioskType: 'fullscreen',
@@ -119,16 +119,16 @@ function switchTab(tabId) {
 }
 
 function updateTabVisibility() {
-    const isMultiApp = state.mode === 'multi';
+    const isMultiOrRestricted = state.mode === 'multi' || state.mode === 'restricted';
     const startMenuTab = document.getElementById('tab-btn-startmenu');
     const systemTab = document.getElementById('tab-btn-system');
 
-    // Show/hide tabs based on mode
-    startMenuTab.classList.toggle('hidden', !isMultiApp);
-    systemTab.classList.toggle('hidden', !isMultiApp);
+    // Show/hide tabs based on mode - both multi and restricted need these tabs
+    startMenuTab.classList.toggle('hidden', !isMultiOrRestricted);
+    systemTab.classList.toggle('hidden', !isMultiOrRestricted);
 
     // If switching to single mode and currently on a multi-only tab, switch to Application tab
-    if (!isMultiApp) {
+    if (!isMultiOrRestricted) {
         const activeTab = document.querySelector('.tab-btn.active');
         if (activeTab && (activeTab.id === 'tab-btn-startmenu' || activeTab.id === 'tab-btn-system')) {
             switchTab('application');
@@ -144,28 +144,57 @@ function setMode(mode) {
 
     const singleBtn = document.getElementById('modeSingle');
     const multiBtn = document.getElementById('modeMulti');
+    const restrictedBtn = document.getElementById('modeRestricted');
     const singleConfig = document.getElementById('singleAppConfig');
     const multiConfig = document.getElementById('multiAppConfig');
 
+    // Update mode buttons
     singleBtn.classList.toggle('active', mode === 'single');
     multiBtn.classList.toggle('active', mode === 'multi');
+    restrictedBtn.classList.toggle('active', mode === 'restricted');
     singleBtn.setAttribute('aria-pressed', mode === 'single');
     multiBtn.setAttribute('aria-pressed', mode === 'multi');
+    restrictedBtn.setAttribute('aria-pressed', mode === 'restricted');
 
+    // Show/hide config panels - restricted uses same UI as multi-app
     singleConfig.classList.toggle('hidden', mode !== 'single');
-    multiConfig.classList.toggle('hidden', mode !== 'multi');
+    multiConfig.classList.toggle('hidden', mode === 'single');
     singleConfig.setAttribute('aria-hidden', mode !== 'single');
-    multiConfig.setAttribute('aria-hidden', mode !== 'multi');
+    multiConfig.setAttribute('aria-hidden', mode === 'single');
+
+    // Update account type options based on mode
+    updateAccountTypeOptions();
 
     // Update tab visibility based on mode
     updateTabVisibility();
 
-    // Update auto-launch selector when switching to multi mode
-    if (mode === 'multi') {
+    // Update auto-launch selector when switching to multi/restricted mode
+    if (mode === 'multi' || mode === 'restricted') {
         updateAutoLaunchSelector();
     }
 
     updatePreview();
+}
+
+function updateAccountTypeOptions() {
+    const groupBtn = document.getElementById('accountGroup');
+    const globalBtn = document.getElementById('accountGlobal');
+    const autoBtn = document.getElementById('accountAuto');
+
+    if (state.mode === 'restricted') {
+        // Show group and global options for restricted mode
+        groupBtn.classList.remove('hidden');
+        globalBtn.classList.remove('hidden');
+    } else {
+        // Hide group and global options for single/multi modes
+        groupBtn.classList.add('hidden');
+        globalBtn.classList.add('hidden');
+
+        // If currently on group or global, switch back to auto
+        if (state.accountType === 'group' || state.accountType === 'global') {
+            setAccountType('auto');
+        }
+    }
 }
 
 function setAccountType(type) {
@@ -173,18 +202,32 @@ function setAccountType(type) {
 
     const autoBtn = document.getElementById('accountAuto');
     const existingBtn = document.getElementById('accountExisting');
+    const groupBtn = document.getElementById('accountGroup');
+    const globalBtn = document.getElementById('accountGlobal');
     const autoConfig = document.getElementById('autoLogonConfig');
     const existingConfig = document.getElementById('existingAccountConfig');
+    const groupConfig = document.getElementById('groupAccountConfig');
+    const globalConfig = document.getElementById('globalProfileConfig');
 
+    // Update button states
     autoBtn.classList.toggle('active', type === 'auto');
     existingBtn.classList.toggle('active', type === 'existing');
+    groupBtn.classList.toggle('active', type === 'group');
+    globalBtn.classList.toggle('active', type === 'global');
     autoBtn.setAttribute('aria-pressed', type === 'auto');
     existingBtn.setAttribute('aria-pressed', type === 'existing');
+    groupBtn.setAttribute('aria-pressed', type === 'group');
+    globalBtn.setAttribute('aria-pressed', type === 'global');
 
+    // Show/hide config panels
     autoConfig.classList.toggle('hidden', type !== 'auto');
     existingConfig.classList.toggle('hidden', type !== 'existing');
+    groupConfig.classList.toggle('hidden', type !== 'group');
+    globalConfig.classList.toggle('hidden', type !== 'global');
     autoConfig.setAttribute('aria-hidden', type !== 'auto');
     existingConfig.setAttribute('aria-hidden', type !== 'existing');
+    groupConfig.setAttribute('aria-hidden', type !== 'group');
+    globalConfig.setAttribute('aria-hidden', type !== 'global');
 
     updatePreview();
 }
@@ -625,18 +668,15 @@ function generateXml() {
     if (state.mode === 'single') {
         xml += generateSingleAppProfile();
     } else {
+        // Both 'multi' and 'restricted' use the same profile structure
         xml += generateMultiAppProfile();
     }
 
     xml += `        </Profile>\n`;
     xml += `    </Profiles>\n`;
 
-    xml += `    <Configs>\n`;
-    xml += `        <Config>\n`;
-    xml += generateAccountConfig();
-    xml += `            <DefaultProfile Id="${profileId}"/>\n`;
-    xml += `        </Config>\n`;
-    xml += `    </Configs>\n`;
+    // Use the new generateConfigsSection for proper account handling
+    xml += generateConfigsSection();
 
     xml += `</AssignedAccessConfiguration>`;
 
@@ -787,14 +827,41 @@ function generateMultiAppProfile() {
 
 function generateAccountConfig() {
     let xml = '';
+    const profileId = document.getElementById('profileId').value;
 
     if (state.accountType === 'auto') {
         const displayName = document.getElementById('displayName').value || 'Kiosk';
         xml += `            <AutoLogonAccount rs5:DisplayName="${escapeXml(displayName)}"/>\n`;
-    } else {
+    } else if (state.accountType === 'existing') {
         const accountName = document.getElementById('accountName').value;
         xml += `            <Account>${escapeXml(accountName)}</Account>\n`;
+    } else if (state.accountType === 'group') {
+        const groupType = document.getElementById('groupType').value;
+        const groupName = document.getElementById('groupName').value;
+        xml += `            <UserGroup Type="${groupType}" Name="${escapeXml(groupName)}"/>\n`;
     }
+    // Note: 'global' account type doesn't add anything here - it uses GlobalProfile instead
+
+    return xml;
+}
+
+function generateConfigsSection() {
+    const profileId = document.getElementById('profileId').value;
+    let xml = '';
+
+    xml += `    <Configs>\n`;
+
+    if (state.accountType === 'global') {
+        // Global profile applies to all non-admin users
+        xml += `        <v3:GlobalProfile Id="${profileId}"/>\n`;
+    } else {
+        xml += `        <Config>\n`;
+        xml += generateAccountConfig();
+        xml += `            <DefaultProfile Id="${profileId}"/>\n`;
+        xml += `        </Config>\n`;
+    }
+
+    xml += `    </Configs>\n`;
 
     return xml;
 }
@@ -813,18 +880,24 @@ function validate() {
         errors.push('Profile GUID format is invalid');
     }
 
-    // Account
+    // Account validation based on type
     if (state.accountType === 'auto') {
         const displayName = document.getElementById('displayName').value;
         if (!displayName) {
             errors.push('Display Name is required for auto-logon account');
         }
-    } else {
+    } else if (state.accountType === 'existing') {
         const accountName = document.getElementById('accountName').value;
         if (!accountName) {
             errors.push('Account Name is required');
         }
+    } else if (state.accountType === 'group') {
+        const groupName = document.getElementById('groupName').value;
+        if (!groupName) {
+            errors.push('Group Name is required');
+        }
     }
+    // 'global' account type doesn't require any additional input
 
     // Single-app mode
     if (state.mode === 'single') {
@@ -855,10 +928,10 @@ function validate() {
         }
     }
 
-    // Multi-app mode
-    if (state.mode === 'multi') {
+    // Multi-app and Restricted modes
+    if (state.mode === 'multi' || state.mode === 'restricted') {
         if (state.allowedApps.length === 0) {
-            errors.push('At least one allowed app is required for multi-app mode');
+            errors.push('At least one allowed app is required');
         }
 
         // Check for shortcuts missing target paths (UWP pins don't need targets)

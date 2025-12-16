@@ -52,10 +52,12 @@
                         <div class="toggle-group" role="group" aria-label="Kiosk mode selection">
                             <button type="button" id="modeSingle" class="active" onclick="setMode('single')" aria-pressed="true">Single-App</button>
                             <button type="button" id="modeMulti" onclick="setMode('multi')" aria-pressed="false">Multi-App</button>
+                            <button type="button" id="modeRestricted" onclick="setMode('restricted')" aria-pressed="false">Restricted User</button>
                         </div>
                         <p class="hint" style="margin-top: 10px;" id="kiosk-mode-hint">
                             <strong>Single-App:</strong> Runs one app fullscreen (e.g., Edge kiosk)<br>
-                            <strong>Multi-App:</strong> Allows multiple apps with custom Start menu
+                            <strong>Multi-App:</strong> Allows multiple apps with custom Start menu<br>
+                            <strong>Restricted User:</strong> Desktop with limited apps, supports user groups
                         </p>
                     </div>
                 </fieldset>
@@ -91,9 +93,11 @@
                                 <button type="button" class="tooltip-icon" aria-label="Help for Account Type" aria-describedby="accountType-tooltip">?</button>
                                 <span class="tooltip-content" id="accountType-tooltip" role="tooltip"><strong>Auto Logon:</strong> Windows creates and manages a local account automatically. Best for most kiosks - no password needed, auto-logs in at boot.<br><br><strong>Existing Account:</strong> Use a pre-created local, domain, or Azure AD account. Use this if you need specific permissions or domain integration.</span>
                             </label>
-                            <div class="toggle-group" role="group" aria-labelledby="account-type-label">
+                            <div class="toggle-group" role="group" aria-labelledby="account-type-label" id="accountTypeButtons">
                                 <button type="button" id="accountAuto" class="active" onclick="setAccountType('auto')" aria-pressed="true">Auto Logon (Managed)</button>
                                 <button type="button" id="accountExisting" onclick="setAccountType('existing')" aria-pressed="false">Existing Account</button>
+                                <button type="button" id="accountGroup" class="hidden" onclick="setAccountType('group')" aria-pressed="false">User Group</button>
+                                <button type="button" id="accountGlobal" class="hidden" onclick="setAccountType('global')" aria-pressed="false">Global Profile</button>
                             </div>
                         </div>
 
@@ -113,10 +117,39 @@
                                 <label for="accountName" class="with-tooltip">
                                     Account Name
                                     <button type="button" class="tooltip-icon" aria-label="Help for Account Name" aria-describedby="accountName-tooltip">?</button>
-                                    <span class="tooltip-content" id="accountName-tooltip" role="tooltip">The username of an existing account. Formats: Local: KioskUser, Domain: DOMAIN\KioskUser, Azure AD: user@domain.com. The account must exist before the kiosk config is applied.</span>
+                                    <span class="tooltip-content" id="accountName-tooltip" role="tooltip">The username of an existing account. Formats: Local: KioskUser, Domain: DOMAIN\KioskUser, Azure AD: AzureAD\user@domain.com. The account must exist before the kiosk config is applied.</span>
                                 </label>
                                 <input type="text" id="accountName" placeholder="e.g., DOMAIN\\KioskUser or KioskUser" onchange="updatePreview()" aria-describedby="accountName-tooltip">
                             </div>
+                        </div>
+
+                        <div id="groupAccountConfig" class="hidden" aria-hidden="true">
+                            <div class="form-group">
+                                <label for="groupType" class="with-tooltip">
+                                    Group Type
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Group Type" aria-describedby="groupType-tooltip">?</button>
+                                    <span class="tooltip-content" id="groupType-tooltip" role="tooltip">Select the type of group to apply this profile to. All members of the group will get the restricted experience.</span>
+                                </label>
+                                <select id="groupType" onchange="updatePreview()" aria-describedby="groupType-tooltip">
+                                    <option value="LocalGroup">Local Group</option>
+                                    <option value="ActiveDirectoryGroup">Active Directory Group</option>
+                                    <option value="AzureActiveDirectoryGroup">Azure AD Group</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="groupName" class="with-tooltip">
+                                    Group Name
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Group Name" aria-describedby="groupName-tooltip">?</button>
+                                    <span class="tooltip-content" id="groupName-tooltip" role="tooltip">Local: GroupName. AD: DOMAIN\GroupName. Azure AD: Use the Group Object ID (GUID). The group must exist before the config is applied.</span>
+                                </label>
+                                <input type="text" id="groupName" placeholder="e.g., KioskUsers or DOMAIN\\KioskGroup" onchange="updatePreview()" aria-describedby="groupName-tooltip">
+                            </div>
+                        </div>
+
+                        <div id="globalProfileConfig" class="hidden" aria-hidden="true">
+                            <p class="hint">
+                                <strong>Global Profile:</strong> This profile applies to ALL non-administrator users on the device. No specific account or group configuration needed.
+                            </p>
                         </div>
                     </div>
                 </fieldset>
@@ -699,7 +732,7 @@
             Inspired by the work of <a href="https://www.linkedin.com/in/brandon-villines/" target="_blank" rel="noopener noreferrer">Brandon Villines</a>
         </p>
         <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
-            Last updated: 2025-12-16 9:15 AM
+            Last updated: 2025-12-16 9:30 AM
         </p>
     </footer>
 
