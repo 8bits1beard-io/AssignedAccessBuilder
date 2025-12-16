@@ -732,103 +732,138 @@
             Inspired by the work of <a href="https://www.linkedin.com/in/brandon-villines/" target="_blank" rel="noopener noreferrer">Brandon Villines</a>
         </p>
         <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
-            Last updated: 2025-12-16 9:45 AM
+            Last updated: 2025-12-16 10:00 AM
         </p>
     </footer>
 
     <!-- Deploy Guide Modal -->
     <div id="deployModal" class="modal hidden" role="dialog" aria-labelledby="deployModalTitle" aria-modal="true">
         <div class="modal-backdrop" onclick="hideDeployHelp()"></div>
-        <div class="modal-content">
+        <div class="modal-content modal-wide">
             <div class="modal-header">
                 <h2 id="deployModalTitle">Deployment Guide</h2>
                 <button type="button" class="modal-close" onclick="hideDeployHelp()" aria-label="Close dialog">&times;</button>
             </div>
             <div class="modal-body">
-                <h3>Method 1: Microsoft Intune (Recommended)</h3>
+                <!-- Deploy Method Tabs -->
+                <nav class="deploy-tabs" role="tablist" aria-label="Deployment methods">
+                    <button type="button" class="deploy-tab active" role="tab" aria-selected="true" aria-controls="deploy-intune" id="deploy-tab-intune" onclick="switchDeployTab('intune')">Intune</button>
+                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-powershell" id="deploy-tab-powershell" onclick="switchDeployTab('powershell')">PowerShell</button>
+                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-ppkg" id="deploy-tab-ppkg" onclick="switchDeployTab('ppkg')">Provisioning Package</button>
+                </nav>
 
-                <h4>1. Navigate to Intune</h4>
-                <ul>
-                    <li>Go to <a href="https://intune.microsoft.com" target="_blank" rel="noopener noreferrer">Microsoft Intune admin center</a></li>
-                    <li>Select <strong>Devices</strong> → <strong>Configuration profiles</strong></li>
-                </ul>
+                <!-- Intune Tab -->
+                <div class="deploy-content active" role="tabpanel" id="deploy-intune" aria-labelledby="deploy-tab-intune">
+                    <p class="deploy-description">Recommended for enterprise. Deploy via Microsoft Intune using a custom OMA-URI policy.</p>
 
-                <h4>2. Create Profile</h4>
-                <ul>
-                    <li>Click <strong>+ Create profile</strong></li>
-                    <li>Platform: <strong>Windows 10 and later</strong></li>
-                    <li>Profile type: <strong>Templates</strong> → <strong>Custom</strong></li>
-                    <li>Click <strong>Create</strong></li>
-                </ul>
+                    <div class="deploy-steps">
+                        <div class="deploy-step">
+                            <h4>1. Navigate to Intune</h4>
+                            <ul>
+                                <li>Go to <a href="https://intune.microsoft.com" target="_blank" rel="noopener noreferrer">Microsoft Intune admin center</a></li>
+                                <li>Select <strong>Devices</strong> → <strong>Configuration profiles</strong></li>
+                            </ul>
+                        </div>
 
-                <h4>3. Configure OMA-URI Setting</h4>
-                <ul>
-                    <li>Name the profile (e.g., "Kiosk Configuration")</li>
-                    <li>Click <strong>Add</strong> under OMA-URI Settings</li>
-                    <li>Fill in the following:</li>
-                </ul>
-                <table class="oma-uri-table">
-                    <tr><th>Field</th><th>Value</th></tr>
-                    <tr><td><strong>Name</strong></td><td>AssignedAccess Configuration</td></tr>
-                    <tr><td><strong>OMA-URI</strong></td><td><code>./Vendor/MSFT/AssignedAccess/Configuration</code></td></tr>
-                    <tr><td><strong>Data type</strong></td><td>String</td></tr>
-                    <tr><td><strong>Value</strong></td><td><em>(Paste your XML here)</em></td></tr>
-                </table>
+                        <div class="deploy-step">
+                            <h4>2. Create Profile</h4>
+                            <ul>
+                                <li>Click <strong>+ Create profile</strong></li>
+                                <li>Platform: <strong>Windows 10 and later</strong></li>
+                                <li>Profile type: <strong>Templates</strong> → <strong>Custom</strong></li>
+                            </ul>
+                        </div>
 
-                <h4>4. Assign &amp; Deploy</h4>
-                <ul>
-                    <li>Assign to a device group</li>
-                    <li>Device will reboot to apply kiosk mode</li>
-                </ul>
+                        <div class="deploy-step">
+                            <h4>3. Configure OMA-URI</h4>
+                            <table class="oma-uri-table">
+                                <tr><th>Field</th><th>Value</th></tr>
+                                <tr><td>Name</td><td>AssignedAccess Configuration</td></tr>
+                                <tr><td>OMA-URI</td><td><code>./Vendor/MSFT/AssignedAccess/Configuration</code></td></tr>
+                                <tr><td>Data type</td><td>String</td></tr>
+                                <tr><td>Value</td><td><em>(Paste your XML)</em></td></tr>
+                            </table>
+                        </div>
 
-                <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+                        <div class="deploy-step">
+                            <h4>4. Assign &amp; Deploy</h4>
+                            <ul>
+                                <li>Assign to a device group</li>
+                                <li>Device will reboot to apply</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                <h3>Method 2: PowerShell (Direct WMI)</h3>
-                <p style="margin-bottom: 12px;">For standalone devices or testing. Must be run as <strong>SYSTEM</strong>.</p>
+                    <div class="deploy-note">
+                        <strong>Requirements:</strong> Device must be Azure AD joined or Hybrid Azure AD joined.
+                    </div>
+                </div>
 
-                <h4>Option A: Using PsExec</h4>
-                <pre style="background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem;">psexec -i -s powershell.exe -ExecutionPolicy Bypass -File "C:\path\to\Apply-AssignedAccess.ps1"</pre>
+                <!-- PowerShell Tab -->
+                <div class="deploy-content" role="tabpanel" id="deploy-powershell" aria-labelledby="deploy-tab-powershell">
+                    <p class="deploy-description">For standalone devices or testing. Must be run as SYSTEM context.</p>
 
-                <h4>Option B: Manual PowerShell Commands</h4>
-                <pre style="background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem;"># Run in SYSTEM context (via psexec -i -s powershell.exe)
-$xml = Get-Content -Path "C:\path\to\config.xml" -Raw
+                    <div class="deploy-steps">
+                        <div class="deploy-step">
+                            <h4>Option A: Using Our Deploy Script</h4>
+                            <p>Download the script using the <strong>Download Deploy Script</strong> button, then run:</p>
+                            <pre class="deploy-code">psexec -i -s powershell.exe -ExecutionPolicy Bypass -File "C:\path\to\Apply-AssignedAccess.ps1"</pre>
+                        </div>
+
+                        <div class="deploy-step">
+                            <h4>Option B: Manual Commands</h4>
+                            <p>Run in SYSTEM context (via <code>psexec -i -s powershell.exe</code>):</p>
+                            <pre class="deploy-code">$xml = Get-Content -Path "C:\path\to\config.xml" -Raw
 $bridge = Get-CimInstance -Namespace "root\cimv2\mdm\dmmap" -ClassName "MDM_AssignedAccess"
 Set-CimInstance -CimInstance $bridge -Property @{Configuration = $xml}</pre>
+                        </div>
+                    </div>
 
-                <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+                    <div class="deploy-note">
+                        <strong>Note:</strong> PsExec can be downloaded from <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec" target="_blank" rel="noopener noreferrer">Microsoft Sysinternals</a>.
+                    </div>
+                </div>
 
-                <h3>Method 3: Provisioning Package (.ppkg)</h3>
-                <p style="margin-bottom: 12px;">For bulk deployment during OOBE or to existing devices.</p>
+                <!-- Provisioning Package Tab -->
+                <div class="deploy-content" role="tabpanel" id="deploy-ppkg" aria-labelledby="deploy-tab-ppkg">
+                    <p class="deploy-description">For bulk deployment during OOBE or to existing devices.</p>
 
-                <h4>1. Install Windows Configuration Designer</h4>
-                <ul>
-                    <li>Download from <a href="https://apps.microsoft.com/detail/9nblggh4tx22" target="_blank" rel="noopener noreferrer">Microsoft Store</a> or Windows ADK</li>
-                </ul>
+                    <div class="deploy-steps">
+                        <div class="deploy-step">
+                            <h4>1. Install Windows Configuration Designer</h4>
+                            <ul>
+                                <li>Download from <a href="https://apps.microsoft.com/detail/9nblggh4tx22" target="_blank" rel="noopener noreferrer">Microsoft Store</a> or Windows ADK</li>
+                            </ul>
+                        </div>
 
-                <h4>2. Create Provisioning Package</h4>
-                <ul>
-                    <li>Open Windows Configuration Designer</li>
-                    <li>Select <strong>Advanced provisioning</strong></li>
-                    <li>Navigate to: <strong>Runtime settings</strong> → <strong>AssignedAccess</strong> → <strong>AssignedAccessSettings</strong></li>
-                    <li>Paste your XML configuration</li>
-                </ul>
+                        <div class="deploy-step">
+                            <h4>2. Create Provisioning Package</h4>
+                            <ul>
+                                <li>Open Windows Configuration Designer</li>
+                                <li>Select <strong>Advanced provisioning</strong></li>
+                                <li>Navigate to: <strong>Runtime settings</strong> → <strong>AssignedAccess</strong> → <strong>AssignedAccessSettings</strong></li>
+                                <li>Paste your XML configuration</li>
+                            </ul>
+                        </div>
 
-                <h4>3. Export &amp; Apply</h4>
-                <ul>
-                    <li>Export → Provisioning package → Create</li>
-                    <li>Apply by double-clicking the .ppkg file or during Windows setup</li>
-                </ul>
+                        <div class="deploy-step">
+                            <h4>3. Export &amp; Apply</h4>
+                            <ul>
+                                <li>Export → Provisioning package → Create</li>
+                                <li>Apply by double-clicking the .ppkg file or during Windows setup</li>
+                            </ul>
+                        </div>
+                    </div>
 
-                <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+                    <div class="deploy-note">
+                        <strong>Tip:</strong> Provisioning packages can be applied during OOBE by placing them on a USB drive.
+                    </div>
+                </div>
 
-                <h3>Important Notes</h3>
-                <ul>
-                    <li>Device must be running Windows 10/11 Pro, Enterprise, or Education</li>
-                    <li>For Intune: Device must be Azure AD joined or Hybrid Azure AD joined</li>
-                    <li>User/group accounts must exist before the configuration is applied</li>
-                    <li>Test on a single device before broad deployment</li>
-                    <li>Use the <strong>Download Deploy Script</strong> button for our recommended PowerShell deployment script</li>
-                </ul>
+                <!-- Common Notes -->
+                <div class="deploy-footer">
+                    <strong>All methods require:</strong> Windows 10/11 Pro, Enterprise, or Education. User/group accounts must exist before configuration is applied.
+                </div>
             </div>
         </div>
     </div>

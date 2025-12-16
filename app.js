@@ -90,6 +90,21 @@ function hideDeployHelp() {
     document.body.style.overflow = '';
 }
 
+function switchDeployTab(tabId) {
+    // Update tab buttons
+    document.querySelectorAll('.deploy-tab').forEach(btn => {
+        const isActive = btn.id === `deploy-tab-${tabId}`;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive);
+    });
+
+    // Update content panels
+    document.querySelectorAll('.deploy-content').forEach(panel => {
+        const isActive = panel.id === `deploy-${tabId}`;
+        panel.classList.toggle('active', isActive);
+    });
+}
+
 // Close modal on Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
