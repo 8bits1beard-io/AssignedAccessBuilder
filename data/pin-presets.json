@@ -1,0 +1,110 @@
+{
+    "pins": {
+        "edge": {
+            "name": "Microsoft Edge",
+            "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": "",
+            "systemShortcut": "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk"
+        },
+        "chrome": {
+            "name": "Google Chrome",
+            "target": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "firefox": {
+            "name": "Mozilla Firefox",
+            "target": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "osk": {
+            "name": "On-Screen Keyboard",
+            "target": "C:\\Windows\\System32\\osk.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "controlPanel": {
+            "name": "Control Panel",
+            "target": "C:\\Windows\\System32\\control.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "fileExplorer": {
+            "name": "File Explorer",
+            "target": "C:\\Windows\\explorer.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "soundSettings": {
+            "name": "Sound Settings",
+            "target": "C:\\Windows\\explorer.exe",
+            "args": "ms-settings:sound",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "printers": {
+            "name": "Printers & Scanners",
+            "target": "C:\\Windows\\explorer.exe",
+            "args": "ms-settings:printers",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "cmd": {
+            "name": "Command Prompt",
+            "target": "C:\\Windows\\System32\\cmd.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "powershell": {
+            "name": "Windows PowerShell",
+            "target": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "notepad": {
+            "name": "Notepad",
+            "target": "C:\\Windows\\System32\\notepad.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "word": {
+            "name": "Microsoft Word",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "excel": {
+            "name": "Microsoft Excel",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "powerpoint": {
+            "name": "Microsoft PowerPoint",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
+        "outlook": {
+            "name": "Microsoft Outlook",
+            "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        }
+    }
+}

@@ -62,9 +62,14 @@ flowchart TD
 - Microsoft Edge kiosk (web URLs or local HTML files)
 - UWP/Store apps and Win32 desktop applications
 - 50+ app presets (browsers, Office, utilities)
+- Start menu pin management with 30+ shortcut presets
 - Auto-logon or existing account support
+- Breakout sequence for technician access (Ctrl+Alt+K)
+- File Explorer restrictions (downloads, removable drives)
+- Auto-launch app configuration
 - Import/export XML configurations
 - PowerShell deploy script with JSON logging
+- Real-time validation with contextual tooltips
 - Dark/light theme, WCAG accessible
 
 ---
