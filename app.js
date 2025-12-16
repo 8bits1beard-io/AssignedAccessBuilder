@@ -523,6 +523,7 @@ function addPin() {
 
     state.startPins.push({
         name: name,
+        pinType: 'desktopAppLink',  // Manual entries default to desktopAppLink
         target: target,
         args: args,
         workingDir: workingDir,
@@ -583,15 +584,19 @@ function renderPinList() {
     }
 
     list.innerHTML = state.startPins.map((pin, i) => {
-        const displayTarget = pin.target ? truncate(pin.target, 40) : '(no target - click to edit)';
+        const isUwp = pin.pinType === 'packagedAppId';
+        const displayTarget = isUwp
+            ? pin.packagedAppId
+            : (pin.target ? truncate(pin.target, 40) : '(no target - click to edit)');
         const hasArgs = pin.args ? ` (${truncate(pin.args, 20)})` : '';
-        const missingTarget = !pin.target;
+        const missingTarget = !isUwp && !pin.target;
         const warningStyle = missingTarget ? 'color: var(--error-color, #e74c3c);' : 'color: var(--text-secondary);';
+        const typeLabel = isUwp ? '<span style="background: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 6px;">UWP</span>' : '';
         return `
         <div class="app-item" role="listitem" style="${missingTarget ? 'border-left: 3px solid var(--error-color, #e74c3c);' : ''}">
             <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
-                <span style="font-weight: 500;">${escapeXml(pin.name)}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
-                <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(pin.target || 'No target specified')}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
+                <span style="font-weight: 500;">${escapeXml(pin.name)}${typeLabel}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
+                <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
             </div>
             <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${escapeXml(pin.name)}">
                 <span aria-hidden="true">✕</span>
@@ -741,12 +746,31 @@ function generateMultiAppProfile() {
     }
 
     // Start Pins (Windows 11)
-    // Use system shortcuts when available, otherwise custom shortcuts in C:\ProgramData\KioskShortcuts\
+    // Supports three pin types: packagedAppId (UWP), desktopAppLink (.lnk), secondaryTile (Edge URLs)
     if (state.startPins.length > 0) {
         const pinsJson = {
-            pinnedList: state.startPins.map(p => ({
-                desktopAppLink: p.systemShortcut || `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
-            }))
+            pinnedList: state.startPins.map(p => {
+                // UWP/Store apps use packagedAppId
+                if (p.pinType === 'packagedAppId' && p.packagedAppId) {
+                    return { packagedAppId: p.packagedAppId };
+                }
+                // Edge with specific URL uses secondaryTile
+                if (p.pinType === 'secondaryTile' && p.packagedAppId) {
+                    return {
+                        secondaryTile: {
+                            tileId: p.tileId || `MSEdge._pin_${p.name.replace(/[^a-zA-Z0-9]/g, '')}`,
+                            arguments: p.args || '',
+                            displayName: p.name,
+                            packagedAppId: p.packagedAppId
+                        }
+                    };
+                }
+                // Win32 apps use desktopAppLink (.lnk shortcut)
+                // Use system shortcut if available, otherwise custom shortcut path
+                return {
+                    desktopAppLink: p.systemShortcut || `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
+                };
+            })
         };
         xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
     }
@@ -834,8 +858,8 @@ function validate() {
             errors.push('At least one allowed app is required for multi-app mode');
         }
 
-        // Check for shortcuts missing target paths
-        const missingTargets = state.startPins.filter(p => !p.target);
+        // Check for shortcuts missing target paths (UWP pins don't need targets)
+        const missingTargets = state.startPins.filter(p => p.pinType !== 'packagedAppId' && !p.target && !p.systemShortcut);
         if (missingTargets.length > 0) {
             errors.push(`${missingTargets.length} shortcut(s) missing target path: ${missingTargets.map(p => p.name).join(', ')}`);
         }
@@ -919,9 +943,10 @@ function downloadPowerShell() {
 
     const xml = generateXml();
 
-    // Generate shortcuts JSON for PowerShell (exclude pins with system shortcuts - they already exist)
+    // Generate shortcuts JSON for PowerShell
+    // Exclude: UWP apps (packagedAppId - no .lnk needed), system shortcuts (already exist)
     const shortcutsJson = JSON.stringify(state.startPins
-        .filter(p => !p.systemShortcut)
+        .filter(p => p.pinType !== 'packagedAppId' && !p.systemShortcut)
         .map(p => ({
             Name: p.name || '',
             TargetPath: p.target || '',

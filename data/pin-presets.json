@@ -2,14 +2,13 @@
     "pins": {
         "edge": {
             "name": "Microsoft Edge",
-            "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
-            "args": "",
-            "workingDir": "",
-            "iconPath": "",
-            "systemShortcut": "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk"
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App",
+            "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe"
         },
         "chrome": {
             "name": "Google Chrome",
+            "pinType": "desktopAppLink",
             "target": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
             "args": "",
             "workingDir": "",
@@ -17,13 +16,30 @@
         },
         "firefox": {
             "name": "Mozilla Firefox",
+            "pinType": "desktopAppLink",
             "target": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
             "args": "",
             "workingDir": "",
             "iconPath": ""
         },
+        "calculator": {
+            "name": "Calculator",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"
+        },
+        "photos": {
+            "name": "Photos",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.Windows.Photos_8wekyb3d8bbwe!App"
+        },
+        "settings": {
+            "name": "Settings",
+            "pinType": "packagedAppId",
+            "packagedAppId": "windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"
+        },
         "osk": {
             "name": "On-Screen Keyboard",
+            "pinType": "desktopAppLink",
             "target": "C:\\Windows\\System32\\osk.exe",
             "args": "",
             "workingDir": "",
@@ -31,6 +47,7 @@
         },
         "controlPanel": {
             "name": "Control Panel",
+            "pinType": "desktopAppLink",
             "target": "C:\\Windows\\System32\\control.exe",
             "args": "",
             "workingDir": "",
@@ -38,27 +55,21 @@
         },
         "fileExplorer": {
             "name": "File Explorer",
+            "pinType": "desktopAppLink",
             "target": "C:\\Windows\\explorer.exe",
             "args": "",
             "workingDir": "",
-            "iconPath": ""
-        },
-        "soundSettings": {
-            "name": "Sound Settings",
-            "target": "C:\\Windows\\explorer.exe",
-            "args": "ms-settings:sound",
-            "workingDir": "",
-            "iconPath": ""
+            "iconPath": "",
+            "systemShortcut": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk"
         },
         "printers": {
             "name": "Printers",
-            "target": "C:\\Windows\\explorer.exe",
-            "args": "ms-settings:printers",
-            "workingDir": "",
-            "iconPath": ""
+            "pinType": "packagedAppId",
+            "packagedAppId": "windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel"
         },
         "cmd": {
             "name": "Command Prompt",
+            "pinType": "desktopAppLink",
             "target": "C:\\Windows\\System32\\cmd.exe",
             "args": "",
             "workingDir": "",
@@ -66,6 +77,7 @@
         },
         "powershell": {
             "name": "Windows PowerShell",
+            "pinType": "desktopAppLink",
             "target": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
             "args": "",
             "workingDir": "",
@@ -73,6 +85,7 @@
         },
         "notepad": {
             "name": "Notepad",
+            "pinType": "desktopAppLink",
             "target": "C:\\Windows\\System32\\notepad.exe",
             "args": "",
             "workingDir": "",
@@ -80,6 +93,7 @@
         },
         "word": {
             "name": "Microsoft Word",
+            "pinType": "desktopAppLink",
             "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
             "args": "",
             "workingDir": "",
@@ -87,6 +101,7 @@
         },
         "excel": {
             "name": "Microsoft Excel",
+            "pinType": "desktopAppLink",
             "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
             "args": "",
             "workingDir": "",
@@ -94,6 +109,7 @@
         },
         "powerpoint": {
             "name": "Microsoft PowerPoint",
+            "pinType": "desktopAppLink",
             "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
             "args": "",
             "workingDir": "",
@@ -101,6 +117,7 @@
         },
         "outlook": {
             "name": "Microsoft Outlook",
+            "pinType": "desktopAppLink",
             "target": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE",
             "args": "",
             "workingDir": "",
