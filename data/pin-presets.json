@@ -136,6 +136,54 @@
             "args": "",
             "workingDir": "",
             "iconPath": ""
+        },
+        "onenote": {
+            "name": "OneNote",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.Office.OneNote_8wekyb3d8bbwe!microsoft.onenoteim"
+        },
+        "terminal": {
+            "name": "Windows Terminal",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.WindowsTerminal_8wekyb3d8bbwe!App"
+        },
+        "paint": {
+            "name": "Paint",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.Paint_8wekyb3d8bbwe!App"
+        },
+        "snipSketch": {
+            "name": "Snipping Tool",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.ScreenSketch_8wekyb3d8bbwe!App"
+        },
+        "stickyNotes": {
+            "name": "Sticky Notes",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe!App"
+        },
+        "camera": {
+            "name": "Camera",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.WindowsCamera_8wekyb3d8bbwe!App"
+        },
+        "movies": {
+            "name": "Movies & TV",
+            "pinType": "packagedAppId",
+            "packagedAppId": "Microsoft.ZuneVideo_8wekyb3d8bbwe!Microsoft.ZuneVideo"
+        },
+        "teams": {
+            "name": "Teams",
+            "pinType": "packagedAppId",
+            "packagedAppId": "MSTeams_8wekyb3d8bbwe!MSTeams"
+        },
+        "zoom": {
+            "name": "Zoom",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\Zoom\\bin\\Zoom.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
         }
     }
 }
