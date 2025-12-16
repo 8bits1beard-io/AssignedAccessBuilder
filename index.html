@@ -732,7 +732,7 @@
             Inspired by the work of <a href="https://www.linkedin.com/in/brandon-villines/" target="_blank" rel="noopener noreferrer">Brandon Villines</a>
         </p>
         <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem;">
-            Last updated: 2025-12-16 9:30 AM
+            Last updated: 2025-12-16 9:45 AM
         </p>
     </footer>
 
@@ -741,11 +741,11 @@
         <div class="modal-backdrop" onclick="hideDeployHelp()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="deployModalTitle">Deploy to Intune via OMA-URI</h2>
+                <h2 id="deployModalTitle">Deployment Guide</h2>
                 <button type="button" class="modal-close" onclick="hideDeployHelp()" aria-label="Close dialog">&times;</button>
             </div>
             <div class="modal-body">
-                <h3>Steps to Create Custom CSP Policy</h3>
+                <h3>Method 1: Microsoft Intune (Recommended)</h3>
 
                 <h4>1. Navigate to Intune</h4>
                 <ul>
@@ -781,11 +781,53 @@
                     <li>Device will reboot to apply kiosk mode</li>
                 </ul>
 
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+
+                <h3>Method 2: PowerShell (Direct WMI)</h3>
+                <p style="margin-bottom: 12px;">For standalone devices or testing. Must be run as <strong>SYSTEM</strong>.</p>
+
+                <h4>Option A: Using PsExec</h4>
+                <pre style="background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem;">psexec -i -s powershell.exe -ExecutionPolicy Bypass -File "C:\path\to\Apply-AssignedAccess.ps1"</pre>
+
+                <h4>Option B: Manual PowerShell Commands</h4>
+                <pre style="background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem;"># Run in SYSTEM context (via psexec -i -s powershell.exe)
+$xml = Get-Content -Path "C:\path\to\config.xml" -Raw
+$bridge = Get-CimInstance -Namespace "root\cimv2\mdm\dmmap" -ClassName "MDM_AssignedAccess"
+Set-CimInstance -CimInstance $bridge -Property @{Configuration = $xml}</pre>
+
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+
+                <h3>Method 3: Provisioning Package (.ppkg)</h3>
+                <p style="margin-bottom: 12px;">For bulk deployment during OOBE or to existing devices.</p>
+
+                <h4>1. Install Windows Configuration Designer</h4>
+                <ul>
+                    <li>Download from <a href="https://apps.microsoft.com/detail/9nblggh4tx22" target="_blank" rel="noopener noreferrer">Microsoft Store</a> or Windows ADK</li>
+                </ul>
+
+                <h4>2. Create Provisioning Package</h4>
+                <ul>
+                    <li>Open Windows Configuration Designer</li>
+                    <li>Select <strong>Advanced provisioning</strong></li>
+                    <li>Navigate to: <strong>Runtime settings</strong> → <strong>AssignedAccess</strong> → <strong>AssignedAccessSettings</strong></li>
+                    <li>Paste your XML configuration</li>
+                </ul>
+
+                <h4>3. Export &amp; Apply</h4>
+                <ul>
+                    <li>Export → Provisioning package → Create</li>
+                    <li>Apply by double-clicking the .ppkg file or during Windows setup</li>
+                </ul>
+
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid var(--border);">
+
                 <h3>Important Notes</h3>
                 <ul>
-                    <li>Device must be Azure AD joined or Hybrid Azure AD joined</li>
-                    <li>User account must exist on the device before policy applies</li>
+                    <li>Device must be running Windows 10/11 Pro, Enterprise, or Education</li>
+                    <li>For Intune: Device must be Azure AD joined or Hybrid Azure AD joined</li>
+                    <li>User/group accounts must exist before the configuration is applied</li>
                     <li>Test on a single device before broad deployment</li>
+                    <li>Use the <strong>Download Deploy Script</strong> button for our recommended PowerShell deployment script</li>
                 </ul>
             </div>
         </div>
