@@ -2,9 +2,12 @@
     "pins": {
         "edge": {
             "name": "Microsoft Edge",
-            "pinType": "packagedAppId",
-            "packagedAppId": "Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App",
-            "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe"
+            "pinType": "desktopAppLink",
+            "target": "%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": "",
+            "systemShortcut": "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk"
         },
         "chrome": {
             "name": "Google Chrome",
