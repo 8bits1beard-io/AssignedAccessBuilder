@@ -931,8 +931,14 @@
                 if (!filePath) return 'file:///C:/Kiosk/index.html';
                 // Convert backslashes to forward slashes
                 filePath = filePath.replace(/\\/g, '/');
-                // Encode spaces and special characters in path
-                filePath = filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+                // Encode spaces and special characters in path, but preserve drive letter colon
+                filePath = filePath.split('/').map((segment, index) => {
+                    // Don't encode drive letter (e.g., "C:")
+                    if (index === 0 && /^[A-Za-z]:$/.test(segment)) {
+                        return segment;
+                    }
+                    return encodeURIComponent(segment);
+                }).join('/');
                 // Ensure it starts with file:///
                 if (!filePath.toLowerCase().startsWith('file:///')) {
                     filePath = 'file:///' + filePath;
@@ -1002,8 +1008,14 @@
                 if (!filePath) return 'file:///C:/Kiosk/index.html';
                 // Convert backslashes to forward slashes
                 filePath = filePath.replace(/\\/g, '/');
-                // Encode spaces and special characters in path
-                filePath = filePath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+                // Encode spaces and special characters in path, but preserve drive letter colon
+                filePath = filePath.split('/').map((segment, index) => {
+                    // Don't encode drive letter (e.g., "C:")
+                    if (index === 0 && /^[A-Za-z]:$/.test(segment)) {
+                        return segment;
+                    }
+                    return encodeURIComponent(segment);
+                }).join('/');
                 // Ensure it starts with file:///
                 if (!filePath.toLowerCase().startsWith('file:///')) {
                     filePath = 'file:///' + filePath;
@@ -1440,6 +1452,17 @@
             const pin = commonPins[pinKey];
             if (pin && !state.startPins.find(p => p.name.toLowerCase() === pin.name.toLowerCase())) {
                 state.startPins.push({ ...pin });
+
+                // If the shortcut uses explorer.exe (for ms-settings: URLs), add it to allowed apps
+                if (pin.target && pin.target.toLowerCase().includes('explorer.exe')) {
+                    const explorerPath = 'C:\\Windows\\explorer.exe';
+                    if (!state.allowedApps.find(a => a.value.toLowerCase() === explorerPath.toLowerCase())) {
+                        state.allowedApps.push({ type: 'path', value: explorerPath });
+                        renderAppList();
+                        updateAutoLaunchSelector();
+                    }
+                }
+
                 renderPinList();
                 updatePreview();
             }
