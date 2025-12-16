@@ -655,7 +655,8 @@ function generateSingleAppProfile() {
         let args = `--kiosk ${url} --edge-kiosk-type=${kioskType}`;
         if (inPrivate) args += ' --inprivate';
 
-        xml += `            <KioskModeApp AppUserModelId="MSEdge" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
+        // Edge Chromium is a Win32 app - use ClassicAppPath, not AppUserModelId
+        xml += `            <KioskModeApp v4:ClassicAppPath="%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
     } else if (appType === 'uwp') {
         const aumid = document.getElementById('uwpAumid').value;
         xml += `            <KioskModeApp AppUserModelId="${escapeXml(aumid)}"/>\n`;
