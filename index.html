@@ -1344,7 +1344,8 @@
                     target: '%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe',
                     args: '',
                     workingDir: '',
-                    iconPath: ''
+                    iconPath: '',
+                    systemShortcut: '%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk'
                 },
                 'chrome': {
                     name: 'Google Chrome',
@@ -1644,11 +1645,11 @@
             }
 
             // Start Pins (Windows 11)
-            // Shortcuts will be created by the deployment script in C:\ProgramData\KioskShortcuts\
+            // Use system shortcuts when available, otherwise custom shortcuts in C:\ProgramData\KioskShortcuts\
             if (state.startPins.length > 0) {
                 const pinsJson = {
                     pinnedList: state.startPins.map(p => ({
-                        desktopAppLink: `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
+                        desktopAppLink: p.systemShortcut || `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
                     }))
                 };
                 xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
@@ -1822,14 +1823,16 @@
 
             const xml = generateXml();
 
-            // Generate shortcuts JSON for PowerShell (keep proper JSON format for ConvertFrom-Json)
-            const shortcutsJson = JSON.stringify(state.startPins.map(p => ({
-                Name: p.name || '',
-                TargetPath: p.target || '',
-                Arguments: p.args || '',
-                WorkingDirectory: p.workingDir || '',
-                IconLocation: p.iconPath || ''
-            })), null, 4);
+            // Generate shortcuts JSON for PowerShell (exclude pins with system shortcuts - they already exist)
+            const shortcutsJson = JSON.stringify(state.startPins
+                .filter(p => !p.systemShortcut)
+                .map(p => ({
+                    Name: p.name || '',
+                    TargetPath: p.target || '',
+                    Arguments: p.args || '',
+                    WorkingDirectory: p.workingDir || '',
+                    IconLocation: p.iconPath || ''
+                })), null, 4);
 
             const ps1 = `#Requires -RunAsAdministrator
 <#
