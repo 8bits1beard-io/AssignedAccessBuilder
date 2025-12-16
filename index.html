@@ -204,6 +204,15 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="edgeIdleTimeout" class="with-tooltip">
+                                        Idle Timeout (minutes)
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Idle Timeout" aria-describedby="edgeIdleTimeout-tooltip">?</button>
+                                        <span class="tooltip-content" id="edgeIdleTimeout-tooltip" role="tooltip">After this many minutes of no user activity, Edge will reset to the home URL and clear the session. Set to 0 to disable timeout. Recommended for public kiosks.</span>
+                                    </label>
+                                    <input type="number" id="edgeIdleTimeout" min="0" max="1440" value="0" placeholder="0 = disabled" onchange="updatePreview()" aria-describedby="edgeIdleTimeout-tooltip">
+                                </div>
                             </div>
 
                             <!-- UWP App Configuration -->

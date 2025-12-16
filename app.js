@@ -651,9 +651,11 @@ function generateSingleAppProfile() {
         const url = getEdgeUrl();
         const kioskType = document.getElementById('edgeKioskType').value;
         const inPrivate = document.getElementById('edgeInPrivate').checked;
+        const idleTimeout = parseInt(document.getElementById('edgeIdleTimeout').value) || 0;
 
         let args = `--kiosk ${url} --edge-kiosk-type=${kioskType}`;
         if (inPrivate) args += ' --inprivate';
+        if (idleTimeout > 0) args += ` --kiosk-idle-timeout-minutes=${idleTimeout}`;
 
         // Edge Chromium is a Win32 app - use ClassicAppPath, not AppUserModelId
         xml += `            <KioskModeApp v4:ClassicAppPath="%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
