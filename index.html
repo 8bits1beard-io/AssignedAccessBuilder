@@ -1028,16 +1028,10 @@
             // Clear all options except "None"
             select.innerHTML = '<option value="">None (show Start menu)</option>';
 
-            // Add allowed apps as options (skip helper executables and Edge exe paths)
+            // Add allowed apps as options (skip helper executables)
             state.allowedApps.forEach((app, index) => {
                 // Skip helper executables - they shouldn't be auto-launched
                 if (isHelperExecutable(app.value)) {
-                    return;
-                }
-
-                // Skip Edge exe paths - only show AUMID version for Edge auto-launch
-                // Edge kiosk mode works best when launched via AUMID, not exe path
-                if (isEdgeApp(app.value) && app.type !== 'aumid') {
                     return;
                 }
 
@@ -1151,7 +1145,7 @@
                 'settings': { type: 'aumid', value: 'windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel' },
                 'fileExplorer': { type: 'path', value: 'C:\\Windows\\explorer.exe' },
                 'controlPanel': { type: 'path', value: 'C:\\Windows\\System32\\control.exe' },
-                'printers': { type: 'aumid', value: 'Microsoft.Windows.PrintDialog_cw5n1h2txyewy!Microsoft.Windows.PrintDialog' },
+                'printers': { type: 'aumid', value: 'windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel' },
                 'cmd': { type: 'path', value: 'C:\\Windows\\System32\\cmd.exe' },
                 'powershell': { type: 'path', value: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe' },
                 'powershell7': { type: 'path', value: 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' },
@@ -1185,15 +1179,9 @@
 
             // Handle apps that need multiple components or both 32/64-bit paths
             if (appKey === 'edge') {
-                // Add all Edge components
+                // Add Edge exe path only (works regardless of installation method)
                 if (!state.allowedApps.find(a => a.value === commonApps.edge.value)) {
                     state.allowedApps.push(commonApps.edge);
-                }
-                if (!state.allowedApps.find(a => a.value === commonApps.edgeProxy.value)) {
-                    state.allowedApps.push(commonApps.edgeProxy);
-                }
-                if (!state.allowedApps.find(a => a.value === commonApps.edgeAumid.value)) {
-                    state.allowedApps.push(commonApps.edgeAumid);
                 }
             } else if (appKey === 'chrome') {
                 // Add both 64-bit and 32-bit Chrome paths
