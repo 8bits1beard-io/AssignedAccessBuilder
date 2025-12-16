@@ -17,9 +17,10 @@ Detailed documentation for AssignedAccess XML Builder.
    - **Fullscreen** — No browser UI (digital signage)
    - **Public Browsing** — Address bar and navigation visible
 5. Enable **InPrivate Mode** for public kiosks
-6. Optionally enable **Breakout Sequence** for technician access (Ctrl+Alt+K)
-7. Configure account (Auto Logon recommended)
-8. Export
+6. Set **Idle Timeout** (optional) — Reset to home URL after inactivity
+7. Optionally enable **Breakout Sequence** for technician access (Ctrl+Alt+K)
+8. Configure account (Auto Logon recommended)
+9. Export
 
 ### Multi-App Kiosk
 
@@ -31,12 +32,31 @@ Detailed documentation for AssignedAccess XML Builder.
    - Select an app to launch automatically at sign-in
    - If Edge is selected, configure URL and kiosk type
 4. Add Start menu pins:
-   - Use preset shortcuts (30+ available) or create custom pins
+   - Use preset shortcuts (27+ available) or create custom pins
    - Each pin needs: Name, Target path, optional arguments/icon
 5. Configure system restrictions:
    - **Taskbar**: Show or hide
    - **File Explorer**: None, Downloads only, Removable drives, or Full access
+6. Configure account (Auto Logon or Existing Account)
+7. Export
+
+### Restricted User Experience
+
+Use this mode when you need to apply the same restricted desktop to multiple users via group membership.
+
+1. Select **Restricted User** mode
+2. Add allowed applications (same as Multi-App)
+3. Add Start menu pins (same as Multi-App)
+4. Configure system restrictions (same as Multi-App)
+5. Choose account type:
+   - **User Group** — Apply to members of a specific group
+     - Local Group: `KioskUsers`
+     - AD Group: `DOMAIN\KioskUsers`
+     - Azure AD Group: Use the Group Object ID (GUID)
+   - **Global Profile** — Apply to ALL non-administrator users on the device
 6. Export
+
+**Note:** Restricted User mode cannot use Auto Logon with groups—the users must sign in with their own credentials.
 
 ---
 
@@ -57,8 +77,8 @@ flowchart LR
 | Field | Value |
 |-------|-------|
 | Name | AssignedAccess Configuration |
-| OMA-URI | `./Device/Vendor/MSFT/AssignedAccess/Configuration` |
-| Data type | String (XML) |
+| OMA-URI | `./Vendor/MSFT/AssignedAccess/Configuration` |
+| Data type | String |
 | Value | *Paste generated XML* |
 
 ### PowerShell Script
@@ -69,7 +89,7 @@ flowchart LR
    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File "Apply-AssignedAccess.ps1"
    ```
 3. The script performs:
-   - Pre-flight checks (Windows edition, SYSTEM context, WMI availability)
+   - Pre-flight checks (Windows edition, SYSTEM context via SID S-1-5-18, WMI availability)
    - Creates shortcuts in `C:\ProgramData\KioskShortcuts\` for Start menu pins
    - Applies configuration via WMI (`MDM_AssignedAccess`)
    - Generates JSON log file with timestamps and execution details
@@ -94,8 +114,10 @@ flowchart LR
 | Kiosk not applying after reboot | Invalid XML or insufficient privileges | Validate XML in tool; ensure script ran as SYSTEM |
 | Configuration partially applied | XML namespace mismatch | Regenerate XML; check Windows version compatibility |
 | Start menu pins not appearing | Shortcut file missing or invalid path | Verify shortcuts exist at paths in StartPins JSON; use PowerShell script to auto-create |
-| Edge not launching in kiosk mode | Missing Edge components in allowed apps | Add Edge via preset button (includes msedge.exe, proxy, and AUMID) |
+| Edge not launching in kiosk mode | Missing Edge components in allowed apps | Add Edge via preset button (includes msedge.exe and proxy) |
 | Auto-launch app not starting | App not in AllowedApps list | Ensure the auto-launch app is also added to the allowed applications list |
+| SYSTEM context check fails | Script not running as SYSTEM | Use `psexec -i -s` to run PowerShell as SYSTEM |
+| "Unsupported edition" error | Windows Home edition | Kiosk mode requires Pro, Enterprise, or Education |
 
 **Diagnostic logs:** `Event Viewer > Applications and Services Logs > Microsoft > Windows > AssignedAccess`
 
@@ -109,9 +131,53 @@ flowchart LR
 |-----------|-----------------|----------------|
 | `2017/config` | Base | Core kiosk functionality |
 | `201901/config` (rs5) | 1903+ | DisplayName for auto-logon, AutoLaunch |
-| `2020/config` (v3) | 20H2+ | AllowRemovableDrives |
+| `2020/config` (v3) | 20H2+ | AllowRemovableDrives, GlobalProfile |
 | `2021/config` (v4) | 21H2+ | ClassicAppPath, BreakoutSequence |
 | `2022/config` (v5) | 22H2+ | StartPins (Windows 11) |
+
+---
+
+## Edge Kiosk Configuration
+
+### Important: Edge Chromium is a Win32 App
+
+Edge Chromium (the current version of Edge) is a **desktop application**, not a UWP app. This affects how it's configured:
+
+| Mode | Configuration Method |
+|------|---------------------|
+| Single-App | `v4:ClassicAppPath="%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"` |
+| Multi-App | `<App DesktopAppPath="%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"/>` |
+
+**Do NOT use** `AppUserModelId="MSEdge"` — that refers to the legacy Edge browser.
+
+### Edge Kiosk Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `--kiosk <URL>` | Sets the starting URL |
+| `--edge-kiosk-type=fullscreen` | No browser chrome, just content |
+| `--edge-kiosk-type=public-browsing` | Address bar and navigation visible |
+| `--inprivate` | No history, cookies, or cache saved |
+| `--kiosk-idle-timeout-minutes=N` | Reset to home URL after N minutes of inactivity |
+
+---
+
+## Account Types
+
+| Type | XML Element | Supported Modes |
+|------|-------------|-----------------|
+| Auto Logon | `<AutoLogonAccount rs5:DisplayName="..."/>` | Single, Multi, Restricted |
+| Existing Account | `<Account>username</Account>` | Single, Multi, Restricted |
+| User Group | `<UserGroup Type="..." Name="..."/>` | Restricted only |
+| Global Profile | `<v3:GlobalProfile Id="..."/>` | Restricted only |
+
+### User Group Types
+
+| Type | Name Format | Example |
+|------|-------------|---------|
+| LocalGroup | Group name | `KioskUsers` |
+| ActiveDirectoryGroup | DOMAIN\GroupName | `CONTOSO\KioskUsers` |
+| AzureActiveDirectoryGroup | Group Object ID | `a1b2c3d4-e5f6-7890-abcd-ef1234567890` |
 
 ---
 
@@ -122,13 +188,14 @@ flowchart LR
 | Calculator | `Microsoft.WindowsCalculator_8wekyb3d8bbwe!App` |
 | Photos | `Microsoft.Windows.Photos_8wekyb3d8bbwe!App` |
 | Settings | `windows.immersivecontrolpanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel` |
-| Edge | `Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App` |
 | Windows Terminal | `Microsoft.WindowsTerminal_8wekyb3d8bbwe!App` |
 | Snipping Tool | `Microsoft.ScreenSketch_8wekyb3d8bbwe!App` |
 | Sticky Notes | `Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe!App` |
 | Paint | `Microsoft.Paint_8wekyb3d8bbwe!App` |
 | Camera | `Microsoft.WindowsCamera_8wekyb3d8bbwe!App` |
-| Movies & TV | `Microsoft.ZuneVideo_8wekyb3d8bbwe!App` |
+| Movies & TV | `Microsoft.ZuneVideo_8wekyb3d8bbwe!Microsoft.ZuneVideo` |
+| Teams | `MSTeams_8wekyb3d8bbwe!MSTeams` |
+| OneNote | `Microsoft.Office.OneNote_8wekyb3d8bbwe!microsoft.onenoteim` |
 
 **Find any app's AUMID:**
 ```powershell
@@ -141,7 +208,7 @@ Get-StartApps | Format-Table Name, AppID
 
 | Application | Path |
 |-------------|------|
-| Edge | `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe` |
+| Edge | `%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe` |
 | Chrome | `C:\Program Files\Google\Chrome\Application\chrome.exe` |
 | Firefox | `C:\Program Files\Mozilla Firefox\firefox.exe` |
 | Notepad | `C:\Windows\System32\notepad.exe` |
@@ -150,6 +217,33 @@ Get-StartApps | Format-Table Name, AppID
 | PowerShell | `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe` |
 | File Explorer | `C:\Windows\explorer.exe` |
 | Control Panel | `C:\Windows\System32\control.exe` |
+| Volume Control | `C:\Windows\System32\sndvol.exe` |
+
+---
+
+## StartPins JSON Format (Windows 11)
+
+The StartPins element uses JSON to define pinned shortcuts. Three formats are supported:
+
+```json
+{
+  "pinnedList": [
+    // UWP/Store apps - use packagedAppId
+    {"packagedAppId": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"},
+
+    // Desktop apps - use desktopAppLink with .lnk path
+    {"desktopAppLink": "C:\\ProgramData\\KioskShortcuts\\Notepad.lnk"},
+
+    // Edge pinned sites - use secondaryTile
+    {"secondaryTile": {
+      "tileId": "MSEdge.pinnedsite",
+      "displayName": "Company Intranet",
+      "arguments": "https://intranet.company.com",
+      "packagedAppId": "Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App"
+    }}
+  ]
+}
+```
 
 ---
 
@@ -158,3 +252,4 @@ Get-StartApps | Format-Table Name, AppID
 - [AssignedAccess CSP Reference](https://docs.microsoft.com/en-us/windows/client-management/mdm/assignedaccess-csp)
 - [Set Up a Kiosk on Windows 11](https://docs.microsoft.com/en-us/windows/configuration/kiosk-methods)
 - [Configure Microsoft Edge Kiosk Mode](https://docs.microsoft.com/en-us/deployedge/microsoft-edge-configure-kiosk-mode)
+- [Assigned Access Configuration File](https://learn.microsoft.com/en-us/windows/configuration/assigned-access/configuration-file)

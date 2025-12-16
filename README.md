@@ -38,39 +38,62 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    A[What's the use case?] --> B{Single task or<br/>multiple apps?}
-    B -->|Digital signage,<br/>dedicated terminal| C[Single-App Mode]
-    B -->|Restricted workstation,<br/>multiple tools needed| D[Multi-App Mode]
-    C --> E[Edge Kiosk]
-    C --> F[UWP App]
-    C --> G[Win32 App]
-    D --> H[Define allowed apps]
-    H --> I[Configure Start menu pins]
-    I --> J[Set taskbar/Explorer access]
+    A[What's the use case?] --> B{How many apps?}
+    B -->|One app only| C[Single-App Mode]
+    B -->|Multiple apps| D{Who uses it?}
+    D -->|Individual user| E[Multi-App Mode]
+    D -->|Group of users or<br/>all non-admins| F[Restricted User Mode]
+    C --> G[Edge Kiosk / UWP / Win32]
+    E --> H[Define apps + Start pins]
+    F --> I[Define apps + Assign to group]
 ```
 
-| Mode | Best For | Example |
-|------|----------|---------|
-| **Single-App** | Signage, check-in terminals, single-purpose devices | Lobby display showing company website |
-| **Multi-App** | Shared workstations, lab computers, frontline workers | Reception desk with Edge, Teams, and Outlook |
+| Mode | Best For | Account Types | Example |
+|------|----------|---------------|---------|
+| **Single-App** | Signage, check-in terminals | Auto Logon, Existing User | Lobby display showing company website |
+| **Multi-App** | Shared workstations, frontline workers | Auto Logon, Existing User | Reception desk with Edge, Teams, Outlook |
+| **Restricted User** | Classrooms, shared labs, group policies | User Groups, Global Profile | Student computers with limited apps |
 
 ---
 
 ## Features
 
-- **Single-App** or **Multi-App** kiosk modes
+### Kiosk Modes
+- **Single-App** — Run one app fullscreen (Edge, UWP, or Win32)
+- **Multi-App** — Allow multiple apps with custom Start menu
+- **Restricted User** — Multi-app with group-based assignment
+
+### Applications
 - Microsoft Edge kiosk (web URLs or local HTML files)
 - UWP/Store apps and Win32 desktop applications
 - 50+ app presets (browsers, Office, utilities)
-- Start menu pin management with 30+ shortcut presets
-- Auto-logon or existing account support
+- Edge idle timeout for public kiosks
+
+### Start Menu & Taskbar
+- Start menu pin management with 27+ shortcut presets
+- Taskbar show/hide control
+- File Explorer restrictions (downloads, removable drives, or full access)
+
+### Account Options
+- Auto-logon (managed local account)
+- Existing user (local, domain, or Azure AD)
+- User groups (Local, AD, or Azure AD groups) — Restricted mode
+- Global profile (all non-admin users) — Restricted mode
+
+### Security & Access
 - Breakout sequence for technician access (Ctrl+Alt+K)
-- File Explorer restrictions (downloads, removable drives)
 - Auto-launch app configuration
-- Import/export XML configurations
+
+### Export & Deploy
+- Real-time XML validation with contextual tooltips
 - PowerShell deploy script with JSON logging
-- Real-time validation with contextual tooltips
-- Dark/light theme, WCAG accessible
+- Import/export XML configurations
+- Tabbed deployment guide (Intune, PowerShell, PPKG)
+
+### Accessibility
+- Dark/light theme
+- WCAG accessible
+- Keyboard navigation
 
 ---
 
@@ -92,6 +115,7 @@ flowchart TD
 | Component | Requirement |
 |-----------|-------------|
 | Target OS | Windows 11 22H2+ (Windows 10 with limited features) |
+| Edition | Pro, Enterprise, or Education |
 | Browser | Any modern browser (Chrome, Edge, Firefox) |
 | Deployment | Intune, PPKG, or PowerShell with SYSTEM privileges |
 
