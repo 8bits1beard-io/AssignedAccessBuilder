@@ -73,6 +73,14 @@
             "workingDir": "",
             "iconPath": ""
         },
+        "soundSettings": {
+            "name": "Sound Settings",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Windows\\System32\\sndvol.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
         "cmd": {
             "name": "Command Prompt",
             "pinType": "desktopAppLink",
