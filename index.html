@@ -1145,8 +1145,8 @@
         function addCommonApp(appKey) {
             const commonApps = {
                 // Browsers - Edge
-                'edge': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe' },
-                'edgeProxy': { type: 'path', value: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge_proxy.exe' },
+                'edge': { type: 'path', value: '%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe' },
+                'edgeProxy': { type: 'path', value: '%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge_proxy.exe' },
                 'edgeAumid': { type: 'aumid', value: 'MSEdge' },
                 // Browsers - Chrome
                 'chrome': { type: 'path', value: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe' },
@@ -1341,7 +1341,7 @@
                 // Browsers
                 'edge': {
                     name: 'Microsoft Edge',
-                    target: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+                    target: '%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe',
                     args: '',
                     workingDir: '',
                     iconPath: ''
@@ -1928,9 +1928,12 @@ function New-Shortcut {
 
     $shortcutPath = Join-Path $shortcutDir "$Name.lnk"
 
+    # Expand environment variables in paths
+    $expandedTarget = [Environment]::ExpandEnvironmentVariables($TargetPath)
+
     $WshShell = New-Object -ComObject WScript.Shell
     $shortcut = $WshShell.CreateShortcut($shortcutPath)
-    $shortcut.TargetPath = $TargetPath
+    $shortcut.TargetPath = $expandedTarget
 
     if ($Arguments) {
         $shortcut.Arguments = $Arguments
