@@ -1080,14 +1080,15 @@ if (-not $isSupported) {
 Write-Log -Action "Windows Edition Check" -Status "Success" -Message $edition
 Write-Host "[OK] Windows Edition: $edition" -ForegroundColor Green
 
-# Check 2: Running as SYSTEM
-$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-$log.executionContext = $currentUser
-if ($currentUser -ne "NT AUTHORITY\\SYSTEM") {
-    Write-Log -Action "SYSTEM Context Check" -Status "Error" -Message "Running as: $currentUser"
+# Check 2: Running as SYSTEM (use SID check for localization support)
+$currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+$log.executionContext = $currentUser.Name
+$isSystem = $currentUser.User.Value -eq "S-1-5-18"
+if (-not $isSystem) {
+    Write-Log -Action "SYSTEM Context Check" -Status "Error" -Message "Running as: $($currentUser.Name)"
     Save-Log
     Write-Host "[FAILED] SYSTEM Context Check" -ForegroundColor Red
-    Write-Host "    Current user: $currentUser" -ForegroundColor Gray
+    Write-Host "    Current user: $($currentUser.Name)" -ForegroundColor Gray
     Write-Host "    This script must run as SYSTEM. Use:" -ForegroundColor Yellow
     Write-Host "    psexec.exe -i -s powershell.exe -ExecutionPolicy Bypass -File \`"$PSCommandPath\`"" -ForegroundColor Yellow
     Write-Host ""
