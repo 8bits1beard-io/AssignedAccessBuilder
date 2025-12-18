@@ -67,6 +67,14 @@
                     <legend class="section-header">Profile</legend>
                     <div class="section-content">
                         <div class="form-group">
+                            <label for="configName" class="with-tooltip">
+                                Configuration Name
+                                <button type="button" class="tooltip-icon" aria-label="Help for Configuration Name" aria-describedby="configName-tooltip">?</button>
+                                <span class="tooltip-content" id="configName-tooltip" role="tooltip">A friendly name for this configuration. Used in downloaded file names (e.g., "Lobby-Kiosk" becomes "AssignedAccess-Lobby-Kiosk.xml"). Leave blank for default naming.</span>
+                            </label>
+                            <input type="text" id="configName" placeholder="e.g., Lobby-Kiosk, Reception-PC" onchange="updatePreview()" aria-describedby="configName-tooltip">
+                        </div>
+                        <div class="form-group">
                             <label for="profileId" class="with-tooltip">
                                 Profile GUID
                                 <button type="button" class="tooltip-icon" aria-label="Help for Profile GUID" aria-describedby="profileId-tooltip">?</button>
@@ -216,26 +224,12 @@
                                     <label for="edgeKioskType" class="with-tooltip">
                                         Kiosk Type
                                         <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Type" aria-describedby="edgeKioskType-tooltip">?</button>
-                                        <span class="tooltip-content" id="edgeKioskType-tooltip" role="tooltip"><strong>Fullscreen:</strong> Shows only the webpage with no browser UI. Ideal for digital signage. <strong>Public Browsing:</strong> Shows address bar and navigation. Users can browse but sessions reset on idle.</span>
+                                        <span class="tooltip-content" id="edgeKioskType-tooltip" role="tooltip"><strong>Fullscreen:</strong> Shows only the webpage with no browser UI. Ideal for digital signage. <strong>Public Browsing:</strong> Shows address bar and navigation. Users can browse but sessions reset on idle. Both modes always run InPrivate (no history/cookies saved).</span>
                                     </label>
                                     <select id="edgeKioskType" onchange="updatePreview()" aria-describedby="edgeKioskType-tooltip">
                                         <option value="fullscreen">Fullscreen (Digital Signage)</option>
                                         <option value="public-browsing">Public Browsing</option>
                                     </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="checkbox-group">
-                                        <span class="toggle-switch">
-                                            <input type="checkbox" id="edgeInPrivate" checked disabled aria-describedby="edgeInPrivate-tooltip">
-                                            <span class="toggle-slider" aria-hidden="true"></span>
-                                        </span>
-                                        <label for="edgeInPrivate" class="with-tooltip disabled-label">
-                                            InPrivate Mode (Always On)
-                                            <button type="button" class="tooltip-icon" aria-label="Help for InPrivate Mode" aria-describedby="edgeInPrivate-tooltip">?</button>
-                                            <span class="tooltip-content" id="edgeInPrivate-tooltip" role="tooltip">Edge kiosk mode always runs as an InPrivate session automatically. Browsing history, cookies, and form data are never saved between sessions. This cannot be disabled.</span>
-                                        </label>
-                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -513,23 +507,12 @@
                                 <label for="multiEdgeKioskType" class="with-tooltip">
                                     Kiosk Mode Type
                                     <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Mode Type" aria-describedby="multiEdgeKiosk-tooltip">?</button>
-                                    <span class="tooltip-content" id="multiEdgeKiosk-tooltip" role="tooltip">Fullscreen: No browser UI, just the web content. Public Browsing: Shows address bar and navigation for controlled browsing.</span>
+                                    <span class="tooltip-content" id="multiEdgeKiosk-tooltip" role="tooltip">Fullscreen: No browser UI, just the web content. Public Browsing: Shows address bar and navigation for controlled browsing. Both modes always run InPrivate (no history/cookies saved).</span>
                                 </label>
                                 <select id="multiEdgeKioskType" onchange="updatePreview()" aria-describedby="multiEdgeKiosk-tooltip">
                                     <option value="fullscreen">Fullscreen (no browser UI)</option>
                                     <option value="public-browsing">Public Browsing (with navigation)</option>
                                 </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="checkbox-group">
-                                    <input type="checkbox" id="multiEdgeInPrivate" checked disabled>
-                                    <span class="with-tooltip disabled-label">
-                                        InPrivate Mode (Always On)
-                                        <button type="button" class="tooltip-icon" aria-label="Help for InPrivate Mode" aria-describedby="multiEdgeInPrivate-tooltip">?</button>
-                                        <span class="tooltip-content" id="multiEdgeInPrivate-tooltip" role="tooltip">Edge kiosk mode always runs as an InPrivate session automatically. Browsing history, cookies, and form data are never saved. This cannot be disabled.</span>
-                                    </span>
-                                </label>
                             </div>
                         </div>
                     </fieldset>

@@ -33,8 +33,7 @@ const state = {
     multiAppEdgeConfig: {     // Edge kiosk config for multi-app/restricted mode
         url: '',
         sourceType: 'url',    // 'url' or 'file'
-        kioskType: 'fullscreen',
-        inPrivate: true
+        kioskType: 'fullscreen'
     }
 };
 
@@ -995,13 +994,23 @@ function copyXml() {
     alert('XML copied to clipboard!');
 }
 
+function getConfigFileName(extension) {
+    const configName = document.getElementById('configName').value.trim();
+    if (configName) {
+        // Sanitize: replace spaces with hyphens, remove invalid filename chars
+        const sanitized = configName.replace(/\s+/g, '-').replace(/[<>:"/\\|?*]/g, '');
+        return `AssignedAccess-${sanitized}.${extension}`;
+    }
+    return `AssignedAccessConfig.${extension}`;
+}
+
 function downloadXml() {
     if (!showValidation()) {
         if (!confirm('Configuration has errors. Download anyway?')) return;
     }
 
     const xml = generateXml();
-    downloadFile(xml, 'AssignedAccessConfig.xml', 'application/xml');
+    downloadFile(xml, getConfigFileName('xml'), 'application/xml');
 }
 
 function downloadPowerShell() {
@@ -1279,12 +1288,12 @@ catch {
 }
 `;
 
-    downloadFile(ps1, 'Apply-AssignedAccess.ps1', 'text/plain');
+    downloadFile(ps1, getConfigFileName('ps1'), 'text/plain');
 
     // Also download the README summary
     const readme = generateReadme();
     setTimeout(() => {
-        downloadFile(readme, 'README.md', 'text/markdown');
+        downloadFile(readme, getConfigFileName('md'), 'text/markdown');
     }, 100);
 }
 
@@ -1313,10 +1322,15 @@ function downloadFile(content, filename, type) {
 }
 
 function generateReadme() {
+    const configName = document.getElementById('configName').value.trim();
     const profileId = document.getElementById('profileId').value || '(not set)';
     const now = new Date().toLocaleString();
 
-    let readme = `# Kiosk Configuration Summary\n\nGenerated: ${now}\n\n`;
+    let readme = `# Kiosk Configuration Summary\n\n`;
+    if (configName) {
+        readme += `**Configuration:** ${configName}\n\n`;
+    }
+    readme += `Generated: ${now}\n\n`;
 
     // Kiosk Mode
     readme += `## Kiosk Mode\n\n`;
@@ -1738,12 +1752,14 @@ function loadPreset(preset) {
     state.startPins = [];
     state.autoLaunchApp = null;
 
+    // Reset config name
+    document.getElementById('configName').value = '';
+
     // Reset multi-app Edge config
     document.getElementById('multiEdgeSourceType').value = 'url';
     document.getElementById('multiEdgeUrl').value = '';
     document.getElementById('multiEdgeFilePath').value = '';
     document.getElementById('multiEdgeKioskType').value = 'fullscreen';
-    document.getElementById('multiEdgeInPrivate').checked = true;
     document.getElementById('win32AutoLaunchArgs').value = '';
     updateMultiEdgeSourceUI();
 
@@ -1758,7 +1774,6 @@ function loadPreset(preset) {
             document.getElementById('edgeUrl').value = '';
             document.getElementById('edgeFilePath').value = '';
             document.getElementById('edgeKioskType').value = 'fullscreen';
-            document.getElementById('edgeInPrivate').checked = true;
             updateAppTypeUI();
             updateEdgeSourceUI();
             break;
@@ -1773,7 +1788,6 @@ function loadPreset(preset) {
             document.getElementById('edgeUrl').value = 'https://www.microsoft.com';
             document.getElementById('edgeFilePath').value = '';
             document.getElementById('edgeKioskType').value = 'fullscreen';
-            document.getElementById('edgeInPrivate').checked = true;
             updateAppTypeUI();
             updateEdgeSourceUI();
             break;
@@ -1788,7 +1802,6 @@ function loadPreset(preset) {
             document.getElementById('edgeUrl').value = 'https://www.bing.com';
             document.getElementById('edgeFilePath').value = '';
             document.getElementById('edgeKioskType').value = 'public-browsing';
-            document.getElementById('edgeInPrivate').checked = true;
             updateAppTypeUI();
             updateEdgeSourceUI();
             break;
