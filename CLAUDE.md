@@ -71,8 +71,10 @@ v5:       http://schemas.microsoft.com/AssignedAccess/2022/config    (StartPins 
 ### Edge Kiosk Arguments
 - `--kiosk <URL>` - Sets the kiosk URL
 - `--edge-kiosk-type=fullscreen|public-browsing` - Display mode
-- `--inprivate` - No history/cookies saved
+- `--no-first-run` - Prevents first-run experience dialog (always included)
 - `--kiosk-idle-timeout-minutes=N` - Reset after N minutes of inactivity
+
+**Note:** Both kiosk types automatically run as InPrivate sessions. The `--inprivate` flag is not needed.
 
 ### Edge Configuration
 **Important:** Edge Chromium is a Win32 desktop app, NOT a UWP app.

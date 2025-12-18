@@ -227,13 +227,13 @@
                                 <div class="form-group">
                                     <div class="checkbox-group">
                                         <span class="toggle-switch">
-                                            <input type="checkbox" id="edgeInPrivate" checked onchange="updatePreview()" aria-describedby="edgeInPrivate-tooltip">
+                                            <input type="checkbox" id="edgeInPrivate" checked disabled aria-describedby="edgeInPrivate-tooltip">
                                             <span class="toggle-slider" aria-hidden="true"></span>
                                         </span>
-                                        <label for="edgeInPrivate" class="with-tooltip">
-                                            InPrivate Mode
+                                        <label for="edgeInPrivate" class="with-tooltip disabled-label">
+                                            InPrivate Mode (Always On)
                                             <button type="button" class="tooltip-icon" aria-label="Help for InPrivate Mode" aria-describedby="edgeInPrivate-tooltip">?</button>
-                                            <span class="tooltip-content" id="edgeInPrivate-tooltip" role="tooltip">Runs Edge in InPrivate (incognito) mode. Browsing history, cookies, and form data are not saved between sessions. Highly recommended for public kiosks to protect user privacy.</span>
+                                            <span class="tooltip-content" id="edgeInPrivate-tooltip" role="tooltip">Edge kiosk mode always runs as an InPrivate session automatically. Browsing history, cookies, and form data are never saved between sessions. This cannot be disabled.</span>
                                         </label>
                                     </div>
                                 </div>
@@ -523,11 +523,11 @@
 
                             <div class="form-group">
                                 <label class="checkbox-group">
-                                    <input type="checkbox" id="multiEdgeInPrivate" checked onchange="updatePreview()">
-                                    <span class="with-tooltip">
-                                        InPrivate Mode
+                                    <input type="checkbox" id="multiEdgeInPrivate" checked disabled>
+                                    <span class="with-tooltip disabled-label">
+                                        InPrivate Mode (Always On)
                                         <button type="button" class="tooltip-icon" aria-label="Help for InPrivate Mode" aria-describedby="multiEdgeInPrivate-tooltip">?</button>
-                                        <span class="tooltip-content" id="multiEdgeInPrivate-tooltip" role="tooltip">Run Edge in InPrivate mode to prevent storing browsing history, cookies, and cached data between sessions.</span>
+                                        <span class="tooltip-content" id="multiEdgeInPrivate-tooltip" role="tooltip">Edge kiosk mode always runs as an InPrivate session automatically. Browsing history, cookies, and form data are never saved. This cannot be disabled.</span>
                                     </span>
                                 </label>
                             </div>

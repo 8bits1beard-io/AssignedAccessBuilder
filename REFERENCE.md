@@ -157,8 +157,10 @@ Edge Chromium (the current version of Edge) is a **desktop application**, not a 
 | `--kiosk <URL>` | Sets the starting URL |
 | `--edge-kiosk-type=fullscreen` | No browser chrome, just content |
 | `--edge-kiosk-type=public-browsing` | Address bar and navigation visible |
-| `--inprivate` | No history, cookies, or cache saved |
+| `--no-first-run` | Prevents first-run experience dialog |
 | `--kiosk-idle-timeout-minutes=N` | Reset to home URL after N minutes of inactivity |
+
+> **Note:** Both kiosk types automatically run as InPrivate sessions. The `--inprivate` flag is not needed.
 
 ---
 

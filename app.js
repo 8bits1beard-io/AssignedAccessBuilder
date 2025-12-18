@@ -705,11 +705,10 @@ function generateSingleAppProfile() {
     if (appType === 'edge') {
         const url = getEdgeUrl();
         const kioskType = document.getElementById('edgeKioskType').value;
-        const inPrivate = document.getElementById('edgeInPrivate').checked;
         const idleTimeout = parseInt(document.getElementById('edgeIdleTimeout').value) || 0;
 
-        let args = `--kiosk ${url} --edge-kiosk-type=${kioskType}`;
-        if (inPrivate) args += ' --inprivate';
+        // Edge kiosk mode always runs InPrivate automatically, so --inprivate is not needed
+        let args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
         if (idleTimeout > 0) args += ` --kiosk-idle-timeout-minutes=${idleTimeout}`;
 
         // Edge Chromium is a Win32 app - use ClassicAppPath, not AppUserModelId
@@ -758,13 +757,12 @@ function generateMultiAppProfile() {
             attrs += ` rs5:AutoLaunch="true"`;
 
             // If Edge is auto-launched, add kiosk arguments
+            // Edge kiosk mode always runs InPrivate automatically, so --inprivate is not needed
             if (isEdge) {
                 const url = getMultiAppEdgeUrl();
                 const kioskType = document.getElementById('multiEdgeKioskType').value;
-                const inPrivate = document.getElementById('multiEdgeInPrivate').checked;
 
-                let args = `--kiosk ${url} --edge-kiosk-type=${kioskType}`;
-                if (inPrivate) args += ' --inprivate';
+                let args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
 
                 attrs += ` rs5:AutoLaunchArguments="${escapeXml(args)}"`;
             } else if (app.type === 'path') {
@@ -1347,12 +1345,11 @@ function generateReadme() {
                 ? document.getElementById('edgeUrl').value
                 : document.getElementById('edgeFilePath').value;
             const kioskType = document.getElementById('edgeKioskType').value;
-            const inPrivate = document.getElementById('edgeInPrivate').checked;
 
             readme += `**App:** Microsoft Edge (Kiosk Mode)\n`;
             readme += `**URL:** ${url || '(not set)'}\n`;
             readme += `**Kiosk Type:** ${kioskType === 'fullscreen' ? 'Fullscreen (Digital Signage)' : 'Public Browsing'}\n`;
-            readme += `**InPrivate Mode:** ${inPrivate ? 'Yes' : 'No'}\n\n`;
+            readme += `**InPrivate Mode:** Always enabled (automatic in kiosk mode)\n\n`;
         } else if (appType === 'uwp') {
             const aumid = document.getElementById('uwpAumid').value;
             readme += `**App:** UWP/Store App\n`;
@@ -1397,11 +1394,10 @@ function generateReadme() {
                     ? document.getElementById('multiEdgeUrl').value
                     : document.getElementById('multiEdgeFilePath').value;
                 const kioskType = document.getElementById('multiEdgeKioskType').value;
-                const inPrivate = document.getElementById('multiEdgeInPrivate').checked;
 
                 readme += `**URL:** ${url || '(not set)'}\n`;
                 readme += `**Kiosk Type:** ${kioskType === 'fullscreen' ? 'Fullscreen' : 'Public Browsing'}\n`;
-                readme += `**InPrivate Mode:** ${inPrivate ? 'Yes' : 'No'}\n\n`;
+                readme += `**InPrivate Mode:** Always enabled (automatic in kiosk mode)\n\n`;
             }
         }
 
@@ -1523,8 +1519,7 @@ function parseAndLoadXml(xmlString) {
 
                 document.getElementById('edgeKioskType').value =
                     classicArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
-
-                document.getElementById('edgeInPrivate').checked = classicArgs.includes('--inprivate');
+                // InPrivate is always enabled in kiosk mode, no need to import this setting
             }
         } else if (aumid) {
             document.getElementById('appType').value = 'uwp';
@@ -1622,8 +1617,7 @@ function parseAndLoadXml(xmlString) {
 
                         document.getElementById('multiEdgeKioskType').value =
                             autoLaunchArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
-
-                        document.getElementById('multiEdgeInPrivate').checked = autoLaunchArgs.includes('--inprivate');
+                        // InPrivate is always enabled in kiosk mode, no need to import this setting
                     } else if (path) {
                         // Non-Edge Win32 app - populate win32 args field
                         document.getElementById('win32AutoLaunchArgs').value = autoLaunchArgs;
