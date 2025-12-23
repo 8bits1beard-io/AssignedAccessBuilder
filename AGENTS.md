@@ -2,10 +2,13 @@
 
 ## Project Structure & Module Organization
 
-- `index.html` provides the UI structure and modal content.
+- `index.html` provides the UI structure and modal content (uses `data-action`/`data-change` hooks).
 - `styles.css` owns the visual system (CSS variables, layout, components).
-- `app.js` contains all application logic, state, and XML generation.
-- `data/` stores JSON presets (`app-presets.json`, `pin-presets.json`) loaded at runtime.
+- `app.js` wires UI handlers and orchestrates app flow.
+- `dom.js` caches DOM lookups; `state.js` holds shared state and preset loading.
+- `helpers.js` hosts shared utilities (URL encoding, args helpers, clipboard, etc.).
+- `xml.js`, `validation.js`, and `summary.js` isolate XML generation, validation, and summary rendering.
+- `data/` stores JSON presets (`app-presets.json`, `pin-presets.json`, `single-app-presets.json`) loaded at runtime.
 - `README.md` and `REFERENCE.md` are the primary docs; update them when behavior changes.
 
 ## Build, Test, and Development Commands
