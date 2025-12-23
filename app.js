@@ -3,41 +3,6 @@
    ============================================================================ */
 
 /* ============================================================================
-   Preset Data (loaded from JSON files)
-   ============================================================================ */
-let appPresets = null;
-let pinPresets = null;
-
-async function loadPresets() {
-    try {
-        const [appResponse, pinResponse] = await Promise.all([
-            fetch('data/app-presets.json'),
-            fetch('data/pin-presets.json')
-        ]);
-        appPresets = await appResponse.json();
-        pinPresets = await pinResponse.json();
-    } catch (e) {
-        console.error('Failed to load presets:', e);
-    }
-}
-
-/* ============================================================================
-   State Management
-   ============================================================================ */
-const state = {
-    mode: 'single',           // 'single', 'multi', or 'restricted'
-    accountType: 'auto',      // 'auto', 'existing', 'group', or 'global'
-    allowedApps: [],          // For multi-app and restricted modes
-    startPins: [],            // For multi-app and restricted modes: array of {name, target, args, workingDir, iconPath}
-    autoLaunchApp: null,      // Index into allowedApps array, or null (for multi-app/restricted)
-    multiAppEdgeConfig: {     // Edge kiosk config for multi-app/restricted mode
-        url: '',
-        sourceType: 'url',    // 'url' or 'file'
-        kioskType: 'fullscreen'
-    }
-};
-
-/* ============================================================================
    GUID Generator
    ============================================================================ */
 function generateGuid() {
@@ -46,8 +11,12 @@ function generateGuid() {
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    document.getElementById('profileId').value = '{' + guid + '}';
+    dom.get('profileId').value = '{' + guid + '}';
     updatePreview();
+}
+
+function copyProfileId() {
+    copyToClipboard(dom.get('profileId').value);
 }
 
 /* ============================================================================
@@ -77,14 +46,14 @@ function toggleTheme() {
    Deploy Guide Modal
    ============================================================================ */
 function showDeployHelp() {
-    const modal = document.getElementById('deployModal');
+    const modal = dom.get('deployModal');
     modal.classList.remove('hidden');
     modal.querySelector('.modal-close').focus();
     document.body.style.overflow = 'hidden';
 }
 
 function hideDeployHelp() {
-    const modal = document.getElementById('deployModal');
+    const modal = dom.get('deployModal');
     modal.classList.add('hidden');
     document.body.style.overflow = '';
 }
@@ -107,7 +76,7 @@ function switchDeployTab(tabId) {
 // Close modal on Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-        const modal = document.getElementById('deployModal');
+        const modal = dom.get('deployModal');
         if (!modal.classList.contains('hidden')) {
             hideDeployHelp();
         }
@@ -134,8 +103,8 @@ function switchTab(tabId) {
 
 function updateTabVisibility() {
     const isMultiOrRestricted = state.mode === 'multi' || state.mode === 'restricted';
-    const startMenuTab = document.getElementById('tab-btn-startmenu');
-    const systemTab = document.getElementById('tab-btn-system');
+    const startMenuTab = dom.get('tab-btn-startmenu');
+    const systemTab = dom.get('tab-btn-system');
 
     // Show/hide tabs based on mode - both multi and restricted need these tabs
     startMenuTab.classList.toggle('hidden', !isMultiOrRestricted);
@@ -143,7 +112,7 @@ function updateTabVisibility() {
 
     // If switching to single mode and currently on a multi-only tab, switch to Application tab
     if (!isMultiOrRestricted) {
-        const activeTab = document.querySelector('.tab-btn.active');
+        const activeTab = document.querySelector('.side-nav-btn.active');
         if (activeTab && (activeTab.id === 'tab-btn-startmenu' || activeTab.id === 'tab-btn-system')) {
             switchTab('application');
         }
@@ -156,11 +125,11 @@ function updateTabVisibility() {
 function setMode(mode) {
     state.mode = mode;
 
-    const singleBtn = document.getElementById('modeSingle');
-    const multiBtn = document.getElementById('modeMulti');
-    const restrictedBtn = document.getElementById('modeRestricted');
-    const singleConfig = document.getElementById('singleAppConfig');
-    const multiConfig = document.getElementById('multiAppConfig');
+    const singleBtn = dom.get('modeSingle');
+    const multiBtn = dom.get('modeMulti');
+    const restrictedBtn = dom.get('modeRestricted');
+    const singleConfig = dom.get('singleAppConfig');
+    const multiConfig = dom.get('multiAppConfig');
 
     // Update mode buttons
     singleBtn.classList.toggle('active', mode === 'single');
@@ -191,9 +160,9 @@ function setMode(mode) {
 }
 
 function updateAccountTypeOptions() {
-    const groupBtn = document.getElementById('accountGroup');
-    const globalBtn = document.getElementById('accountGlobal');
-    const autoBtn = document.getElementById('accountAuto');
+    const groupBtn = dom.get('accountGroup');
+    const globalBtn = dom.get('accountGlobal');
+    const autoBtn = dom.get('accountAuto');
 
     if (state.mode === 'restricted') {
         // Show group and global options for restricted mode
@@ -214,14 +183,14 @@ function updateAccountTypeOptions() {
 function setAccountType(type) {
     state.accountType = type;
 
-    const autoBtn = document.getElementById('accountAuto');
-    const existingBtn = document.getElementById('accountExisting');
-    const groupBtn = document.getElementById('accountGroup');
-    const globalBtn = document.getElementById('accountGlobal');
-    const autoConfig = document.getElementById('autoLogonConfig');
-    const existingConfig = document.getElementById('existingAccountConfig');
-    const groupConfig = document.getElementById('groupAccountConfig');
-    const globalConfig = document.getElementById('globalProfileConfig');
+    const autoBtn = dom.get('accountAuto');
+    const existingBtn = dom.get('accountExisting');
+    const groupBtn = dom.get('accountGroup');
+    const globalBtn = dom.get('accountGlobal');
+    const autoConfig = dom.get('autoLogonConfig');
+    const existingConfig = dom.get('existingAccountConfig');
+    const groupConfig = dom.get('groupAccountConfig');
+    const globalConfig = dom.get('globalProfileConfig');
 
     // Update button states
     autoBtn.classList.toggle('active', type === 'auto');
@@ -247,10 +216,10 @@ function setAccountType(type) {
 }
 
 function updateAppTypeUI() {
-    const appType = document.getElementById('appType').value;
-    const edgeConfig = document.getElementById('edgeConfig');
-    const uwpConfig = document.getElementById('uwpConfig');
-    const win32Config = document.getElementById('win32Config');
+    const appType = dom.get('appType').value;
+    const edgeConfig = dom.get('edgeConfig');
+    const uwpConfig = dom.get('uwpConfig');
+    const win32Config = dom.get('win32Config');
 
     edgeConfig.classList.toggle('hidden', appType !== 'edge');
     uwpConfig.classList.toggle('hidden', appType !== 'uwp');
@@ -261,45 +230,110 @@ function updateAppTypeUI() {
     win32Config.setAttribute('aria-hidden', appType !== 'win32');
 }
 
-function applySingleAppPreset(preset) {
-    const appTypeSelect = document.getElementById('appType');
-    const edgeSourceType = document.getElementById('edgeSourceType');
-    const edgeUrl = document.getElementById('edgeUrl');
-    const edgeKioskType = document.getElementById('edgeKioskType');
-    const win32Path = document.getElementById('win32Path');
-    const win32Args = document.getElementById('win32Args');
+/* ============================================================================
+   Event Delegation
+   ============================================================================ */
+const actionHandlers = {
+    loadPreset,
+    importXml,
+    showDeployHelp,
+    hideDeployHelp,
+    toggleTheme,
+    switchTab,
+    switchDeployTab,
+    setMode,
+    setAccountType,
+    generateGuid,
+    applySingleAppPreset,
+    addApp,
+    addCommonApp,
+    addPin,
+    addCommonPin,
+    removeApp,
+    removePin,
+    updatePreview,
+    updateAppTypeUI,
+    updateEdgeSourceUI,
+    updateBreakoutUI,
+    updateBreakoutPreview,
+    updateAutoLaunchSelection,
+    updateMultiEdgeSourceUI,
+    updateBrowserPinModeUI,
+    updateBrowserPinSourceUI,
+    copyXml,
+    downloadXml,
+    downloadPowerShell,
+    handleImport,
+    copyProfileId
+};
 
-    if (preset === 'edge') {
-        appTypeSelect.value = 'edge';
-        edgeSourceType.value = 'url';
-        edgeUrl.value = edgeUrl.value || 'https://www.microsoft.com';
-        edgeKioskType.value = 'fullscreen';
+function runAction(action, target, event) {
+    const handler = actionHandlers[action];
+    if (!handler) return;
+
+    const arg = target?.dataset?.arg;
+    if (action === 'handleImport') {
+        handler(event);
+        return;
+    }
+
+    if (arg !== undefined) {
+        if (action === 'removeApp' || action === 'removePin') {
+            handler(parseInt(arg, 10));
+        } else {
+            handler(arg);
+        }
+        return;
+    }
+
+    handler();
+}
+
+function runActions(actionString, target, event) {
+    actionString.split('|').forEach(action => {
+        runAction(action.trim(), target, event);
+    });
+}
+
+function applySingleAppPreset(preset) {
+    if (!singleAppPresets || !singleAppPresets.presets) {
+        alert('Single-app presets are not available yet. Please try again.');
+        return;
+    }
+
+    const config = singleAppPresets.presets[preset];
+    if (!config) return;
+
+    const appTypeSelect = dom.get('appType');
+    const edgeSourceType = dom.get('edgeSourceType');
+    const edgeUrl = dom.get('edgeUrl');
+    const edgeKioskType = dom.get('edgeKioskType');
+    const win32Path = dom.get('win32Path');
+    const win32Args = dom.get('win32Args');
+
+    appTypeSelect.value = config.appType;
+
+    if (config.appType === 'edge') {
+        edgeSourceType.value = config.sourceType || 'url';
+        edgeUrl.value = config.url || edgeUrl.value || 'https://www.microsoft.com';
+        edgeKioskType.value = config.kioskType || 'fullscreen';
         updateAppTypeUI();
         updateEdgeSourceUI();
         updatePreview();
         return;
     }
 
-    if (preset === 'chrome') {
-        appTypeSelect.value = 'win32';
-        win32Path.value = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-        win32Args.value = '--kiosk https://example.com';
-    }
-
-    if (preset === 'firefox') {
-        appTypeSelect.value = 'win32';
-        win32Path.value = 'C:\\Program Files\\Mozilla Firefox\\firefox.exe';
-        win32Args.value = '--kiosk https://example.com';
-    }
+    win32Path.value = config.path || '';
+    win32Args.value = config.args || '';
 
     updateAppTypeUI();
     updatePreview();
 }
 
 function updateEdgeSourceUI() {
-    const sourceType = document.getElementById('edgeSourceType').value;
-    const urlConfig = document.getElementById('edgeUrlConfig');
-    const fileConfig = document.getElementById('edgeFileConfig');
+    const sourceType = dom.get('edgeSourceType').value;
+    const urlConfig = dom.get('edgeUrlConfig');
+    const fileConfig = dom.get('edgeFileConfig');
 
     urlConfig.classList.toggle('hidden', sourceType !== 'url');
     fileConfig.classList.toggle('hidden', sourceType !== 'file');
@@ -309,9 +343,9 @@ function updateEdgeSourceUI() {
 }
 
 function updateBrowserPinSourceUI() {
-    const sourceType = document.getElementById('browserPinSourceType').value;
-    const urlConfig = document.getElementById('browserPinUrlConfig');
-    const fileConfig = document.getElementById('browserPinFileConfig');
+    const sourceType = dom.get('browserPinSourceType').value;
+    const urlConfig = dom.get('browserPinUrlConfig');
+    const fileConfig = dom.get('browserPinFileConfig');
 
     urlConfig.classList.toggle('hidden', sourceType !== 'url');
     fileConfig.classList.toggle('hidden', sourceType !== 'file');
@@ -321,8 +355,8 @@ function updateBrowserPinSourceUI() {
 }
 
 function updateBrowserPinModeUI() {
-    const mode = document.getElementById('browserPinMode').value;
-    const sourceConfig = document.getElementById('browserPinSourceConfig');
+    const mode = dom.get('browserPinMode').value;
+    const sourceConfig = dom.get('browserPinSourceConfig');
     const needsSource = mode === 'kioskFullscreen' || mode === 'kioskPublic';
 
     sourceConfig.classList.toggle('hidden', !needsSource);
@@ -334,209 +368,38 @@ function updateBrowserPinModeUI() {
 }
 
 function getEdgeUrl() {
-    const sourceType = document.getElementById('edgeSourceType').value;
-    if (sourceType === 'file') {
-        let filePath = document.getElementById('edgeFilePath').value.trim();
-        if (!filePath) return 'file:///C:/Kiosk/index.html';
-        // Convert backslashes to forward slashes
-        filePath = filePath.replace(/\\/g, '/');
-        // Encode spaces and special characters in path, but preserve drive letter colon
-        filePath = filePath.split('/').map((segment, index) => {
-            // Don't encode drive letter (e.g., "C:")
-            if (index === 0 && /^[A-Za-z]:$/.test(segment)) {
-                return segment;
-            }
-            return encodeURIComponent(segment);
-        }).join('/');
-        // Ensure it starts with file:///
-        if (!filePath.toLowerCase().startsWith('file:///')) {
-            filePath = 'file:///' + filePath;
-        }
-        return filePath;
-    } else {
-        return document.getElementById('edgeUrl').value || 'https://www.microsoft.com';
-    }
-}
-
-function buildFileUrl(filePath) {
-    if (!filePath) return '';
-    let normalized = filePath.trim();
-    if (!normalized) return '';
-    if (normalized.toLowerCase().startsWith('file:///')) {
-        return normalized;
-    }
-    normalized = normalized.replace(/\\/g, '/');
-    normalized = normalized.split('/').map((segment, index) => {
-        if (index === 0 && /^[A-Za-z]:$/.test(segment)) {
-            return segment;
-        }
-        return encodeURIComponent(segment);
-    }).join('/');
-    if (!normalized.toLowerCase().startsWith('file:///')) {
-        normalized = 'file:///' + normalized;
-    }
-    return normalized;
+    const sourceType = dom.get('edgeSourceType').value;
+    return buildLaunchUrl(
+        sourceType,
+        dom.get('edgeUrl').value,
+        dom.get('edgeFilePath').value,
+        'https://www.microsoft.com'
+    );
 }
 
 function getBrowserPinLaunchUrl() {
-    const sourceType = document.getElementById('browserPinSourceType').value;
-    if (sourceType === 'file') {
-        return buildFileUrl(document.getElementById('browserPinFilePath').value);
-    }
-    return document.getElementById('browserPinUrl').value.trim();
-}
-
-function formatKioskModeSummary() {
-    if (state.mode === 'single') {
-        const appType = document.getElementById('appType').value;
-        if (appType === 'edge') {
-            const kioskType = document.getElementById('edgeKioskType').value;
-            const kioskLabel = kioskType === 'public-browsing' ? 'Public Browsing' : 'Fullscreen';
-            return `Single-App (Edge - ${kioskLabel})`;
-        }
-        if (appType === 'uwp') return 'Single-App (UWP)';
-        return 'Single-App (Win32)';
-    }
-    return state.mode === 'restricted' ? 'Restricted User' : 'Multi-App';
-}
-
-function formatAllowedAppsSummary() {
-    if (state.mode === 'single') {
-        return 'N/A (single-app mode)';
-    }
-    if (state.allowedApps.length === 0) {
-        return 'None';
-    }
-    const items = state.allowedApps.map((app, index) => {
-        const label = isEdgeApp(app.value) ? 'Microsoft Edge' : app.value;
-        const autoTag = state.autoLaunchApp === index ? ' (auto-launch)' : '';
-        return `<li>${escapeXml(label)}${autoTag}</li>`;
-    }).join('');
-    return `<ul>${items}</ul>`;
-}
-
-function formatStartPinsSummary() {
-    if (state.mode === 'single') {
-        return 'N/A (single-app mode)';
-    }
-    if (state.startPins.length === 0) {
-        return 'None';
-    }
-    const items = state.startPins.map(pin => {
-        const name = pin.name || 'Unnamed pin';
-        const args = pin.args ? ` (args: ${pin.args})` : '';
-        return `<li>${escapeXml(name)}${escapeXml(args)}</li>`;
-    }).join('');
-    return `<ul>${items}</ul>`;
-}
-
-function formatAutoLaunchSummary() {
-    if (state.mode === 'single') {
-        const appType = document.getElementById('appType').value;
-        if (appType === 'edge') {
-            const url = getEdgeUrl();
-            const kioskType = document.getElementById('edgeKioskType').value;
-            const idleTimeout = parseInt(document.getElementById('edgeIdleTimeout').value) || 0;
-            let args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
-            if (idleTimeout > 0) args += ` --kiosk-idle-timeout-minutes=${idleTimeout}`;
-            return `Microsoft Edge (args: ${args})`;
-        }
-        if (appType === 'uwp') {
-            const aumid = document.getElementById('uwpAumid').value.trim();
-            return aumid ? `UWP App (${aumid})` : 'UWP App';
-        }
-        const path = document.getElementById('win32Path').value.trim();
-        const args = document.getElementById('win32Args').value.trim();
-        return path ? `${path}${args ? ` (args: ${args})` : ''}` : 'Win32 App';
-    }
-
-    if (state.autoLaunchApp === null || !state.allowedApps[state.autoLaunchApp]) {
-        return 'None';
-    }
-
-    const app = state.allowedApps[state.autoLaunchApp];
-    const label = isEdgeApp(app.value) ? 'Microsoft Edge' : app.value;
-    let args = '';
-
-    if (isEdgeApp(app.value)) {
-        const url = getMultiAppEdgeUrl();
-        const kioskType = document.getElementById('multiEdgeKioskType').value;
-        args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
-    } else if (app.type === 'path') {
-        args = document.getElementById('win32AutoLaunchArgs').value.trim();
-    }
-
-    return `${label}${args ? ` (args: ${args})` : ''}`;
-}
-
-function updateSummary() {
-    const summaryGrid = document.getElementById('summaryGrid');
-    if (!summaryGrid) return;
-
-    const configName = document.getElementById('configName').value.trim() || 'Unnamed';
-    const autoLogon = state.accountType === 'auto';
-    const displayName = document.getElementById('displayName').value.trim();
-    const accountName = document.getElementById('accountName')?.value.trim() || '';
-    const groupName = document.getElementById('groupName')?.value.trim() || '';
-    const groupType = document.getElementById('groupType')?.value || '';
-
-    let accountSummary = 'Auto Logon (Managed)';
-    if (state.accountType === 'existing') {
-        accountSummary = accountName ? `Existing Account (${accountName})` : 'Existing Account';
-    } else if (state.accountType === 'group') {
-        const typeLabel = groupType ? `, ${groupType}` : '';
-        accountSummary = groupName ? `User Group (${groupName}${typeLabel})` : 'User Group';
-    } else if (state.accountType === 'global') {
-        accountSummary = 'Global Profile (All non-admin users)';
-    }
-
-    const rows = [
-        { label: 'Name', value: escapeXml(configName) },
-        { label: 'Kiosk Type', value: escapeXml(formatKioskModeSummary()) },
-        { label: 'Account', value: escapeXml(accountSummary) },
-        { label: 'Allowed Apps', value: formatAllowedAppsSummary() },
-        { label: 'Start Menu Pins', value: formatStartPinsSummary() },
-        { label: 'Auto Logon', value: autoLogon ? 'Yes' : 'No' },
-        { label: 'Auto Logon Username', value: autoLogon ? escapeXml(displayName || 'Managed kiosk account') : 'N/A' },
-        { label: 'Auto-Start App', value: escapeXml(formatAutoLaunchSummary()) }
-    ];
-
-    summaryGrid.innerHTML = rows.map(row => `
-        <div class="summary-item">
-            <div class="summary-label">${row.label}</div>
-            <div class="summary-value">${row.value}</div>
-        </div>
-    `).join('');
-}
-
-function formatLastUpdated(date) {
-    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-        return 'Unavailable';
-    }
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours === 0 ? 12 : hours;
-    return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
+    const sourceType = dom.get('browserPinSourceType').value;
+    return buildLaunchUrl(
+        sourceType,
+        dom.get('browserPinUrl').value.trim(),
+        dom.get('browserPinFilePath').value,
+        ''
+    );
 }
 
 function updateBreakoutUI() {
-    const enabled = document.getElementById('enableBreakout').checked;
-    const breakoutConfig = document.getElementById('breakoutConfig');
+    const enabled = dom.get('enableBreakout').checked;
+    const breakoutConfig = dom.get('breakoutConfig');
     breakoutConfig.classList.toggle('hidden', !enabled);
     breakoutConfig.setAttribute('aria-hidden', !enabled);
     updateBreakoutPreview();
 }
 
 function updateBreakoutPreview() {
-    const ctrl = document.getElementById('breakoutCtrl').checked;
-    const alt = document.getElementById('breakoutAlt').checked;
-    const shift = document.getElementById('breakoutShift').checked;
-    const key = document.getElementById('breakoutFinalKey').value;
+    const ctrl = dom.get('breakoutCtrl').checked;
+    const alt = dom.get('breakoutAlt').checked;
+    const shift = dom.get('breakoutShift').checked;
+    const key = dom.get('breakoutFinalKey').value;
 
     let combo = [];
     if (ctrl) combo.push('Ctrl');
@@ -544,16 +407,16 @@ function updateBreakoutPreview() {
     if (shift) combo.push('Shift');
     combo.push(key);
 
-    document.getElementById('breakoutPreview').textContent = combo.join('+');
+    dom.get('breakoutPreview').textContent = combo.join('+');
 }
 
 function getBreakoutSequence() {
-    if (!document.getElementById('enableBreakout').checked) return null;
+    if (!dom.get('enableBreakout').checked) return null;
 
-    const ctrl = document.getElementById('breakoutCtrl').checked;
-    const alt = document.getElementById('breakoutAlt').checked;
-    const shift = document.getElementById('breakoutShift').checked;
-    const key = document.getElementById('breakoutFinalKey').value;
+    const ctrl = dom.get('breakoutCtrl').checked;
+    const alt = dom.get('breakoutAlt').checked;
+    const shift = dom.get('breakoutShift').checked;
+    const key = dom.get('breakoutFinalKey').value;
 
     // Build the key string in the format expected by AssignedAccess
     let combo = [];
@@ -568,37 +431,14 @@ function getBreakoutSequence() {
 /* ============================================================================
    Multi-App Auto-Launch Functions
    ============================================================================ */
-function isEdgeApp(value) {
-    if (!value) return false;
-    const lowerValue = value.toLowerCase();
-    return lowerValue.includes('msedge') ||
-           lowerValue.includes('microsoftedge') ||
-           lowerValue.includes('edge\\application');
-}
-
 function getMultiAppEdgeUrl() {
-    const sourceType = document.getElementById('multiEdgeSourceType').value;
-    if (sourceType === 'file') {
-        let filePath = document.getElementById('multiEdgeFilePath').value.trim();
-        if (!filePath) return 'file:///C:/Kiosk/index.html';
-        // Convert backslashes to forward slashes
-        filePath = filePath.replace(/\\/g, '/');
-        // Encode spaces and special characters in path, but preserve drive letter colon
-        filePath = filePath.split('/').map((segment, index) => {
-            // Don't encode drive letter (e.g., "C:")
-            if (index === 0 && /^[A-Za-z]:$/.test(segment)) {
-                return segment;
-            }
-            return encodeURIComponent(segment);
-        }).join('/');
-        // Ensure it starts with file:///
-        if (!filePath.toLowerCase().startsWith('file:///')) {
-            filePath = 'file:///' + filePath;
-        }
-        return filePath;
-    } else {
-        return document.getElementById('multiEdgeUrl').value || 'https://www.microsoft.com';
-    }
+    const sourceType = dom.get('multiEdgeSourceType').value;
+    return buildLaunchUrl(
+        sourceType,
+        dom.get('multiEdgeUrl').value,
+        dom.get('multiEdgeFilePath').value,
+        'https://www.microsoft.com'
+    );
 }
 
 function isHelperExecutable(value) {
@@ -612,7 +452,7 @@ function isHelperExecutable(value) {
 }
 
 function updateAutoLaunchSelector() {
-    const select = document.getElementById('autoLaunchApp');
+    const select = dom.get('autoLaunchApp');
     const currentValue = select.value;
 
     // Clear all options except "None"
@@ -651,7 +491,7 @@ function updateAutoLaunchSelector() {
 }
 
 function updateAutoLaunchSelection() {
-    const select = document.getElementById('autoLaunchApp');
+    const select = dom.get('autoLaunchApp');
     const value = select.value;
 
     if (value === '') {
@@ -664,8 +504,8 @@ function updateAutoLaunchSelection() {
 }
 
 function updateMultiAppEdgeUI() {
-    const edgeConfig = document.getElementById('multiAppEdgeConfig');
-    const win32ArgsConfig = document.getElementById('win32ArgsConfig');
+    const edgeConfig = dom.get('multiAppEdgeConfig');
+    const win32ArgsConfig = dom.get('win32ArgsConfig');
 
     // Show Edge config only if an Edge app is selected for auto-launch
     // Show Win32 args config if a non-Edge Win32 app is selected for auto-launch
@@ -690,9 +530,9 @@ function updateMultiAppEdgeUI() {
 }
 
 function updateMultiEdgeSourceUI() {
-    const sourceType = document.getElementById('multiEdgeSourceType').value;
-    const urlGroup = document.getElementById('multiEdgeUrlGroup');
-    const fileGroup = document.getElementById('multiEdgeFileGroup');
+    const sourceType = dom.get('multiEdgeSourceType').value;
+    const urlGroup = dom.get('multiEdgeUrlGroup');
+    const fileGroup = dom.get('multiEdgeFileGroup');
 
     urlGroup.classList.toggle('hidden', sourceType !== 'url');
     fileGroup.classList.toggle('hidden', sourceType !== 'file');
@@ -705,13 +545,13 @@ function updateMultiEdgeSourceUI() {
    App List Management (Multi-App Mode)
    ============================================================================ */
 function addApp() {
-    const type = document.getElementById('addAppType').value;
-    const value = document.getElementById('addAppValue').value.trim();
+    const type = dom.get('addAppType').value;
+    const value = dom.get('addAppValue').value.trim();
 
     if (!value) return;
 
     state.allowedApps.push({ type, value });
-    document.getElementById('addAppValue').value = '';
+    dom.get('addAppValue').value = '';
     renderAppList();
     updateAutoLaunchSelector();
     updatePreview();
@@ -763,8 +603,8 @@ function removeApp(index) {
 }
 
 function renderAppList() {
-    const list = document.getElementById('appList');
-    const count = document.getElementById('appCount');
+    const list = dom.get('appList');
+    const count = dom.get('appCount');
 
     count.textContent = state.allowedApps.length;
 
@@ -776,7 +616,7 @@ function renderAppList() {
     list.innerHTML = state.allowedApps.map((app, i) => `
         <div class="app-item" role="listitem">
             <span title="${escapeXml(app.value)}"><span aria-hidden="true">${app.type === 'aumid' ? '📦 ' : '📄 '}</span>${escapeXml(truncate(app.value, 60))}</span>
-            <button type="button" class="remove-btn" onclick="removeApp(${i})" aria-label="Remove ${escapeXml(truncate(app.value, 30))}">
+            <button type="button" class="remove-btn" data-action="removeApp" data-arg="${i}" aria-label="Remove ${escapeXml(truncate(app.value, 30))}">
                 <span aria-hidden="true">✕</span>
             </button>
         </div>
@@ -787,11 +627,11 @@ function renderAppList() {
    Start Pins Management (Multi-App Mode)
    ============================================================================ */
 function addPin() {
-    const name = document.getElementById('pinName').value.trim();
-    const target = document.getElementById('pinTarget').value.trim();
-    const args = document.getElementById('pinArgs').value.trim();
-    const workingDir = document.getElementById('pinWorkingDir').value.trim();
-    const iconPath = document.getElementById('pinIconPath').value.trim();
+    const name = dom.get('pinName').value.trim();
+    const target = dom.get('pinTarget').value.trim();
+    const args = dom.get('pinArgs').value.trim();
+    const workingDir = dom.get('pinWorkingDir').value.trim();
+    const iconPath = dom.get('pinIconPath').value.trim();
 
     if (!name || !target) {
         alert('Shortcut Name and Target Path are required.');
@@ -814,11 +654,11 @@ function addPin() {
     });
 
     // Clear the form
-    document.getElementById('pinName').value = '';
-    document.getElementById('pinTarget').value = '';
-    document.getElementById('pinArgs').value = '';
-    document.getElementById('pinWorkingDir').value = '';
-    document.getElementById('pinIconPath').value = '';
+    dom.get('pinName').value = '';
+    dom.get('pinTarget').value = '';
+    dom.get('pinArgs').value = '';
+    dom.get('pinWorkingDir').value = '';
+    dom.get('pinIconPath').value = '';
 
     renderPinList();
     updatePreview();
@@ -836,7 +676,7 @@ function addCommonPin(pinKey) {
         let pinToAdd = { ...pin };
 
         if (browserKeys.includes(pinKey)) {
-            const mode = document.getElementById('browserPinMode').value;
+            const mode = dom.get('browserPinMode').value;
 
             if (mode === 'private') {
                 const privateArgs = {
@@ -854,12 +694,12 @@ function addCommonPin(pinKey) {
                     return;
                 }
 
-                let args = `--kiosk ${launchUrl}`;
+                let args = '';
                 if (pinKey === 'edge') {
                     const kioskType = mode === 'kioskPublic' ? 'public-browsing' : 'fullscreen';
-                    args += ` --edge-kiosk-type=${kioskType} --no-first-run`;
-                } else if (pinKey === 'chrome') {
-                    args += ' --no-first-run';
+                    args = buildEdgeKioskArgs(launchUrl, kioskType, 0);
+                } else {
+                    args = buildBrowserKioskArgs(pinKey, launchUrl, 'fullscreen');
                 }
 
                 pinToAdd.args = args;
@@ -892,8 +732,8 @@ function removePin(index) {
 }
 
 function renderPinList() {
-    const list = document.getElementById('pinList');
-    const count = document.getElementById('pinCount');
+    const list = dom.get('pinList');
+    const count = dom.get('pinCount');
 
     count.textContent = state.startPins.length;
 
@@ -917,7 +757,7 @@ function renderPinList() {
                 <span style="font-weight: 500;">${escapeXml(pin.name)}${typeLabel}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
                 <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
             </div>
-            <button type="button" class="remove-btn" onclick="removePin(${i})" aria-label="Remove ${escapeXml(pin.name)}">
+            <button type="button" class="remove-btn" data-action="removePin" data-arg="${i}" aria-label="Remove ${escapeXml(pin.name)}">
                 <span aria-hidden="true">✕</span>
             </button>
         </div>
@@ -925,321 +765,11 @@ function renderPinList() {
 }
 
 /* ============================================================================
-   XML Generation
-   ============================================================================ */
-function generateXml() {
-    const profileId = document.getElementById('profileId').value || '{00000000-0000-0000-0000-000000000000}';
-
-    let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
-    xml += `<AssignedAccessConfiguration\n`;
-    xml += `    xmlns="http://schemas.microsoft.com/AssignedAccess/2017/config"\n`;
-    xml += `    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201901/config"\n`;
-    xml += `    xmlns:v3="http://schemas.microsoft.com/AssignedAccess/2020/config"\n`;
-    xml += `    xmlns:v4="http://schemas.microsoft.com/AssignedAccess/2021/config"\n`;
-    xml += `    xmlns:v5="http://schemas.microsoft.com/AssignedAccess/2022/config">\n`;
-
-    xml += `    <Profiles>\n`;
-    xml += `        <Profile Id="${profileId}">\n`;
-
-    if (state.mode === 'single') {
-        xml += generateSingleAppProfile();
-    } else {
-        // Both 'multi' and 'restricted' use the same profile structure
-        xml += generateMultiAppProfile();
-    }
-
-    xml += `        </Profile>\n`;
-    xml += `    </Profiles>\n`;
-
-    // Use the new generateConfigsSection for proper account handling
-    xml += generateConfigsSection();
-
-    xml += `</AssignedAccessConfiguration>`;
-
-    return xml;
-}
-
-function generateSingleAppProfile() {
-    const appType = document.getElementById('appType').value;
-    let xml = '';
-
-    if (appType === 'edge') {
-        const url = getEdgeUrl();
-        const kioskType = document.getElementById('edgeKioskType').value;
-        const idleTimeout = parseInt(document.getElementById('edgeIdleTimeout').value) || 0;
-
-        // Edge kiosk mode always runs InPrivate automatically, so --inprivate is not needed
-        let args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
-        if (idleTimeout > 0) args += ` --kiosk-idle-timeout-minutes=${idleTimeout}`;
-
-        // Edge Chromium is a Win32 app - use ClassicAppPath, not AppUserModelId
-        xml += `            <KioskModeApp v4:ClassicAppPath="%ProgramFiles(x86)%\\Microsoft\\Edge\\Application\\msedge.exe" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
-    } else if (appType === 'uwp') {
-        const aumid = document.getElementById('uwpAumid').value;
-        xml += `            <KioskModeApp AppUserModelId="${escapeXml(aumid)}"/>\n`;
-    } else if (appType === 'win32') {
-        const path = document.getElementById('win32Path').value;
-        const args = document.getElementById('win32Args').value;
-
-        if (args) {
-            xml += `            <KioskModeApp v4:ClassicAppPath="${escapeXml(path)}" v4:ClassicAppArguments="${escapeXml(args)}"/>\n`;
-        } else {
-            xml += `            <KioskModeApp v4:ClassicAppPath="${escapeXml(path)}"/>\n`;
-        }
-    }
-
-    // Add breakout sequence if enabled
-    const breakoutSequence = getBreakoutSequence();
-    if (breakoutSequence) {
-        xml += `            <v4:BreakoutSequence Key="${escapeXml(breakoutSequence)}"/>\n`;
-    }
-
-    return xml;
-}
-
-function generateMultiAppProfile() {
-    let xml = '';
-
-    // AllAppsList
-    xml += `            <AllAppsList>\n`;
-    xml += `                <AllowedApps>\n`;
-
-    state.allowedApps.forEach((app, index) => {
-        const isAutoLaunch = state.autoLaunchApp === index;
-        const isEdge = isEdgeApp(app.value);
-
-        // Build base attribute
-        let attrs = app.type === 'aumid'
-            ? `AppUserModelId="${escapeXml(app.value)}"`
-            : `DesktopAppPath="${escapeXml(app.value)}"`;
-
-        // Add AutoLaunch attributes if this is the auto-launch app
-        if (isAutoLaunch) {
-            attrs += ` rs5:AutoLaunch="true"`;
-
-            // If Edge is auto-launched, add kiosk arguments
-            // Edge kiosk mode always runs InPrivate automatically, so --inprivate is not needed
-            if (isEdge) {
-                const url = getMultiAppEdgeUrl();
-                const kioskType = document.getElementById('multiEdgeKioskType').value;
-
-                let args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
-
-                attrs += ` rs5:AutoLaunchArguments="${escapeXml(args)}"`;
-            } else if (app.type === 'path') {
-                // Non-Edge Win32 app - add arguments if specified
-                const win32Args = document.getElementById('win32AutoLaunchArgs').value.trim();
-                if (win32Args) {
-                    attrs += ` rs5:AutoLaunchArguments="${escapeXml(win32Args)}"`;
-                }
-            }
-        }
-
-        xml += `                    <App ${attrs}/>\n`;
-    });
-
-    xml += `                </AllowedApps>\n`;
-    xml += `            </AllAppsList>\n`;
-
-    // File Explorer Restrictions
-    const fileAccess = document.getElementById('fileExplorerAccess').value;
-    if (fileAccess === 'downloads') {
-        xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
-        xml += `                <rs5:AllowedNamespace Name="Downloads"/>\n`;
-        xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
-    } else if (fileAccess === 'removable') {
-        xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
-        xml += `                <v3:AllowRemovableDrives/>\n`;
-        xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
-    } else if (fileAccess === 'downloads-removable') {
-        xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
-        xml += `                <rs5:AllowedNamespace Name="Downloads"/>\n`;
-        xml += `                <v3:AllowRemovableDrives/>\n`;
-        xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
-    } else if (fileAccess === 'all') {
-        xml += `            <rs5:FileExplorerNamespaceRestrictions>\n`;
-        xml += `                <v3:NoRestriction/>\n`;
-        xml += `            </rs5:FileExplorerNamespaceRestrictions>\n`;
-    }
-
-    // Start Pins (Windows 11)
-    // Supports three pin types: packagedAppId (UWP), desktopAppLink (.lnk), secondaryTile (Edge URLs)
-    if (state.startPins.length > 0) {
-        const pinsJson = {
-            pinnedList: state.startPins.map(p => {
-                // UWP/Store apps use packagedAppId
-                if (p.pinType === 'packagedAppId' && p.packagedAppId) {
-                    return { packagedAppId: p.packagedAppId };
-                }
-                // Edge with specific URL uses secondaryTile
-                if (p.pinType === 'secondaryTile' && p.packagedAppId) {
-                    return {
-                        secondaryTile: {
-                            tileId: p.tileId || `MSEdge._pin_${p.name.replace(/[^a-zA-Z0-9]/g, '')}`,
-                            arguments: p.args || '',
-                            displayName: p.name,
-                            packagedAppId: p.packagedAppId
-                        }
-                    };
-                }
-                // Win32 apps use desktopAppLink (.lnk shortcut)
-                // Use system shortcut if available, otherwise custom shortcut path
-                return {
-                    desktopAppLink: p.systemShortcut || `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
-                };
-            })
-        };
-        xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
-    }
-
-    // Taskbar
-    const showTaskbar = document.getElementById('showTaskbar').checked;
-    xml += `            <Taskbar ShowTaskbar="${showTaskbar}"/>\n`;
-
-    return xml;
-}
-
-function generateAccountConfig() {
-    let xml = '';
-    const profileId = document.getElementById('profileId').value;
-
-    if (state.accountType === 'auto') {
-        const displayName = document.getElementById('displayName').value || 'Kiosk';
-        xml += `            <AutoLogonAccount rs5:DisplayName="${escapeXml(displayName)}"/>\n`;
-    } else if (state.accountType === 'existing') {
-        const accountName = document.getElementById('accountName').value;
-        xml += `            <Account>${escapeXml(accountName)}</Account>\n`;
-    } else if (state.accountType === 'group') {
-        const groupType = document.getElementById('groupType').value;
-        const groupName = document.getElementById('groupName').value;
-        xml += `            <UserGroup Type="${groupType}" Name="${escapeXml(groupName)}"/>\n`;
-    }
-    // Note: 'global' account type doesn't add anything here - it uses GlobalProfile instead
-
-    return xml;
-}
-
-function generateConfigsSection() {
-    const profileId = document.getElementById('profileId').value;
-    let xml = '';
-
-    xml += `    <Configs>\n`;
-
-    if (state.accountType === 'global') {
-        // Global profile applies to all non-admin users
-        xml += `        <v3:GlobalProfile Id="${profileId}"/>\n`;
-    } else {
-        xml += `        <Config>\n`;
-        xml += generateAccountConfig();
-        xml += `            <DefaultProfile Id="${profileId}"/>\n`;
-        xml += `        </Config>\n`;
-    }
-
-    xml += `    </Configs>\n`;
-
-    return xml;
-}
-
-/* ============================================================================
-   Validation
-   ============================================================================ */
-function validate() {
-    const errors = [];
-
-    // Profile ID
-    const profileId = document.getElementById('profileId').value;
-    if (!profileId) {
-        errors.push('Profile GUID is required');
-    } else if (!/^\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}$/i.test(profileId)) {
-        errors.push('Profile GUID format is invalid');
-    }
-
-    // Account validation based on type
-    if (state.accountType === 'auto') {
-        const displayName = document.getElementById('displayName').value;
-        if (!displayName) {
-            errors.push('Display Name is required for auto-logon account');
-        }
-    } else if (state.accountType === 'existing') {
-        const accountName = document.getElementById('accountName').value;
-        if (!accountName) {
-            errors.push('Account Name is required');
-        }
-    } else if (state.accountType === 'group') {
-        const groupName = document.getElementById('groupName').value;
-        if (!groupName) {
-            errors.push('Group Name is required');
-        }
-    }
-    // 'global' account type doesn't require any additional input
-
-    // Single-app mode
-    if (state.mode === 'single') {
-        const appType = document.getElementById('appType').value;
-        if (appType === 'edge') {
-            const sourceType = document.getElementById('edgeSourceType').value;
-            if (sourceType === 'url') {
-                const url = document.getElementById('edgeUrl').value;
-                if (!url) {
-                    errors.push('Edge URL is required');
-                }
-            } else {
-                const filePath = document.getElementById('edgeFilePath').value;
-                if (!filePath) {
-                    errors.push('Edge file path is required');
-                }
-            }
-        } else if (appType === 'uwp') {
-            const aumid = document.getElementById('uwpAumid').value;
-            if (!aumid) {
-                errors.push('UWP App AUMID is required');
-            }
-        } else if (appType === 'win32') {
-            const path = document.getElementById('win32Path').value;
-            if (!path) {
-                errors.push('Win32 Application Path is required');
-            }
-        }
-    }
-
-    // Multi-app and Restricted modes
-    if (state.mode === 'multi' || state.mode === 'restricted') {
-        if (state.allowedApps.length === 0) {
-            errors.push('At least one allowed app is required');
-        }
-
-        // Check for shortcuts missing target paths (UWP pins don't need targets)
-        const missingTargets = state.startPins.filter(p => p.pinType !== 'packagedAppId' && !p.target && !p.systemShortcut);
-        if (missingTargets.length > 0) {
-            errors.push(`${missingTargets.length} shortcut(s) missing target path: ${missingTargets.map(p => p.name).join(', ')}`);
-        }
-    }
-
-    return errors;
-}
-
-function showValidation() {
-    const errors = validate();
-    const statusDiv = document.getElementById('validationStatus');
-
-    if (errors.length === 0) {
-        statusDiv.innerHTML = '<div class="status success">✓ Configuration is valid</div>';
-    } else {
-        statusDiv.innerHTML = `<div class="status error">
-            <strong>Validation Errors:</strong>
-            <ul style="margin: 5px 0 0 20px;">${errors.map(e => `<li>${e}</li>`).join('')}</ul>
-        </div>`;
-    }
-
-    return errors.length === 0;
-}
-
-/* ============================================================================
    Preview & Syntax Highlighting
    ============================================================================ */
 function updatePreview() {
     const xml = generateXml();
-    document.getElementById('xmlPreview').textContent = xml;
+    dom.get('xmlPreview').textContent = xml;
     showValidation();
     updateSummary();
 }
@@ -1258,7 +788,7 @@ function copyXml() {
 }
 
 function getConfigFileName(extension) {
-    const configName = document.getElementById('configName').value.trim();
+    const configName = dom.get('configName').value.trim();
     if (configName) {
         // Sanitize: replace spaces with hyphens, remove invalid filename chars
         const sanitized = configName.replace(/\s+/g, '-').replace(/[<>:"/\\|?*]/g, '');
@@ -1560,33 +1090,9 @@ catch {
     }, 100);
 }
 
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).catch(() => {
-        // Fallback
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-    });
-}
-
-function downloadFile(content, filename, type) {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
 function generateReadme() {
-    const configName = document.getElementById('configName').value.trim();
-    const profileId = document.getElementById('profileId').value || '(not set)';
+    const configName = dom.get('configName').value.trim();
+    const profileId = dom.get('profileId').value || '(not set)';
     const now = new Date().toLocaleString();
 
     let readme = `# Kiosk Configuration Summary\n\n`;
@@ -1602,11 +1108,11 @@ function generateReadme() {
     // Account
     readme += `## Account\n\n`;
     if (state.accountType === 'auto') {
-        const displayName = document.getElementById('displayName').value || 'Kiosk User';
+        const displayName = dom.get('displayName').value || 'Kiosk User';
         readme += `**Type:** Auto Logon (Managed)\n`;
         readme += `**Display Name:** ${displayName}\n\n`;
     } else {
-        const accountName = document.getElementById('accountName').value || '(not set)';
+        const accountName = dom.get('accountName').value || '(not set)';
         readme += `**Type:** Existing Account\n`;
         readme += `**Account:** ${accountName}\n\n`;
     }
@@ -1614,26 +1120,26 @@ function generateReadme() {
     if (state.mode === 'single') {
         // Single-App details
         readme += `## Application\n\n`;
-        const appType = document.getElementById('appType').value;
+        const appType = dom.get('appType').value;
 
         if (appType === 'edge') {
-            const sourceType = document.getElementById('edgeSourceType').value;
+            const sourceType = dom.get('edgeSourceType').value;
             const url = sourceType === 'url'
-                ? document.getElementById('edgeUrl').value
-                : document.getElementById('edgeFilePath').value;
-            const kioskType = document.getElementById('edgeKioskType').value;
+                ? dom.get('edgeUrl').value
+                : dom.get('edgeFilePath').value;
+            const kioskType = dom.get('edgeKioskType').value;
 
             readme += `**App:** Microsoft Edge (Kiosk Mode)\n`;
             readme += `**URL:** ${url || '(not set)'}\n`;
             readme += `**Kiosk Type:** ${kioskType === 'fullscreen' ? 'Fullscreen (Digital Signage)' : 'Public Browsing'}\n`;
             readme += `**InPrivate Mode:** Always enabled (automatic in kiosk mode)\n\n`;
         } else if (appType === 'uwp') {
-            const aumid = document.getElementById('uwpAumid').value;
+            const aumid = dom.get('uwpAumid').value;
             readme += `**App:** UWP/Store App\n`;
             readme += `**AUMID:** ${aumid || '(not set)'}\n\n`;
         } else {
-            const path = document.getElementById('win32Path').value;
-            const args = document.getElementById('win32Args').value;
+            const path = dom.get('win32Path').value;
+            const args = dom.get('win32Args').value;
             readme += `**App:** Win32 Desktop App\n`;
             readme += `**Path:** ${path || '(not set)'}\n`;
             if (args) readme += `**Arguments:** ${args}\n`;
@@ -1641,9 +1147,9 @@ function generateReadme() {
         }
 
         // Breakout sequence
-        const breakoutEnabled = document.getElementById('enableBreakout').checked;
+        const breakoutEnabled = dom.get('enableBreakout').checked;
         if (breakoutEnabled) {
-            const breakoutPreview = document.getElementById('breakoutPreview').textContent;
+            const breakoutPreview = dom.get('breakoutPreview').textContent;
             readme += `## Breakout Sequence\n\n`;
             readme += `**Enabled:** Yes\n`;
             readme += `**Key Combination:** ${breakoutPreview}\n\n`;
@@ -1666,11 +1172,11 @@ function generateReadme() {
             const autoApp = state.allowedApps[state.autoLaunchApp];
             if (autoApp && autoApp.value.toLowerCase().includes('msedge')) {
                 readme += `## Edge Auto-Launch Settings\n\n`;
-                const sourceType = document.getElementById('multiEdgeSourceType').value;
+                const sourceType = dom.get('multiEdgeSourceType').value;
                 const url = sourceType === 'url'
-                    ? document.getElementById('multiEdgeUrl').value
-                    : document.getElementById('multiEdgeFilePath').value;
-                const kioskType = document.getElementById('multiEdgeKioskType').value;
+                    ? dom.get('multiEdgeUrl').value
+                    : dom.get('multiEdgeFilePath').value;
+                const kioskType = dom.get('multiEdgeKioskType').value;
 
                 readme += `**URL:** ${url || '(not set)'}\n`;
                 readme += `**Kiosk Type:** ${kioskType === 'fullscreen' ? 'Fullscreen' : 'Public Browsing'}\n`;
@@ -1694,8 +1200,8 @@ function generateReadme() {
 
         // System restrictions
         readme += `## System Restrictions\n\n`;
-        const showTaskbar = document.getElementById('showTaskbar').checked;
-        const fileExplorer = document.getElementById('fileExplorerAccess').value;
+        const showTaskbar = dom.get('showTaskbar').checked;
+        const fileExplorer = dom.get('fileExplorerAccess').value;
 
         readme += `**Taskbar:** ${showTaskbar ? 'Visible' : 'Hidden'}\n`;
         readme += `**File Explorer Access:** `;
@@ -1727,7 +1233,7 @@ function generateReadme() {
    Import XML
    ============================================================================ */
 function importXml() {
-    document.getElementById('importInput').click();
+    dom.get('importInput').click();
 }
 
 function handleImport(event) {
@@ -1754,7 +1260,7 @@ function parseAndLoadXml(xmlString) {
     // Profile ID
     const profile = doc.querySelector('Profile');
     if (profile) {
-        document.getElementById('profileId').value = profile.getAttribute('Id') || '';
+        dom.get('profileId').value = profile.getAttribute('Id') || '';
     }
 
     // Check for KioskModeApp (single-app) or AllAppsList (multi-app)
@@ -1770,7 +1276,7 @@ function parseAndLoadXml(xmlString) {
                            kioskModeApp.getAttribute('v4:ClassicAppArguments');
 
         if (aumid === 'MSEdge' || (aumid && aumid.includes('Edge'))) {
-            document.getElementById('appType').value = 'edge';
+            dom.get('appType').value = 'edge';
             updateAppTypeUI();
 
             if (classicArgs) {
@@ -1780,37 +1286,37 @@ function parseAndLoadXml(xmlString) {
                     const extractedUrl = urlMatch[1];
                     // Check if it's a file:// URL
                     if (extractedUrl.toLowerCase().startsWith('file:///')) {
-                        document.getElementById('edgeSourceType').value = 'file';
+                        dom.get('edgeSourceType').value = 'file';
                         // Decode the file path and remove file:/// prefix
                         let filePath = extractedUrl.substring(8); // Remove 'file:///'
                         filePath = decodeURIComponent(filePath);
-                        document.getElementById('edgeFilePath').value = filePath;
-                        document.getElementById('edgeUrl').value = '';
+                        dom.get('edgeFilePath').value = filePath;
+                        dom.get('edgeUrl').value = '';
                     } else {
-                        document.getElementById('edgeSourceType').value = 'url';
-                        document.getElementById('edgeUrl').value = extractedUrl;
-                        document.getElementById('edgeFilePath').value = '';
+                        dom.get('edgeSourceType').value = 'url';
+                        dom.get('edgeUrl').value = extractedUrl;
+                        dom.get('edgeFilePath').value = '';
                     }
                     updateEdgeSourceUI();
                 }
 
-                document.getElementById('edgeKioskType').value =
+                dom.get('edgeKioskType').value =
                     classicArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
                 // InPrivate is always enabled in kiosk mode, no need to import this setting
             }
         } else if (aumid) {
-            document.getElementById('appType').value = 'uwp';
+            dom.get('appType').value = 'uwp';
             updateAppTypeUI();
-            document.getElementById('uwpAumid').value = aumid;
+            dom.get('uwpAumid').value = aumid;
         } else {
             // Win32 app - check for ClassicAppPath
             const classicAppPath = kioskModeApp.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/2021/config', 'ClassicAppPath') ||
                                   kioskModeApp.getAttribute('v4:ClassicAppPath');
             if (classicAppPath) {
-                document.getElementById('appType').value = 'win32';
+                dom.get('appType').value = 'win32';
                 updateAppTypeUI();
-                document.getElementById('win32Path').value = classicAppPath;
-                document.getElementById('win32Args').value = classicArgs || '';
+                dom.get('win32Path').value = classicAppPath;
+                dom.get('win32Args').value = classicArgs || '';
             }
         }
 
@@ -1819,19 +1325,19 @@ function parseAndLoadXml(xmlString) {
                                 Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'BreakoutSequence');
         const breakoutKey = breakoutSequence ? breakoutSequence.getAttribute('Key') : null;
         if (breakoutKey) {
-            document.getElementById('enableBreakout').checked = true;
+            dom.get('enableBreakout').checked = true;
             updateBreakoutUI();
 
             // Parse the key combination (e.g., "Ctrl+Alt+K")
             const parts = breakoutKey.split('+');
             const finalKey = parts[parts.length - 1].toUpperCase();
 
-            document.getElementById('breakoutCtrl').checked = breakoutKey.toLowerCase().includes('ctrl');
-            document.getElementById('breakoutAlt').checked = breakoutKey.toLowerCase().includes('alt');
-            document.getElementById('breakoutShift').checked = breakoutKey.toLowerCase().includes('shift');
+            dom.get('breakoutCtrl').checked = breakoutKey.toLowerCase().includes('ctrl');
+            dom.get('breakoutAlt').checked = breakoutKey.toLowerCase().includes('alt');
+            dom.get('breakoutShift').checked = breakoutKey.toLowerCase().includes('shift');
 
             // Set the final key if it's a valid option
-            const finalKeySelect = document.getElementById('breakoutFinalKey');
+            const finalKeySelect = dom.get('breakoutFinalKey');
             for (let option of finalKeySelect.options) {
                 if (option.value === finalKey) {
                     finalKeySelect.value = finalKey;
@@ -1840,7 +1346,7 @@ function parseAndLoadXml(xmlString) {
             }
             updateBreakoutPreview();
         } else {
-            document.getElementById('enableBreakout').checked = false;
+            dom.get('enableBreakout').checked = false;
             updateBreakoutUI();
         }
     } else if (allAppsList) {
@@ -1879,25 +1385,25 @@ function parseAndLoadXml(xmlString) {
                         if (urlMatch) {
                             const extractedUrl = urlMatch[1];
                             if (extractedUrl.toLowerCase().startsWith('file:///')) {
-                                document.getElementById('multiEdgeSourceType').value = 'file';
+                                dom.get('multiEdgeSourceType').value = 'file';
                                 let filePath = extractedUrl.substring(8);
                                 filePath = decodeURIComponent(filePath);
-                                document.getElementById('multiEdgeFilePath').value = filePath;
-                                document.getElementById('multiEdgeUrl').value = '';
+                                dom.get('multiEdgeFilePath').value = filePath;
+                                dom.get('multiEdgeUrl').value = '';
                             } else {
-                                document.getElementById('multiEdgeSourceType').value = 'url';
-                                document.getElementById('multiEdgeUrl').value = extractedUrl;
-                                document.getElementById('multiEdgeFilePath').value = '';
+                                dom.get('multiEdgeSourceType').value = 'url';
+                                dom.get('multiEdgeUrl').value = extractedUrl;
+                                dom.get('multiEdgeFilePath').value = '';
                             }
                             updateMultiEdgeSourceUI();
                         }
 
-                        document.getElementById('multiEdgeKioskType').value =
+                        dom.get('multiEdgeKioskType').value =
                             autoLaunchArgs.includes('public-browsing') ? 'public-browsing' : 'fullscreen';
                         // InPrivate is always enabled in kiosk mode, no need to import this setting
                     } else if (path) {
                         // Non-Edge Win32 app - populate win32 args field
-                        document.getElementById('win32AutoLaunchArgs').value = autoLaunchArgs;
+                        dom.get('win32AutoLaunchArgs').value = autoLaunchArgs;
                     }
                 }
             }
@@ -1907,7 +1413,7 @@ function parseAndLoadXml(xmlString) {
         updateAutoLaunchSelector();
         // Restore auto-launch selection after selector is populated
         if (state.autoLaunchApp !== null) {
-            document.getElementById('autoLaunchApp').value = state.autoLaunchApp;
+            dom.get('autoLaunchApp').value = state.autoLaunchApp;
             updateMultiAppEdgeUI();
         }
 
@@ -1957,7 +1463,7 @@ function parseAndLoadXml(xmlString) {
         const taskbar = doc.querySelector('Taskbar') ||
                        Array.from(doc.querySelectorAll('*')).find(el => el.localName === 'Taskbar');
         if (taskbar) {
-            document.getElementById('showTaskbar').checked =
+            dom.get('showTaskbar').checked =
                 taskbar.getAttribute('ShowTaskbar') === 'true';
         }
 
@@ -1973,18 +1479,18 @@ function parseAndLoadXml(xmlString) {
                                  Array.from(fileExplorerRestrictions.querySelectorAll('*')).find(el => el.localName === 'NoRestriction');
 
             if (noRestriction) {
-                document.getElementById('fileExplorerAccess').value = 'all';
+                dom.get('fileExplorerAccess').value = 'all';
             } else if (downloads && removable) {
-                document.getElementById('fileExplorerAccess').value = 'downloads-removable';
+                dom.get('fileExplorerAccess').value = 'downloads-removable';
             } else if (downloads) {
-                document.getElementById('fileExplorerAccess').value = 'downloads';
+                dom.get('fileExplorerAccess').value = 'downloads';
             } else if (removable) {
-                document.getElementById('fileExplorerAccess').value = 'removable';
+                dom.get('fileExplorerAccess').value = 'removable';
             } else {
-                document.getElementById('fileExplorerAccess').value = 'none';
+                dom.get('fileExplorerAccess').value = 'none';
             }
         } else {
-            document.getElementById('fileExplorerAccess').value = 'none';
+            dom.get('fileExplorerAccess').value = 'none';
         }
     }
 
@@ -1997,10 +1503,10 @@ function parseAndLoadXml(xmlString) {
         const displayName = autoLogon.getAttributeNS('http://schemas.microsoft.com/AssignedAccess/201901/config', 'DisplayName') ||
                            autoLogon.getAttribute('rs5:DisplayName') ||
                            autoLogon.getAttribute('DisplayName');
-        document.getElementById('displayName').value = displayName || '';
+        dom.get('displayName').value = displayName || '';
     } else if (account) {
         setAccountType('existing');
-        document.getElementById('accountName').value = account.textContent || '';
+        dom.get('accountName').value = account.textContent || '';
     }
 
     updatePreview();
@@ -2016,14 +1522,14 @@ function loadPreset(preset) {
     state.autoLaunchApp = null;
 
     // Reset config name
-    document.getElementById('configName').value = '';
+    dom.get('configName').value = '';
 
     // Reset multi-app Edge config
-    document.getElementById('multiEdgeSourceType').value = 'url';
-    document.getElementById('multiEdgeUrl').value = '';
-    document.getElementById('multiEdgeFilePath').value = '';
-    document.getElementById('multiEdgeKioskType').value = 'fullscreen';
-    document.getElementById('win32AutoLaunchArgs').value = '';
+    dom.get('multiEdgeSourceType').value = 'url';
+    dom.get('multiEdgeUrl').value = '';
+    dom.get('multiEdgeFilePath').value = '';
+    dom.get('multiEdgeKioskType').value = 'fullscreen';
+    dom.get('win32AutoLaunchArgs').value = '';
     updateMultiEdgeSourceUI();
 
     switch (preset) {
@@ -2031,12 +1537,12 @@ function loadPreset(preset) {
             setMode('single');
             setAccountType('auto');
             generateGuid();
-            document.getElementById('displayName').value = '';
-            document.getElementById('appType').value = 'edge';
-            document.getElementById('edgeSourceType').value = 'url';
-            document.getElementById('edgeUrl').value = '';
-            document.getElementById('edgeFilePath').value = '';
-            document.getElementById('edgeKioskType').value = 'fullscreen';
+            dom.get('displayName').value = '';
+            dom.get('appType').value = 'edge';
+            dom.get('edgeSourceType').value = 'url';
+            dom.get('edgeUrl').value = '';
+            dom.get('edgeFilePath').value = '';
+            dom.get('edgeKioskType').value = 'fullscreen';
             updateAppTypeUI();
             updateEdgeSourceUI();
             break;
@@ -2045,12 +1551,12 @@ function loadPreset(preset) {
             setMode('single');
             setAccountType('auto');
             generateGuid();
-            document.getElementById('displayName').value = 'Kiosk';
-            document.getElementById('appType').value = 'edge';
-            document.getElementById('edgeSourceType').value = 'url';
-            document.getElementById('edgeUrl').value = 'https://www.microsoft.com';
-            document.getElementById('edgeFilePath').value = '';
-            document.getElementById('edgeKioskType').value = 'fullscreen';
+            dom.get('displayName').value = 'Kiosk';
+            dom.get('appType').value = 'edge';
+            dom.get('edgeSourceType').value = 'url';
+            dom.get('edgeUrl').value = 'https://www.microsoft.com';
+            dom.get('edgeFilePath').value = '';
+            dom.get('edgeKioskType').value = 'fullscreen';
             updateAppTypeUI();
             updateEdgeSourceUI();
             break;
@@ -2059,12 +1565,12 @@ function loadPreset(preset) {
             setMode('single');
             setAccountType('auto');
             generateGuid();
-            document.getElementById('displayName').value = 'Public Browsing';
-            document.getElementById('appType').value = 'edge';
-            document.getElementById('edgeSourceType').value = 'url';
-            document.getElementById('edgeUrl').value = 'https://www.bing.com';
-            document.getElementById('edgeFilePath').value = '';
-            document.getElementById('edgeKioskType').value = 'public-browsing';
+            dom.get('displayName').value = 'Public Browsing';
+            dom.get('appType').value = 'edge';
+            dom.get('edgeSourceType').value = 'url';
+            dom.get('edgeUrl').value = 'https://www.bing.com';
+            dom.get('edgeFilePath').value = '';
+            dom.get('edgeKioskType').value = 'public-browsing';
             updateAppTypeUI();
             updateEdgeSourceUI();
             break;
@@ -2073,12 +1579,12 @@ function loadPreset(preset) {
             setMode('multi');
             setAccountType('auto');
             generateGuid();
-            document.getElementById('displayName').value = 'Multi-App Kiosk';
+            dom.get('displayName').value = 'Multi-App Kiosk';
             addCommonApp('edge');
             addCommonApp('osk');
             addCommonApp('calculator');
-            document.getElementById('showTaskbar').checked = true;
-            document.getElementById('fileExplorerAccess').value = 'downloads';
+            dom.get('showTaskbar').checked = true;
+            dom.get('fileExplorerAccess').value = 'downloads';
             break;
 
     }
@@ -2088,24 +1594,6 @@ function loadPreset(preset) {
     renderPinList();
     updateAutoLaunchSelector();
     updatePreview();
-}
-
-/* ============================================================================
-   Utility Functions
-   ============================================================================ */
-function escapeXml(str) {
-    if (!str) return '';
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
-}
-
-function truncate(str, len) {
-    if (str.length <= len) return str;
-    return str.substring(0, len - 3) + '...';
 }
 
 /* ============================================================================
@@ -2151,19 +1639,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateTabVisibility();
     updatePreview();
 
-    const lastUpdatedEl = document.getElementById('lastUpdated');
+    document.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-action]');
+        if (!target) return;
+        runAction(target.dataset.action, target, event);
+    });
+
+    document.addEventListener('change', (event) => {
+        const target = event.target.closest('[data-change]');
+        if (!target) return;
+        runActions(target.dataset.change, target, event);
+    });
+
+    const lastUpdatedEl = dom.get('lastUpdated');
     if (lastUpdatedEl) {
         const modified = new Date(document.lastModified);
         lastUpdatedEl.textContent = formatLastUpdated(modified);
     }
 
-    const browserPinMode = document.getElementById('browserPinMode');
-    const browserPinSourceType = document.getElementById('browserPinSourceType');
-    if (browserPinMode && browserPinSourceType) {
-        browserPinMode.addEventListener('change', updateBrowserPinModeUI);
-        browserPinSourceType.addEventListener('change', updateBrowserPinSourceUI);
-        updateBrowserPinModeUI();
-    }
+    updateBrowserPinModeUI();
 
     // Add tooltip positioning on hover/focus
     document.querySelectorAll('.tooltip-icon').forEach(icon => {

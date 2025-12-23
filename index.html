@@ -18,10 +18,10 @@
                 <span class="subtitle">Windows 11 24H2+</span>
             </h1>
             <nav class="header-actions" aria-label="Main actions">
-                <button type="button" class="btn-secondary" onclick="loadPreset('blank')">New</button>
-                <button type="button" class="btn-secondary" onclick="importXml()">Import XML</button>
-                <button type="button" class="btn-secondary" onclick="showDeployHelp()">Deploy Guide</button>
-                <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode" title="Toggle light mode">
+                <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
+                <button type="button" class="btn-secondary" data-action="importXml">Import XML</button>
+                <button type="button" class="btn-secondary" data-action="showDeployHelp">Deploy Guide</button>
+                <button type="button" class="theme-toggle" data-action="toggleTheme" aria-label="Toggle light mode" title="Toggle light mode">
                     <span aria-hidden="true">&#9728;</span>
                 </button>
             </nav>
@@ -31,11 +31,11 @@
     <main id="main-content" class="container layout">
         <aside class="side-nav" role="tablist" aria-label="Configuration sections">
             <div class="side-nav-title">Configuration</div>
-            <button type="button" class="side-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" onclick="switchTab('setup')">Setup</button>
-            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
-            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
-            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
-            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" onclick="switchTab('summary')">Summary</button>
+            <button type="button" class="side-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" data-action="switchTab" data-arg="setup">Setup</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" data-action="switchTab" data-arg="application">Application</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" data-action="switchTab" data-arg="startmenu">Start Menu</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" data-action="switchTab" data-arg="system">System</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" data-action="switchTab" data-arg="summary">Summary</button>
         </aside>
 
         <!-- Configuration Panel -->
@@ -53,9 +53,9 @@
                     <legend class="section-header">Kiosk Mode</legend>
                     <div class="section-content">
                         <div class="toggle-group" role="group" aria-label="Kiosk mode selection">
-                            <button type="button" id="modeSingle" class="active" onclick="setMode('single')" aria-pressed="true">Single-App</button>
-                            <button type="button" id="modeMulti" onclick="setMode('multi')" aria-pressed="false">Multi-App</button>
-                            <button type="button" id="modeRestricted" onclick="setMode('restricted')" aria-pressed="false">Restricted User</button>
+                            <button type="button" id="modeSingle" class="active" data-action="setMode" data-arg="single" aria-pressed="true">Single-App</button>
+                            <button type="button" id="modeMulti" data-action="setMode" data-arg="multi" aria-pressed="false">Multi-App</button>
+                            <button type="button" id="modeRestricted" data-action="setMode" data-arg="restricted" aria-pressed="false">Restricted User</button>
                         </div>
                         <p class="hint" style="margin-top: 10px;" id="kiosk-mode-hint">
                             <strong>Single-App:</strong> Runs one app fullscreen (e.g., Edge kiosk)<br>
@@ -75,7 +75,7 @@
                                 <button type="button" class="tooltip-icon" aria-label="Help for Configuration Name" aria-describedby="configName-tooltip">?</button>
                                 <span class="tooltip-content" id="configName-tooltip" role="tooltip">A friendly name for this configuration. Used in downloaded file names (e.g., "Lobby-Kiosk" becomes "AssignedAccess-Lobby-Kiosk.xml"). Leave blank for default naming.</span>
                             </label>
-                            <input type="text" id="configName" placeholder="e.g., Lobby-Kiosk, Reception-PC" onchange="updatePreview()" aria-describedby="configName-tooltip">
+                            <input type="text" id="configName" placeholder="e.g., Lobby-Kiosk, Reception-PC" data-change="updatePreview" aria-describedby="configName-tooltip">
                         </div>
                         <div class="form-group">
                             <label for="profileId" class="with-tooltip">
@@ -84,9 +84,9 @@
                                 <span class="tooltip-content" id="profileId-tooltip" role="tooltip">A unique identifier for this kiosk profile. Each profile needs its own GUID. Click "Generate" to create a random one. This ID links the profile configuration to the account that will use it.</span>
                             </label>
                             <div class="input-group">
-                                <input type="text" id="profileId" placeholder="{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" onchange="updatePreview()" aria-describedby="profileId-tooltip">
-                                <button type="button" class="btn-secondary" onclick="generateGuid()">Generate</button>
-                                <button type="button" class="btn-secondary btn-small" onclick="copyToClipboard(document.getElementById('profileId').value)" aria-label="Copy Profile GUID to clipboard">
+                                <input type="text" id="profileId" placeholder="{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" data-change="updatePreview" aria-describedby="profileId-tooltip">
+                                <button type="button" class="btn-secondary" data-action="generateGuid">Generate</button>
+                                <button type="button" class="btn-secondary btn-small" data-action="copyProfileId" aria-label="Copy Profile GUID to clipboard">
                                     <span aria-hidden="true">&#128203;</span>
                                 </button>
                             </div>
@@ -105,10 +105,10 @@
                                 <span class="tooltip-content" id="accountType-tooltip" role="tooltip"><strong>Auto Logon:</strong> Windows creates and manages a local account automatically. Best for most kiosks - no password needed, auto-logs in at boot.<br><br><strong>Existing Account:</strong> Use a pre-created local, domain, or Azure AD account. Use this if you need specific permissions or domain integration.</span>
                             </label>
                             <div class="toggle-group" role="group" aria-labelledby="account-type-label" id="accountTypeButtons">
-                                <button type="button" id="accountAuto" class="active" onclick="setAccountType('auto')" aria-pressed="true">Auto Logon (Managed)</button>
-                                <button type="button" id="accountExisting" onclick="setAccountType('existing')" aria-pressed="false">Existing Account</button>
-                                <button type="button" id="accountGroup" class="hidden" onclick="setAccountType('group')" aria-pressed="false">User Group</button>
-                                <button type="button" id="accountGlobal" class="hidden" onclick="setAccountType('global')" aria-pressed="false">Global Profile</button>
+                                <button type="button" id="accountAuto" class="active" data-action="setAccountType" data-arg="auto" aria-pressed="true">Auto Logon (Managed)</button>
+                                <button type="button" id="accountExisting" data-action="setAccountType" data-arg="existing" aria-pressed="false">Existing Account</button>
+                                <button type="button" id="accountGroup" class="hidden" data-action="setAccountType" data-arg="group" aria-pressed="false">User Group</button>
+                                <button type="button" id="accountGlobal" class="hidden" data-action="setAccountType" data-arg="global" aria-pressed="false">Global Profile</button>
                             </div>
                         </div>
 
@@ -119,7 +119,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Display Name" aria-describedby="displayName-tooltip">?</button>
                                     <span class="tooltip-content" id="displayName-tooltip" role="tooltip">The friendly name shown on the Windows login screen. Windows will create a managed local account (typically "kioskUser0") that auto-logs in. This display name is just for identification.</span>
                                 </label>
-                                <input type="text" id="displayName" value="Kiosk User" placeholder="e.g., Kiosk User" onchange="updatePreview()" aria-describedby="displayName-tooltip">
+                                <input type="text" id="displayName" value="Kiosk User" placeholder="e.g., Kiosk User" data-change="updatePreview" aria-describedby="displayName-tooltip">
                             </div>
                         </div>
 
@@ -130,7 +130,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Account Name" aria-describedby="accountName-tooltip">?</button>
                                     <span class="tooltip-content" id="accountName-tooltip" role="tooltip">The username of an existing account. Formats: Local: KioskUser, Domain: DOMAIN\KioskUser, Azure AD: AzureAD\user@domain.com. The account must exist before the kiosk config is applied.</span>
                                 </label>
-                                <input type="text" id="accountName" placeholder="e.g., DOMAIN\\KioskUser or KioskUser" onchange="updatePreview()" aria-describedby="accountName-tooltip">
+                                <input type="text" id="accountName" placeholder="e.g., DOMAIN\\KioskUser or KioskUser" data-change="updatePreview" aria-describedby="accountName-tooltip">
                             </div>
                         </div>
 
@@ -141,7 +141,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Group Type" aria-describedby="groupType-tooltip">?</button>
                                     <span class="tooltip-content" id="groupType-tooltip" role="tooltip">Select the type of group to apply this profile to. All members of the group will get the restricted experience.</span>
                                 </label>
-                                <select id="groupType" onchange="updatePreview()" aria-describedby="groupType-tooltip">
+                                <select id="groupType" data-change="updatePreview" aria-describedby="groupType-tooltip">
                                     <option value="LocalGroup">Local Group</option>
                                     <option value="ActiveDirectoryGroup">Active Directory Group</option>
                                     <option value="AzureActiveDirectoryGroup">Azure AD Group</option>
@@ -153,7 +153,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Group Name" aria-describedby="groupName-tooltip">?</button>
                                     <span class="tooltip-content" id="groupName-tooltip" role="tooltip">Local: GroupName. AD: DOMAIN\GroupName. Azure AD: Use the Group Object ID (GUID). The group must exist before the config is applied.</span>
                                 </label>
-                                <input type="text" id="groupName" placeholder="e.g., KioskUsers or DOMAIN\\KioskGroup" onchange="updatePreview()" aria-describedby="groupName-tooltip">
+                                <input type="text" id="groupName" placeholder="e.g., KioskUsers or DOMAIN\\KioskGroup" data-change="updatePreview" aria-describedby="groupName-tooltip">
                             </div>
                         </div>
 
@@ -181,9 +181,9 @@
                                     <span class="tooltip-content" id="singleAppPresets-tooltip" role="tooltip">Quick-fill common single-app choices. You can edit URLs and arguments after selecting a preset.</span>
                                 </label>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                                    <button type="button" class="btn-secondary btn-small" onclick="applySingleAppPreset('edge')">Edge Kiosk</button>
-                                    <button type="button" class="btn-secondary btn-small" onclick="applySingleAppPreset('chrome')">Chrome Kiosk</button>
-                                    <button type="button" class="btn-secondary btn-small" onclick="applySingleAppPreset('firefox')">Firefox Kiosk</button>
+                                    <button type="button" class="btn-secondary btn-small" data-action="applySingleAppPreset" data-arg="edge">Edge Kiosk</button>
+                                    <button type="button" class="btn-secondary btn-small" data-action="applySingleAppPreset" data-arg="chrome">Chrome Kiosk</button>
+                                    <button type="button" class="btn-secondary btn-small" data-action="applySingleAppPreset" data-arg="firefox">Firefox Kiosk</button>
                                 </div>
                             </div>
 
@@ -193,7 +193,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Application Type" aria-describedby="appType-tooltip">?</button>
                                     <span class="tooltip-content" id="appType-tooltip" role="tooltip"><strong>Edge Kiosk:</strong> Best for web apps and local HTML. Native kiosk support with idle timeout. <strong>UWP:</strong> Store apps with clean sandboxed integration. <strong>Win32:</strong> Traditional desktop apps. May have RestrictRun issues - use Edge or UWP when possible.</span>
                                 </label>
-                                <select id="appType" onchange="updateAppTypeUI(); updatePreview();" aria-describedby="appType-tooltip">
+                                <select id="appType" data-change="updateAppTypeUI|updatePreview" aria-describedby="appType-tooltip">
                                     <option value="edge">Microsoft Edge (Kiosk Mode)</option>
                                     <option value="uwp">UWP / Store App</option>
                                     <option value="win32">Win32 Desktop App</option>
@@ -208,7 +208,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Load From" aria-describedby="edgeSourceType-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeSourceType-tooltip" role="tooltip">Choose where Edge loads content from. <strong>Web URL:</strong> A website (https://example.com). <strong>Local File:</strong> An HTML file on the device (C:\Kiosk\page.html).</span>
                                     </label>
-                                    <select id="edgeSourceType" onchange="updateEdgeSourceUI(); updatePreview();" aria-describedby="edgeSourceType-tooltip">
+                                    <select id="edgeSourceType" data-change="updateEdgeSourceUI|updatePreview" aria-describedby="edgeSourceType-tooltip">
                                         <option value="url">Web URL</option>
                                         <option value="file">Local File</option>
                                     </select>
@@ -220,7 +220,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for URL" aria-describedby="edgeUrl-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The web address Edge will load in kiosk mode. Include the full URL with https://. You can also use file:/// URLs directly (use %20 for spaces in paths).</span>
                                     </label>
-                                    <input type="text" id="edgeUrl" value="https://www.microsoft.com" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
+                                    <input type="text" id="edgeUrl" value="https://www.microsoft.com" placeholder="https://example.com" data-change="updatePreview" aria-describedby="edgeUrl-tooltip">
                                 </div>
 
                                 <div id="edgeFileConfig" class="form-group hidden" aria-hidden="true">
@@ -229,7 +229,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for File Path" aria-describedby="edgeFilePath-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeFilePath-tooltip" role="tooltip">Full path to an HTML file on the local device. Use forward slashes. Spaces in the path will be automatically converted to %20.</span>
                                     </label>
-                                    <input type="text" id="edgeFilePath" placeholder="C:/Kiosk/index.html" onchange="updatePreview()" aria-describedby="edgeFilePath-tooltip">
+                                    <input type="text" id="edgeFilePath" placeholder="C:/Kiosk/index.html" data-change="updatePreview" aria-describedby="edgeFilePath-tooltip">
                                     <p class="hint" style="margin-top: 6px;">
                                         <strong>Tip:</strong> Use forward slashes (/) in the path. Spaces are converted automatically.<br>
                                         Example: <code>C:/Program Files/Kiosk/page.html</code> → <code>file:///C:/Program%20Files/Kiosk/page.html</code>
@@ -242,7 +242,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Type" aria-describedby="edgeKioskType-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeKioskType-tooltip" role="tooltip"><strong>Fullscreen:</strong> Shows only the webpage with no browser UI. Ideal for digital signage. <strong>Public Browsing:</strong> Shows address bar and navigation. Users can browse but sessions reset on idle. Both modes always run InPrivate (no history/cookies saved).</span>
                                     </label>
-                                    <select id="edgeKioskType" onchange="updatePreview()" aria-describedby="edgeKioskType-tooltip">
+                                    <select id="edgeKioskType" data-change="updatePreview" aria-describedby="edgeKioskType-tooltip">
                                         <option value="fullscreen">Fullscreen (Digital Signage)</option>
                                         <option value="public-browsing">Public Browsing</option>
                                     </select>
@@ -254,7 +254,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Idle Timeout" aria-describedby="edgeIdleTimeout-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeIdleTimeout-tooltip" role="tooltip">After this many minutes of no user activity, Edge will reset to the home URL and clear the session. Set to 0 to disable timeout. Recommended for public kiosks.</span>
                                     </label>
-                                    <input type="number" id="edgeIdleTimeout" min="0" max="1440" value="0" placeholder="0 = disabled" onchange="updatePreview()" aria-describedby="edgeIdleTimeout-tooltip">
+                                    <input type="number" id="edgeIdleTimeout" min="0" max="1440" value="0" placeholder="0 = disabled" data-change="updatePreview" aria-describedby="edgeIdleTimeout-tooltip">
                                 </div>
                             </div>
 
@@ -266,7 +266,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for AUMID" aria-describedby="uwpAumid-tooltip">?</button>
                                         <span class="tooltip-content" id="uwpAumid-tooltip" role="tooltip">The unique identifier for a UWP/Store app. Format: PackageName_PublisherId!AppId. To find an app's AUMID, run this in PowerShell: Get-StartApps | Format-Table Name, AppID</span>
                                     </label>
-                                    <input type="text" id="uwpAumid" placeholder="e.g., Microsoft.WindowsCalculator_8wekyb3d8bbwe!App" onchange="updatePreview()" aria-describedby="uwpAumid-tooltip">
+                                    <input type="text" id="uwpAumid" placeholder="e.g., Microsoft.WindowsCalculator_8wekyb3d8bbwe!App" data-change="updatePreview" aria-describedby="uwpAumid-tooltip">
                                 </div>
                             </div>
 
@@ -278,7 +278,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Application Path" aria-describedby="win32Path-tooltip">?</button>
                                         <span class="tooltip-content" id="win32Path-tooltip" role="tooltip">Full path to the .exe file. Warning: Win32 apps use DesktopAppPath which creates RestrictRun registry entries. This can cause "operation cancelled due to restrictions" errors. Consider using Edge Kiosk mode instead when possible.</span>
                                     </label>
-                                    <input type="text" id="win32Path" placeholder="e.g., C:\Program Files\MyApp\app.exe" onchange="updatePreview()" aria-describedby="win32Path-tooltip">
+                                    <input type="text" id="win32Path" placeholder="e.g., C:\Program Files\MyApp\app.exe" data-change="updatePreview" aria-describedby="win32Path-tooltip">
                                 </div>
                                 <div class="form-group">
                                     <label for="win32Args" class="with-tooltip">
@@ -286,7 +286,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Arguments" aria-describedby="win32Args-tooltip">?</button>
                                         <span class="tooltip-content" id="win32Args-tooltip" role="tooltip">Command-line arguments passed to the application at launch. For example: --fullscreen or --kiosk</span>
                                     </label>
-                                    <input type="text" id="win32Args" placeholder="e.g., --fullscreen" onchange="updatePreview()" aria-describedby="win32Args-tooltip">
+                                    <input type="text" id="win32Args" placeholder="e.g., --fullscreen" data-change="updatePreview" aria-describedby="win32Args-tooltip">
                                 </div>
                             </div>
 
@@ -294,7 +294,7 @@
                             <div class="form-group" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
                                 <div class="checkbox-group">
                                     <span class="toggle-switch">
-                                        <input type="checkbox" id="enableBreakout" onchange="updateBreakoutUI(); updatePreview()" aria-describedby="enableBreakout-tooltip">
+                                        <input type="checkbox" id="enableBreakout" data-change="updateBreakoutUI|updatePreview" aria-describedby="enableBreakout-tooltip">
                                         <span class="toggle-slider" aria-hidden="true"></span>
                                     </span>
                                     <label for="enableBreakout" class="with-tooltip">
@@ -313,17 +313,17 @@
                                     </label>
                                     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;" role="group" aria-labelledby="breakoutKey-label">
                                         <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
-                                            <input type="checkbox" id="breakoutCtrl" checked onchange="updateBreakoutPreview(); updatePreview()"> Ctrl
+                                            <input type="checkbox" id="breakoutCtrl" checked data-change="updateBreakoutPreview|updatePreview"> Ctrl
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
-                                            <input type="checkbox" id="breakoutAlt" checked onchange="updateBreakoutPreview(); updatePreview()"> Alt
+                                            <input type="checkbox" id="breakoutAlt" checked data-change="updateBreakoutPreview|updatePreview"> Alt
                                         </label>
                                         <label style="display: flex; align-items: center; gap: 4px; font-weight: normal;">
-                                            <input type="checkbox" id="breakoutShift" onchange="updateBreakoutPreview(); updatePreview()"> Shift
+                                            <input type="checkbox" id="breakoutShift" data-change="updateBreakoutPreview|updatePreview"> Shift
                                         </label>
                                         <span aria-hidden="true">+</span>
                                         <label for="breakoutFinalKey" class="sr-only">Final key</label>
-                                        <select id="breakoutFinalKey" onchange="updateBreakoutPreview(); updatePreview()" style="width: auto;">
+                                        <select id="breakoutFinalKey" data-change="updateBreakoutPreview|updatePreview" style="width: auto;">
                                             <option value="A">A</option>
                                             <option value="B">B</option>
                                             <option value="C">C</option>
@@ -402,7 +402,7 @@
                                     </select>
                                     <label for="addAppValue" class="sr-only">Application path or AUMID</label>
                                     <input type="text" id="addAppValue" placeholder="Path or AUMID">
-                                    <button type="button" class="btn-primary" onclick="addApp()">Add</button>
+                                    <button type="button" class="btn-primary" data-action="addApp">Add</button>
                                 </div>
                             </div>
 
@@ -418,47 +418,47 @@
                                 <div role="group" aria-labelledby="commonApps-label">
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('edge')">Edge</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('chrome')">Chrome</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('firefox')">Firefox</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="edge">Edge</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="chrome">Chrome</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="firefox">Firefox</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('osk')">On-Screen Keyboard</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('volume')">Volume Control</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('settings')">Settings</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('fileExplorer')">File Explorer</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('printers')">Printers</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('printSpooler')">Print Spooler</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('controlPanel')">Control Panel</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('cmd')">Command Prompt</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell')">PowerShell 5.x</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell7')">PowerShell 7.x</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('terminal')">Windows Terminal</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="osk">On-Screen Keyboard</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="volume">Volume Control</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="settings">Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="fileExplorer">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="printers">Printers</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="printSpooler">Print Spooler</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="controlPanel">Control Panel</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="cmd">Command Prompt</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powershell">PowerShell 5.x</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powershell7">PowerShell 7.x</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="terminal">Windows Terminal</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('calculator')">Calculator</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('notepad')">Notepad</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('paint')">Paint</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('snipSketch')">Snipping Tool</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('stickyNotes')">Sticky Notes</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="calculator">Calculator</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="notepad">Notepad</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="paint">Paint</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="snipSketch">Snipping Tool</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="stickyNotes">Sticky Notes</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('photos')">Photos</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('camera')">Camera</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('movies')">Movies &amp; TV</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('teams')">Teams</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('zoom')">Zoom</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="photos">Photos</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="camera">Camera</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="movies">Movies &amp; TV</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="teams">Teams</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="zoom">Zoom</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('word')">Word</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('excel')">Excel</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powerpoint')">PowerPoint</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('outlook')">Outlook</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('onenote')">OneNote</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="word">Word</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="excel">Excel</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="powerpoint">PowerPoint</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="outlook">Outlook</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonApp" data-arg="onenote">OneNote</button>
                                     </div>
                                 </div>
                             </div>
@@ -481,7 +481,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Auto-Launch" aria-describedby="autoLaunch-tooltip">?</button>
                                     <span class="tooltip-content" id="autoLaunch-tooltip" role="tooltip">Automatically launch this app when the kiosk user signs in. The app will start immediately, providing a single-app experience while still allowing access to other whitelisted apps.</span>
                                 </label>
-                                <select id="autoLaunchApp" onchange="updateAutoLaunchSelection(); updatePreview();" aria-describedby="autoLaunch-tooltip">
+                                <select id="autoLaunchApp" data-change="updateAutoLaunchSelection|updatePreview" aria-describedby="autoLaunch-tooltip">
                                     <option value="">None (show Start menu)</option>
                                 </select>
                             </div>
@@ -497,7 +497,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for URL Source" aria-describedby="multiEdgeSource-tooltip">?</button>
                                     <span class="tooltip-content" id="multiEdgeSource-tooltip" role="tooltip">Choose whether Edge should open a web URL or a local HTML file when auto-launched.</span>
                                 </label>
-                                <select id="multiEdgeSourceType" onchange="updateMultiEdgeSourceUI(); updatePreview();" aria-describedby="multiEdgeSource-tooltip">
+                                <select id="multiEdgeSourceType" data-change="updateMultiEdgeSourceUI|updatePreview" aria-describedby="multiEdgeSource-tooltip">
                                     <option value="url">Web URL</option>
                                     <option value="file">Local File (file:// URL)</option>
                                 </select>
@@ -509,7 +509,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Kiosk URL" aria-describedby="multiEdgeUrl-tooltip">?</button>
                                     <span class="tooltip-content" id="multiEdgeUrl-tooltip" role="tooltip">The URL that Edge will open in kiosk mode. This is your landing page where you can provide links to whitelisted utilities.</span>
                                 </label>
-                                <input type="text" id="multiEdgeUrl" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="multiEdgeUrl-tooltip">
+                                <input type="text" id="multiEdgeUrl" placeholder="https://example.com" data-change="updatePreview" aria-describedby="multiEdgeUrl-tooltip">
                             </div>
 
                             <div class="form-group hidden" id="multiEdgeFileGroup" aria-hidden="true">
@@ -518,7 +518,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Local File Path" aria-describedby="multiEdgeFile-tooltip">?</button>
                                     <span class="tooltip-content" id="multiEdgeFile-tooltip" role="tooltip">Path to a local HTML file (e.g., C:\Kiosk\index.html). The path will be converted to a file:// URL.</span>
                                 </label>
-                                <input type="text" id="multiEdgeFilePath" placeholder="C:\Kiosk\index.html" onchange="updatePreview()" aria-describedby="multiEdgeFile-tooltip">
+                                <input type="text" id="multiEdgeFilePath" placeholder="C:\Kiosk\index.html" data-change="updatePreview" aria-describedby="multiEdgeFile-tooltip">
                             </div>
 
                             <div class="form-group">
@@ -527,7 +527,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Kiosk Mode Type" aria-describedby="multiEdgeKiosk-tooltip">?</button>
                                     <span class="tooltip-content" id="multiEdgeKiosk-tooltip" role="tooltip">Fullscreen: No browser UI, just the web content. Public Browsing: Shows address bar and navigation for controlled browsing. Both modes always run InPrivate (no history/cookies saved).</span>
                                 </label>
-                                <select id="multiEdgeKioskType" onchange="updatePreview()" aria-describedby="multiEdgeKiosk-tooltip">
+                                <select id="multiEdgeKioskType" data-change="updatePreview" aria-describedby="multiEdgeKiosk-tooltip">
                                     <option value="fullscreen">Fullscreen (no browser UI)</option>
                                     <option value="public-browsing">Public Browsing (with navigation)</option>
                                 </select>
@@ -544,7 +544,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Launch Arguments" aria-describedby="win32Args-tooltip">?</button>
                                     <span class="tooltip-content" id="win32Args-tooltip" role="tooltip">Optional command-line arguments to pass to the Win32 application when it auto-launches. Example: --fullscreen or /silent</span>
                                 </label>
-                                <input type="text" id="win32AutoLaunchArgs" placeholder="--fullscreen /silent" onchange="updatePreview()" aria-describedby="win32Args-tooltip">
+                                <input type="text" id="win32AutoLaunchArgs" placeholder="--fullscreen /silent" data-change="updatePreview" aria-describedby="win32Args-tooltip">
                             </div>
                         </div>
                     </fieldset>
@@ -591,7 +591,7 @@
                                     <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
                                         Note: If icon path is specified, you are responsible for ensuring the icon file exists at that path.
                                     </div>
-                                    <button type="button" class="btn-primary" onclick="addPin()" style="align-self: flex-start;">Add Shortcut</button>
+                                    <button type="button" class="btn-primary" data-action="addPin" style="align-self: flex-start;">Add Shortcut</button>
                                 </div>
                             </div>
 
@@ -608,7 +608,7 @@
                                     <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <div style="flex: 1; min-width: 200px;">
                                             <label for="browserPinMode" style="font-size: 0.75rem; color: var(--text-secondary);">Browser Mode</label>
-                                            <select id="browserPinMode" style="width: 100%;">
+                                            <select id="browserPinMode" data-change="updateBrowserPinModeUI" style="width: 100%;">
                                                 <option value="standard">Standard</option>
                                                 <option value="kioskFullscreen">Kiosk Fullscreen</option>
                                                 <option value="kioskPublic">Kiosk Public Browsing (Edge)</option>
@@ -618,7 +618,7 @@
                                         <div id="browserPinSourceConfig" style="flex: 2; min-width: 260px;">
                                             <label for="browserPinSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Kiosk Source</label>
                                             <div style="display: flex; gap: 8px; align-items: center;">
-                                                <select id="browserPinSourceType" style="width: 140px;">
+                                                <select id="browserPinSourceType" data-change="updateBrowserPinSourceUI" style="width: 140px;">
                                                     <option value="url">Web URL</option>
                                                     <option value="file">Local File</option>
                                                 </select>
@@ -636,47 +636,47 @@
                                     </p>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('edge')">Edge</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('chrome')">Chrome</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('firefox')">Firefox</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="edge">Edge</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="chrome">Chrome</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="firefox">Firefox</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('osk')">On-Screen Keyboard</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('soundSettings')">Sound Settings</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('settings')">Settings</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('fileExplorer')">File Explorer</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('printers')">Printers</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('printSpooler')">Print Spooler</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('controlPanel')">Control Panel</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('cmd')">Command Prompt</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell')">PowerShell 5.x</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell7')">PowerShell 7.x</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('terminal')">Windows Terminal</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="osk">On-Screen Keyboard</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="soundSettings">Sound Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="settings">Settings</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="fileExplorer">File Explorer</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="printers">Printers</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="printSpooler">Print Spooler</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="controlPanel">Control Panel</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="cmd">Command Prompt</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="powershell">PowerShell 5.x</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="powershell7">PowerShell 7.x</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="terminal">Windows Terminal</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Productivity:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('calculator')">Calculator</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('notepad')">Notepad</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('paint')">Paint</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('snipSketch')">Snipping Tool</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('stickyNotes')">Sticky Notes</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="calculator">Calculator</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="notepad">Notepad</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="paint">Paint</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="snipSketch">Snipping Tool</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="stickyNotes">Sticky Notes</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Media &amp; Communication:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('photos')">Photos</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('camera')">Camera</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('movies')">Movies &amp; TV</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('teams')">Teams</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('zoom')">Zoom</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="photos">Photos</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="camera">Camera</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="movies">Movies &amp; TV</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="teams">Teams</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="zoom">Zoom</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Microsoft Office:</strong>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('word')">Word</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('excel')">Excel</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powerpoint')">PowerPoint</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('outlook')">Outlook</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('onenote')">OneNote</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="word">Word</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="excel">Excel</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="powerpoint">PowerPoint</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="outlook">Outlook</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="onenote">OneNote</button>
                                     </div>
                                 </div>
                             </div>
@@ -700,7 +700,7 @@
                             <div class="form-group">
                                 <div class="checkbox-group">
                                     <span class="toggle-switch">
-                                        <input type="checkbox" id="showTaskbar" checked onchange="updatePreview()" aria-describedby="showTaskbar-tooltip">
+                                        <input type="checkbox" id="showTaskbar" checked data-change="updatePreview" aria-describedby="showTaskbar-tooltip">
                                         <span class="toggle-slider" aria-hidden="true"></span>
                                     </span>
                                     <label for="showTaskbar" class="with-tooltip">
@@ -717,7 +717,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for File Explorer Access" aria-describedby="fileExplorerAccess-tooltip">?</button>
                                     <span class="tooltip-content" id="fileExplorerAccess-tooltip" role="tooltip">No Access: File Explorer is blocked. Downloads Only: Access to Downloads folder. Removable Drives: Access to USB drives. Downloads + Removable: Both options. No Restriction: Full file system access.</span>
                                 </label>
-                                <select id="fileExplorerAccess" onchange="updatePreview()" aria-describedby="fileExplorerAccess-tooltip">
+                                <select id="fileExplorerAccess" data-change="updatePreview" aria-describedby="fileExplorerAccess-tooltip">
                                     <option value="none">No Access (Blocked)</option>
                                     <option value="downloads">Downloads Folder Only</option>
                                     <option value="removable">Removable Drives Only</option>
@@ -753,9 +753,9 @@
             <h2 id="preview-heading" class="panel-header">
                 <span>XML Preview</span>
                 <div class="export-actions" role="group" aria-label="Export options">
-                    <button type="button" class="btn-secondary btn-small" onclick="copyXml()">Copy XML</button>
-                    <button type="button" class="btn-primary btn-small" onclick="downloadXml()">Download XML</button>
-                    <button type="button" class="btn-success btn-small" onclick="downloadPowerShell()">Download Deploy Script</button>
+                    <button type="button" class="btn-secondary btn-small" data-action="copyXml">Copy XML</button>
+                    <button type="button" class="btn-primary btn-small" data-action="downloadXml">Download XML</button>
+                    <button type="button" class="btn-success btn-small" data-action="downloadPowerShell">Download Deploy Script</button>
                 </div>
             </h2>
             <div class="panel-content preview-content">
@@ -768,7 +768,7 @@
     </main>
 
     <label for="importInput" class="sr-only">Import XML configuration file</label>
-    <input type="file" id="importInput" accept=".xml" style="display:none" onchange="handleImport(event)">
+    <input type="file" id="importInput" accept=".xml" style="display:none" data-change="handleImport">
 
     <footer role="contentinfo">
         <p>
@@ -783,18 +783,18 @@
 
     <!-- Deploy Guide Modal -->
     <div id="deployModal" class="modal hidden" role="dialog" aria-labelledby="deployModalTitle" aria-modal="true">
-        <div class="modal-backdrop" onclick="hideDeployHelp()"></div>
+        <div class="modal-backdrop" data-action="hideDeployHelp"></div>
         <div class="modal-content modal-wide">
             <div class="modal-header">
                 <h2 id="deployModalTitle">Deployment Guide</h2>
-                <button type="button" class="modal-close" onclick="hideDeployHelp()" aria-label="Close dialog">&times;</button>
+                <button type="button" class="modal-close" data-action="hideDeployHelp" aria-label="Close dialog">&times;</button>
             </div>
             <div class="modal-body">
                 <!-- Deploy Method Tabs -->
                 <nav class="deploy-tabs" role="tablist" aria-label="Deployment methods">
-                    <button type="button" class="deploy-tab active" role="tab" aria-selected="true" aria-controls="deploy-intune" id="deploy-tab-intune" onclick="switchDeployTab('intune')">Intune</button>
-                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-powershell" id="deploy-tab-powershell" onclick="switchDeployTab('powershell')">PowerShell</button>
-                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-ppkg" id="deploy-tab-ppkg" onclick="switchDeployTab('ppkg')">Provisioning Package</button>
+                    <button type="button" class="deploy-tab active" role="tab" aria-selected="true" aria-controls="deploy-intune" id="deploy-tab-intune" data-action="switchDeployTab" data-arg="intune">Intune</button>
+                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-powershell" id="deploy-tab-powershell" data-action="switchDeployTab" data-arg="powershell">PowerShell</button>
+                    <button type="button" class="deploy-tab" role="tab" aria-selected="false" aria-controls="deploy-ppkg" id="deploy-tab-ppkg" data-action="switchDeployTab" data-arg="ppkg">Provisioning Package</button>
                 </nav>
 
                 <!-- Intune Tab -->
@@ -913,6 +913,12 @@ Set-CimInstance -CimInstance $bridge -Property @{Configuration = $xml}</pre>
         </div>
     </div>
 
+    <script src="dom.js"></script>
+    <script src="state.js"></script>
+    <script src="helpers.js"></script>
+    <script src="summary.js"></script>
+    <script src="xml.js"></script>
+    <script src="validation.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
