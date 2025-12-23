@@ -105,6 +105,14 @@
             "workingDir": "",
             "iconPath": ""
         },
+        "powershell7": {
+            "name": "PowerShell 7",
+            "pinType": "desktopAppLink",
+            "target": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+            "args": "",
+            "workingDir": "",
+            "iconPath": ""
+        },
         "notepad": {
             "name": "Notepad",
             "pinType": "desktopAppLink",

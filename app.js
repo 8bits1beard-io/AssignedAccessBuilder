@@ -273,6 +273,31 @@ function updateEdgeSourceUI() {
     fileConfig.setAttribute('aria-hidden', sourceType !== 'file');
 }
 
+function updateBrowserPinSourceUI() {
+    const sourceType = document.getElementById('browserPinSourceType').value;
+    const urlConfig = document.getElementById('browserPinUrlConfig');
+    const fileConfig = document.getElementById('browserPinFileConfig');
+
+    urlConfig.classList.toggle('hidden', sourceType !== 'url');
+    fileConfig.classList.toggle('hidden', sourceType !== 'file');
+
+    urlConfig.setAttribute('aria-hidden', sourceType !== 'url');
+    fileConfig.setAttribute('aria-hidden', sourceType !== 'file');
+}
+
+function updateBrowserPinModeUI() {
+    const mode = document.getElementById('browserPinMode').value;
+    const sourceConfig = document.getElementById('browserPinSourceConfig');
+    const needsSource = mode === 'kioskFullscreen' || mode === 'kioskPublic';
+
+    sourceConfig.classList.toggle('hidden', !needsSource);
+    sourceConfig.setAttribute('aria-hidden', !needsSource);
+
+    if (needsSource) {
+        updateBrowserPinSourceUI();
+    }
+}
+
 function getEdgeUrl() {
     const sourceType = document.getElementById('edgeSourceType').value;
     if (sourceType === 'file') {
@@ -296,6 +321,157 @@ function getEdgeUrl() {
     } else {
         return document.getElementById('edgeUrl').value || 'https://www.microsoft.com';
     }
+}
+
+function buildFileUrl(filePath) {
+    if (!filePath) return '';
+    let normalized = filePath.trim();
+    if (!normalized) return '';
+    if (normalized.toLowerCase().startsWith('file:///')) {
+        return normalized;
+    }
+    normalized = normalized.replace(/\\/g, '/');
+    normalized = normalized.split('/').map((segment, index) => {
+        if (index === 0 && /^[A-Za-z]:$/.test(segment)) {
+            return segment;
+        }
+        return encodeURIComponent(segment);
+    }).join('/');
+    if (!normalized.toLowerCase().startsWith('file:///')) {
+        normalized = 'file:///' + normalized;
+    }
+    return normalized;
+}
+
+function getBrowserPinLaunchUrl() {
+    const sourceType = document.getElementById('browserPinSourceType').value;
+    if (sourceType === 'file') {
+        return buildFileUrl(document.getElementById('browserPinFilePath').value);
+    }
+    return document.getElementById('browserPinUrl').value.trim();
+}
+
+function formatKioskModeSummary() {
+    if (state.mode === 'single') {
+        const appType = document.getElementById('appType').value;
+        if (appType === 'edge') {
+            const kioskType = document.getElementById('edgeKioskType').value;
+            const kioskLabel = kioskType === 'public-browsing' ? 'Public Browsing' : 'Fullscreen';
+            return `Single-App (Edge - ${kioskLabel})`;
+        }
+        if (appType === 'uwp') return 'Single-App (UWP)';
+        return 'Single-App (Win32)';
+    }
+    return state.mode === 'restricted' ? 'Restricted User' : 'Multi-App';
+}
+
+function formatAllowedAppsSummary() {
+    if (state.mode === 'single') {
+        return 'N/A (single-app mode)';
+    }
+    if (state.allowedApps.length === 0) {
+        return 'None';
+    }
+    const items = state.allowedApps.map((app, index) => {
+        const label = isEdgeApp(app.value) ? 'Microsoft Edge' : app.value;
+        const autoTag = state.autoLaunchApp === index ? ' (auto-launch)' : '';
+        return `<li>${escapeXml(label)}${autoTag}</li>`;
+    }).join('');
+    return `<ul>${items}</ul>`;
+}
+
+function formatStartPinsSummary() {
+    if (state.mode === 'single') {
+        return 'N/A (single-app mode)';
+    }
+    if (state.startPins.length === 0) {
+        return 'None';
+    }
+    const items = state.startPins.map(pin => {
+        const name = pin.name || 'Unnamed pin';
+        const args = pin.args ? ` (args: ${pin.args})` : '';
+        return `<li>${escapeXml(name)}${escapeXml(args)}</li>`;
+    }).join('');
+    return `<ul>${items}</ul>`;
+}
+
+function formatAutoLaunchSummary() {
+    if (state.mode === 'single') {
+        const appType = document.getElementById('appType').value;
+        if (appType === 'edge') {
+            const url = getEdgeUrl();
+            const kioskType = document.getElementById('edgeKioskType').value;
+            const idleTimeout = parseInt(document.getElementById('edgeIdleTimeout').value) || 0;
+            let args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
+            if (idleTimeout > 0) args += ` --kiosk-idle-timeout-minutes=${idleTimeout}`;
+            return `Microsoft Edge (args: ${args})`;
+        }
+        if (appType === 'uwp') {
+            const aumid = document.getElementById('uwpAumid').value.trim();
+            return aumid ? `UWP App (${aumid})` : 'UWP App';
+        }
+        const path = document.getElementById('win32Path').value.trim();
+        const args = document.getElementById('win32Args').value.trim();
+        return path ? `${path}${args ? ` (args: ${args})` : ''}` : 'Win32 App';
+    }
+
+    if (state.autoLaunchApp === null || !state.allowedApps[state.autoLaunchApp]) {
+        return 'None';
+    }
+
+    const app = state.allowedApps[state.autoLaunchApp];
+    const label = isEdgeApp(app.value) ? 'Microsoft Edge' : app.value;
+    let args = '';
+
+    if (isEdgeApp(app.value)) {
+        const url = getMultiAppEdgeUrl();
+        const kioskType = document.getElementById('multiEdgeKioskType').value;
+        args = `--kiosk ${url} --edge-kiosk-type=${kioskType} --no-first-run`;
+    } else if (app.type === 'path') {
+        args = document.getElementById('win32AutoLaunchArgs').value.trim();
+    }
+
+    return `${label}${args ? ` (args: ${args})` : ''}`;
+}
+
+function updateSummary() {
+    const summaryGrid = document.getElementById('summaryGrid');
+    if (!summaryGrid) return;
+
+    const configName = document.getElementById('configName').value.trim() || 'Unnamed';
+    const autoLogon = state.accountType === 'auto';
+    const displayName = document.getElementById('displayName').value.trim();
+    const accountName = document.getElementById('accountName')?.value.trim() || '';
+    const groupName = document.getElementById('groupName')?.value.trim() || '';
+    const groupType = document.getElementById('groupType')?.value || '';
+
+    let accountSummary = 'Auto Logon (Managed)';
+    if (state.accountType === 'existing') {
+        accountSummary = accountName ? `Existing Account (${accountName})` : 'Existing Account';
+    } else if (state.accountType === 'group') {
+        const typeLabel = groupType ? `, ${groupType}` : '';
+        accountSummary = groupName ? `User Group (${groupName}${typeLabel})` : 'User Group';
+    } else if (state.accountType === 'global') {
+        accountSummary = 'Global Profile (All non-admin users)';
+    }
+
+    const rows = [
+        { label: 'Name', value: escapeXml(configName) },
+        { label: 'Kiosk Type', value: escapeXml(formatKioskModeSummary()) },
+        { label: 'Account', value: escapeXml(accountSummary) },
+        { label: 'Allowed Apps', value: formatAllowedAppsSummary() },
+        { label: 'Start Menu Pins', value: formatStartPinsSummary() },
+        { label: 'Auto Logon', value: autoLogon ? 'Yes' : 'No' },
+        { label: 'Auto Logon Username', value: autoLogon ? escapeXml(displayName || 'Managed kiosk account') : 'N/A' },
+        { label: 'Auto-Start App', value: escapeXml(formatAutoLaunchSummary()) }
+    ];
+
+    summaryGrid.innerHTML = rows.map(row => `
+        <div class="summary-item">
+            <div class="summary-label">${row.label}</div>
+            <div class="summary-value">${row.value}</div>
+        </div>
+    `).join('');
 }
 
 function updateBreakoutUI() {
@@ -606,10 +782,46 @@ function addCommonPin(pinKey) {
 
     const pin = pinPresets.pins[pinKey];
     if (pin && !state.startPins.find(p => p.name.toLowerCase() === pin.name.toLowerCase())) {
-        state.startPins.push({ ...pin });
+        const browserKeys = ['edge', 'chrome', 'firefox'];
+        let pinToAdd = { ...pin };
+
+        if (browserKeys.includes(pinKey)) {
+            const mode = document.getElementById('browserPinMode').value;
+
+            if (mode === 'private') {
+                const privateArgs = {
+                    edge: '--inprivate',
+                    chrome: '--incognito',
+                    firefox: '-private-window'
+                };
+                pinToAdd.args = privateArgs[pinKey] || '';
+                pinToAdd.pinType = 'desktopAppLink';
+                delete pinToAdd.systemShortcut;
+            } else if (mode === 'kioskFullscreen' || mode === 'kioskPublic') {
+                const launchUrl = getBrowserPinLaunchUrl();
+                if (!launchUrl) {
+                    alert('Kiosk browser pins require a URL or local file path.');
+                    return;
+                }
+
+                let args = `--kiosk ${launchUrl}`;
+                if (pinKey === 'edge') {
+                    const kioskType = mode === 'kioskPublic' ? 'public-browsing' : 'fullscreen';
+                    args += ` --edge-kiosk-type=${kioskType} --no-first-run`;
+                } else if (pinKey === 'chrome') {
+                    args += ' --no-first-run';
+                }
+
+                pinToAdd.args = args;
+                pinToAdd.pinType = 'desktopAppLink';
+                delete pinToAdd.systemShortcut;
+            }
+        }
+
+        state.startPins.push(pinToAdd);
 
         // If the shortcut uses explorer.exe (for ms-settings: URLs), add it to allowed apps
-        if (pin.target && pin.target.toLowerCase().includes('explorer.exe')) {
+        if (pinToAdd.target && pinToAdd.target.toLowerCase().includes('explorer.exe')) {
             const explorerPath = 'C:\\Windows\\explorer.exe';
             if (!state.allowedApps.find(a => a.value.toLowerCase() === explorerPath.toLowerCase())) {
                 state.allowedApps.push({ type: 'path', value: explorerPath });
@@ -979,6 +1191,7 @@ function updatePreview() {
     const xml = generateXml();
     document.getElementById('xmlPreview').textContent = xml;
     showValidation();
+    updateSummary();
 }
 
 /* ============================================================================
@@ -1887,6 +2100,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     generateGuid();
     updateTabVisibility();
     updatePreview();
+
+    const browserPinMode = document.getElementById('browserPinMode');
+    const browserPinSourceType = document.getElementById('browserPinSourceType');
+    if (browserPinMode && browserPinSourceType) {
+        browserPinMode.addEventListener('change', updateBrowserPinModeUI);
+        browserPinSourceType.addEventListener('change', updateBrowserPinSourceUI);
+        updateBrowserPinModeUI();
+    }
 
     // Add tooltip positioning on hover/focus
     document.querySelectorAll('.tooltip-icon').forEach(icon => {

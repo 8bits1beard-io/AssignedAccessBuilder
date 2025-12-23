@@ -636,6 +636,47 @@ legend.section-header {
     color: var(--warning);
 }
 
+.status.info {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+}
+
+/* ============================================
+   Summary
+   ============================================ */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.summary-item {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.summary-value {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+}
+
+.summary-value ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
 /* ============================================
    Validation Errors
    ============================================ */

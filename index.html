@@ -39,6 +39,7 @@
                     <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
                     <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
                     <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
+                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" onclick="switchTab('summary')">Summary</button>
                 </nav>
 
                 <!-- Tab Panels -->
@@ -416,7 +417,8 @@
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('printSpooler')">Print Spooler</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('controlPanel')">Control Panel</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('cmd')">Command Prompt</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell')">PowerShell</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell')">PowerShell 5.x</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('powershell7')">PowerShell 7.x</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonApp('terminal')">Windows Terminal</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
@@ -588,6 +590,35 @@
                                     <strong>Note:</strong> Common pins use default installation paths. If an app is installed in a custom location, use "Add Custom Shortcut" above instead.
                                 </p>
                                 <div role="group" aria-labelledby="commonPins-label">
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <div style="flex: 1; min-width: 200px;">
+                                            <label for="browserPinMode" style="font-size: 0.75rem; color: var(--text-secondary);">Browser Mode</label>
+                                            <select id="browserPinMode" style="width: 100%;">
+                                                <option value="standard">Standard</option>
+                                                <option value="kioskFullscreen">Kiosk Fullscreen</option>
+                                                <option value="kioskPublic">Kiosk Public Browsing (Edge)</option>
+                                                <option value="private">Private/Incognito</option>
+                                            </select>
+                                        </div>
+                                        <div id="browserPinSourceConfig" style="flex: 2; min-width: 260px;">
+                                            <label for="browserPinSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Kiosk Source</label>
+                                            <div style="display: flex; gap: 8px; align-items: center;">
+                                                <select id="browserPinSourceType" style="width: 140px;">
+                                                    <option value="url">Web URL</option>
+                                                    <option value="file">Local File</option>
+                                                </select>
+                                                <div id="browserPinUrlConfig" style="flex: 1;">
+                                                    <input type="text" id="browserPinUrl" placeholder="https://example.com" style="width: 100%;">
+                                                </div>
+                                                <div id="browserPinFileConfig" class="hidden" style="flex: 1;" aria-hidden="true">
+                                                    <input type="text" id="browserPinFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="hint" style="margin-bottom: 8px;">
+                                        <strong>Tip:</strong> Kiosk modes require a URL or local file. Public browsing applies to Edge only; other browsers use fullscreen kiosk.
+                                    </p>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('edge')">Edge</button>
@@ -604,7 +635,8 @@
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('printSpooler')">Print Spooler</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('controlPanel')">Control Panel</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('cmd')">Command Prompt</button>
-                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell')">PowerShell</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell')">PowerShell 5.x</button>
+                                        <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('powershell7')">PowerShell 7.x</button>
                                         <button type="button" class="btn-secondary btn-small" onclick="addCommonPin('terminal')">Windows Terminal</button>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
@@ -682,6 +714,19 @@
                     </fieldset>
                     </div>
                     <!-- End System Tab -->
+
+                    <div class="tab-content" role="tabpanel" id="tab-summary" aria-labelledby="tab-btn-summary">
+                        <fieldset class="section">
+                            <legend class="section-header">Configuration Summary</legend>
+                            <div class="section-content">
+                                <div class="status info">
+                                    <strong>Deployment tip:</strong> The XML output is used as the String value for the AssignedAccess OMA-URI in Intune. The PowerShell script applies the configuration on-demand to a local device.
+                                </div>
+                                <div class="summary-grid" id="summaryGrid" aria-live="polite"></div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <!-- End Summary Tab -->
 
                 </div>
                 <!-- End tab-panels -->
