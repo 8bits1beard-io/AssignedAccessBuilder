@@ -26,16 +26,18 @@
                 </button>
             </nav>
         </div>
-        <nav class="tab-nav header-tabs" role="tablist" aria-label="Configuration sections">
-            <button type="button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" onclick="switchTab('setup')">Setup</button>
-            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
-            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
-            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
-            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" onclick="switchTab('summary')">Summary</button>
-        </nav>
     </header>
 
-    <main id="main-content" class="container">
+    <main id="main-content" class="container layout">
+        <aside class="side-nav" role="tablist" aria-label="Configuration sections">
+            <div class="side-nav-title">Configuration</div>
+            <button type="button" class="side-nav-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" onclick="switchTab('setup')">Setup</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
+            <button type="button" class="side-nav-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" onclick="switchTab('summary')">Summary</button>
+        </aside>
+
         <!-- Configuration Panel -->
         <section class="panel" aria-labelledby="config-heading">
             <h2 id="config-heading" class="panel-header">

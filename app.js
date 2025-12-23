@@ -119,7 +119,7 @@ document.addEventListener('keydown', function(e) {
    ============================================================================ */
 function switchTab(tabId) {
     // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.tab-btn, .side-nav-btn').forEach(btn => {
         const isActive = btn.id === `tab-btn-${tabId}`;
         btn.classList.toggle('active', isActive);
         btn.setAttribute('aria-selected', isActive);
