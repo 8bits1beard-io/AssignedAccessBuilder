@@ -558,6 +558,19 @@
                         <legend class="section-header">Start Menu Pins</legend>
                         <div class="section-content">
                             <div class="form-group">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" id="autoPinAllowed" checked data-change="syncAutoPins" aria-describedby="autoPinAllowed-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="autoPinAllowed" class="with-tooltip">
+                                        Auto-pin Allowed Apps
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Auto-pin Allowed Apps" aria-describedby="autoPinAllowed-tooltip">?</button>
+                                        <span class="tooltip-content" id="autoPinAllowed-tooltip" role="tooltip">When enabled, new allowed apps are automatically added as Start menu pins. You can remove individual pins as needed.</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="with-tooltip">
                                     Add Custom Shortcut
                                     <button type="button" class="tooltip-icon" aria-label="Help for Add Shortcut" aria-describedby="addShortcut-tooltip">?</button>

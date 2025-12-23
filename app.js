@@ -258,6 +258,7 @@ const actionHandlers = {
     updateBreakoutPreview,
     updateAutoLaunchSelection,
     updateMultiEdgeSourceUI,
+    syncAutoPins,
     updateBrowserPinModeUI,
     updateBrowserPinSourceUI,
     copyXml,
@@ -552,6 +553,9 @@ function addApp() {
 
     state.allowedApps.push({ type, value });
     dom.get('addAppValue').value = '';
+    if (dom.get('autoPinAllowed')?.checked) {
+        ensurePinForAllowedApp({ type, value });
+    }
     renderAppList();
     updateAutoLaunchSelector();
     updatePreview();
@@ -565,6 +569,7 @@ function addCommonApp(appKey) {
 
     const apps = appPresets.apps;
     const groups = appPresets.groups;
+    const beforeCount = state.allowedApps.length;
 
     // Check if this key has a group (multiple apps to add)
     if (groups[appKey]) {
@@ -584,6 +589,9 @@ function addCommonApp(appKey) {
 
     renderAppList();
     updateAutoLaunchSelector();
+    if (dom.get('autoPinAllowed')?.checked && state.allowedApps.length !== beforeCount) {
+        state.allowedApps.slice(beforeCount).forEach(app => ensurePinForAllowedApp(app));
+    }
     updatePreview();
 }
 
@@ -723,6 +731,47 @@ function addCommonPin(pinKey) {
         renderPinList();
         updatePreview();
     }
+}
+
+function ensurePinForAllowedApp(app) {
+    if (!app || !app.value) return;
+
+    const existing = state.startPins.some(pin => {
+        if (pin.pinType === 'packagedAppId') {
+            return pin.packagedAppId && pin.packagedAppId.toLowerCase() === app.value.toLowerCase();
+        }
+        return pin.target && pin.target.toLowerCase() === app.value.toLowerCase();
+    });
+
+    if (existing) return;
+
+    if (app.type === 'aumid') {
+        state.startPins.push({
+            name: app.value,
+            pinType: 'packagedAppId',
+            packagedAppId: app.value
+        });
+        return;
+    }
+
+    state.startPins.push({
+        name: app.value.split('\\').pop() || app.value,
+        pinType: 'desktopAppLink',
+        target: app.value,
+        args: '',
+        workingDir: '',
+        iconPath: ''
+    });
+}
+
+function syncAutoPins() {
+    if (!dom.get('autoPinAllowed')?.checked) {
+        return;
+    }
+
+    state.allowedApps.forEach(app => ensurePinForAllowedApp(app));
+    renderPinList();
+    updatePreview();
 }
 
 function removePin(index) {
@@ -1591,7 +1640,9 @@ function loadPreset(preset) {
 
     updateAppTypeUI();
     renderAppList();
-    renderPinList();
+    if (dom.get('autoPinAllowed')?.checked && (state.mode === 'multi' || state.mode === 'restricted')) {
+        syncAutoPins();
+    }
     updateAutoLaunchSelector();
     updatePreview();
 }
