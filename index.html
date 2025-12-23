@@ -11,18 +11,27 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     <header role="banner">
-        <h1>
-            <span class="logo" aria-hidden="true">AAXB</span>
-            AssignedAccess XML Builder
-            <span class="subtitle">Windows 11 23H2+</span>
-        </h1>
-        <nav class="header-actions" aria-label="Main actions">
-            <button type="button" class="btn-secondary" onclick="loadPreset('blank')">New</button>
-            <button type="button" class="btn-secondary" onclick="importXml()">Import XML</button>
-            <button type="button" class="btn-secondary" onclick="showDeployHelp()">Deploy Guide</button>
-            <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode" title="Toggle light mode">
-                <span aria-hidden="true">&#9728;</span>
-            </button>
+        <div class="header-top">
+            <h1>
+                <span class="logo" aria-hidden="true">AAXB</span>
+                AssignedAccess XML Builder
+                <span class="subtitle">Windows 11 24H2+</span>
+            </h1>
+            <nav class="header-actions" aria-label="Main actions">
+                <button type="button" class="btn-secondary" onclick="loadPreset('blank')">New</button>
+                <button type="button" class="btn-secondary" onclick="importXml()">Import XML</button>
+                <button type="button" class="btn-secondary" onclick="showDeployHelp()">Deploy Guide</button>
+                <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light mode" title="Toggle light mode">
+                    <span aria-hidden="true">&#9728;</span>
+                </button>
+            </nav>
+        </div>
+        <nav class="tab-nav header-tabs" role="tablist" aria-label="Configuration sections">
+            <button type="button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" onclick="switchTab('setup')">Setup</button>
+            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
+            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
+            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
+            <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" onclick="switchTab('summary')">Summary</button>
         </nav>
     </header>
 
@@ -33,15 +42,6 @@
                 Configuration
             </h2>
             <div class="panel-content with-tabs">
-                <!-- Tab Navigation -->
-                <nav class="tab-nav" role="tablist" aria-label="Configuration sections">
-                    <button type="button" class="tab-btn active" role="tab" aria-selected="true" aria-controls="tab-setup" id="tab-btn-setup" onclick="switchTab('setup')">Setup</button>
-                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-application" id="tab-btn-application" onclick="switchTab('application')">Application</button>
-                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-startmenu" id="tab-btn-startmenu" onclick="switchTab('startmenu')">Start Menu</button>
-                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-system" id="tab-btn-system" onclick="switchTab('system')">System</button>
-                    <button type="button" class="tab-btn" role="tab" aria-selected="false" aria-controls="tab-summary" id="tab-btn-summary" onclick="switchTab('summary')">Summary</button>
-                </nav>
-
                 <!-- Tab Panels -->
                 <div class="tab-panels">
                     <!-- Setup Tab -->
