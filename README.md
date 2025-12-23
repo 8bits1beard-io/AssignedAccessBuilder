@@ -99,11 +99,18 @@ flowchart TD
 
 ## Getting Started
 
-**Option 1: Run Locally**
+**Option 1: Use the Hosted Tool (Recommended)**
+
+Open `https://aaxb.pages.dev` in any modern browser.
+
+**Option 2: Run Locally**
+
+Because the app loads presets with `fetch()`, serve the repo from a local web server:
 ```
 1. Download or clone repository
-2. Open index.html in any browser
-3. Configure and export
+2. Run: python -m http.server
+3. Open http://localhost:8000
+4. Configure and export
 ```
 
 **Option 2: Host Internally** — Deploy to any web server. No backend required.
