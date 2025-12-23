@@ -2,6 +2,8 @@
 
 Detailed documentation for AssignedAccess XML Builder.
 
+**Note:** Local use should be served from a web server (not `file://`) so preset JSON loads correctly.
+
 ---
 
 ## Usage Examples

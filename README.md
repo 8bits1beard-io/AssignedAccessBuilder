@@ -2,6 +2,8 @@
 
 A visual tool for creating Windows 11 kiosk configurations—no XML expertise required.
 
+**Hosted app:** https://aaxb.pages.dev
+
 ## Executive Summary
 
 | Challenge | Solution |
