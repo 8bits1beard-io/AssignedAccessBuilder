@@ -104,6 +104,7 @@ flowchart TD
 **Option 1: Use the Hosted Tool (Recommended)**
 
 Open `https://aaxb.pages.dev` in any modern browser.
+Use the left sidebar to navigate between Setup, Application, Start Menu, System, and Summary.
 
 **Option 2: Run Locally**
 
@@ -115,7 +116,7 @@ Because the app loads presets with `fetch()`, serve the repo from a local web se
 4. Configure and export
 ```
 
-**Option 2: Host Internally** — Deploy to any web server. No backend required.
+**Option 3: Host Internally** — Deploy to any web server. No backend required.
 
 ---
 
