@@ -474,6 +474,21 @@ function updateSummary() {
     `).join('');
 }
 
+function formatLastUpdated(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+        return 'Unavailable';
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours;
+    return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
+}
+
 function updateBreakoutUI() {
     const enabled = document.getElementById('enableBreakout').checked;
     const breakoutConfig = document.getElementById('breakoutConfig');
@@ -2100,6 +2115,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     generateGuid();
     updateTabVisibility();
     updatePreview();
+
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+    if (lastUpdatedEl) {
+        const modified = new Date(document.lastModified);
+        lastUpdatedEl.textContent = formatLastUpdated(modified);
+    }
 
     const browserPinMode = document.getElementById('browserPinMode');
     const browserPinSourceType = document.getElementById('browserPinSourceType');
