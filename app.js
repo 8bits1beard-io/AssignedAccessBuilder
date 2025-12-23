@@ -261,6 +261,41 @@ function updateAppTypeUI() {
     win32Config.setAttribute('aria-hidden', appType !== 'win32');
 }
 
+function applySingleAppPreset(preset) {
+    const appTypeSelect = document.getElementById('appType');
+    const edgeSourceType = document.getElementById('edgeSourceType');
+    const edgeUrl = document.getElementById('edgeUrl');
+    const edgeKioskType = document.getElementById('edgeKioskType');
+    const win32Path = document.getElementById('win32Path');
+    const win32Args = document.getElementById('win32Args');
+
+    if (preset === 'edge') {
+        appTypeSelect.value = 'edge';
+        edgeSourceType.value = 'url';
+        edgeUrl.value = edgeUrl.value || 'https://www.microsoft.com';
+        edgeKioskType.value = 'fullscreen';
+        updateAppTypeUI();
+        updateEdgeSourceUI();
+        updatePreview();
+        return;
+    }
+
+    if (preset === 'chrome') {
+        appTypeSelect.value = 'win32';
+        win32Path.value = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+        win32Args.value = '--kiosk https://example.com';
+    }
+
+    if (preset === 'firefox') {
+        appTypeSelect.value = 'win32';
+        win32Path.value = 'C:\\Program Files\\Mozilla Firefox\\firefox.exe';
+        win32Args.value = '--kiosk https://example.com';
+    }
+
+    updateAppTypeUI();
+    updatePreview();
+}
+
 function updateEdgeSourceUI() {
     const sourceType = document.getElementById('edgeSourceType').value;
     const urlConfig = document.getElementById('edgeUrlConfig');

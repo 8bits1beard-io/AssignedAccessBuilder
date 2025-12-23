@@ -119,7 +119,7 @@
                                     <button type="button" class="tooltip-icon" aria-label="Help for Display Name" aria-describedby="displayName-tooltip">?</button>
                                     <span class="tooltip-content" id="displayName-tooltip" role="tooltip">The friendly name shown on the Windows login screen. Windows will create a managed local account (typically "kioskUser0") that auto-logs in. This display name is just for identification.</span>
                                 </label>
-                                <input type="text" id="displayName" placeholder="e.g., Kiosk User" onchange="updatePreview()" aria-describedby="displayName-tooltip">
+                                <input type="text" id="displayName" value="Kiosk User" placeholder="e.g., Kiosk User" onchange="updatePreview()" aria-describedby="displayName-tooltip">
                             </div>
                         </div>
 
@@ -175,6 +175,19 @@
                         <legend class="section-header">Single-App Settings</legend>
                         <div class="section-content">
                             <div class="form-group">
+                                <label class="with-tooltip">
+                                    Single-App Presets
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Single-App Presets" aria-describedby="singleAppPresets-tooltip">?</button>
+                                    <span class="tooltip-content" id="singleAppPresets-tooltip" role="tooltip">Quick-fill common single-app choices. You can edit URLs and arguments after selecting a preset.</span>
+                                </label>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                                    <button type="button" class="btn-secondary btn-small" onclick="applySingleAppPreset('edge')">Edge Kiosk</button>
+                                    <button type="button" class="btn-secondary btn-small" onclick="applySingleAppPreset('chrome')">Chrome Kiosk</button>
+                                    <button type="button" class="btn-secondary btn-small" onclick="applySingleAppPreset('firefox')">Firefox Kiosk</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
                                 <label for="appType" class="with-tooltip">
                                     Application Type
                                     <button type="button" class="tooltip-icon" aria-label="Help for Application Type" aria-describedby="appType-tooltip">?</button>
@@ -207,7 +220,7 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for URL" aria-describedby="edgeUrl-tooltip">?</button>
                                         <span class="tooltip-content" id="edgeUrl-tooltip" role="tooltip">The web address Edge will load in kiosk mode. Include the full URL with https://. You can also use file:/// URLs directly (use %20 for spaces in paths).</span>
                                     </label>
-                                    <input type="text" id="edgeUrl" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
+                                    <input type="text" id="edgeUrl" value="https://www.microsoft.com" placeholder="https://example.com" onchange="updatePreview()" aria-describedby="edgeUrl-tooltip">
                                 </div>
 
                                 <div id="edgeFileConfig" class="form-group hidden" aria-hidden="true">
