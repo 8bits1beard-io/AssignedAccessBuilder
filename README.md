@@ -89,8 +89,11 @@ flowchart TD
 ### Export & Deploy
 - Real-time XML validation with contextual tooltips
 - PowerShell deploy script with JSON logging
+- Shortcut-only script for Start Menu pins (Intune/OMA-URI scenarios)
 - Import/export XML configurations
 - Tabbed deployment guide (Intune, PowerShell, PPKG)
+
+Note: If Windows blocks a downloaded script, right-click the `.ps1` file, choose **Properties**, then **Unblock**.
 
 ### Accessibility
 - Dark/light theme

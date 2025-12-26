@@ -98,6 +98,11 @@ flowchart LR
    - Generates JSON log file with timestamps and execution details
 4. Reboot
 
+**Shortcut-Only Script (Intune/OMA-URI):**
+- Click **Download Shortcut Script** to generate only the Start Menu .lnk files
+- Run as Administrator on target devices to populate the Start Menu Programs folder
+- If Windows blocks the script, right-click the .ps1 file, choose **Properties**, then **Unblock**
+
 ### Provisioning Package (PPKG)
 
 1. Generate XML
