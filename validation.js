@@ -2,6 +2,21 @@
    Validation
    ============================================================================ */
 function validate() {
+    function isStartMenuShortcutPath(path) {
+        if (!path) return false;
+        const normalized = path.replace(/\//g, '\\').toLowerCase();
+        const startMenuFragment = '\\microsoft\\windows\\start menu\\programs\\';
+        const hasFragment = normalized.includes(startMenuFragment);
+        const allowedRoots = [
+            '%appdata%',
+            '%allusersprofile%',
+            '%programdata%',
+            'c:\\users\\',
+            'c:\\programdata\\'
+        ];
+        return hasFragment && allowedRoots.some(root => normalized.startsWith(root));
+    }
+
     const rules = [
         () => {
             const errs = [];
@@ -62,6 +77,11 @@ function validate() {
             const missingTargets = state.startPins.filter(p => p.pinType !== 'packagedAppId' && !p.target && !p.systemShortcut);
             if (missingTargets.length > 0) {
                 errs.push(`${missingTargets.length} shortcut(s) missing target path: ${missingTargets.map(p => p.name).join(', ')}`);
+            }
+
+            const invalidShortcutPaths = state.startPins.filter(p => p.systemShortcut && !isStartMenuShortcutPath(p.systemShortcut));
+            if (invalidShortcutPaths.length > 0) {
+                errs.push(`Start menu pin shortcuts must live under the Start Menu Programs folder (%APPDATA% or %ALLUSERSPROFILE%): ${invalidShortcutPaths.map(p => p.name).join(', ')}`);
             }
 
             return errs;

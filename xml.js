@@ -155,9 +155,9 @@ function generateMultiAppProfile() {
                     };
                 }
                 // Win32 apps use desktopAppLink (.lnk shortcut)
-                // Use system shortcut if available, otherwise custom shortcut path
+                // Use system shortcut if available, otherwise Start Menu Programs path
                 return {
-                    desktopAppLink: p.systemShortcut || `C:\\ProgramData\\KioskShortcuts\\${p.name}.lnk`
+                    desktopAppLink: p.systemShortcut || `%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\${p.name}.lnk`
                 };
             })
         };

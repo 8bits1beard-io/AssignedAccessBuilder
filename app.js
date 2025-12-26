@@ -795,9 +795,10 @@ function renderPinList() {
         const isUwp = pin.pinType === 'packagedAppId';
         const displayTarget = isUwp
             ? pin.packagedAppId
-            : (pin.target ? truncate(pin.target, 40) : '(no target - click to edit)');
+            : (pin.target ? truncate(pin.target, 40)
+                : (pin.systemShortcut ? truncate(pin.systemShortcut, 40) : '(no target - click to edit)'));
         const hasArgs = pin.args ? ` (${truncate(pin.args, 20)})` : '';
-        const missingTarget = !isUwp && !pin.target;
+        const missingTarget = !isUwp && !pin.target && !pin.systemShortcut;
         const warningStyle = missingTarget ? 'color: var(--error-color, #e74c3c);' : 'color: var(--text-secondary);';
         const typeLabel = isUwp ? '<span style="background: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 6px;">UWP</span>' : '';
         return `
@@ -964,7 +965,7 @@ function New-Shortcut {
         [string]$IconLocation
     )
 
-    $shortcutDir = "C:\\ProgramData\\KioskShortcuts"
+    $shortcutDir = Join-Path $env:ALLUSERSPROFILE "Microsoft\\Windows\\Start Menu\\Programs"
     if (-not (Test-Path $shortcutDir)) {
         New-Item -ItemType Directory -Path $shortcutDir -Force | Out-Null
     }
@@ -1478,7 +1479,7 @@ function parseAndLoadXml(xmlString) {
                 if (pinsJson.pinnedList) {
                     pinsJson.pinnedList.forEach(pin => {
                         if (pin.desktopAppLink) {
-                            // Try to extract name from path (e.g., C:\ProgramData\KioskShortcuts\Name.lnk)
+                            // Try to extract name from path (e.g., %ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Name.lnk)
                             const path = pin.desktopAppLink;
                             let name = path;
 
@@ -1491,7 +1492,8 @@ function parseAndLoadXml(xmlString) {
                             // Create a basic shortcut object - user may need to update target
                             state.startPins.push({
                                 name: name,
-                                target: '', // Unknown from XML, user needs to set
+                                target: '', // Unknown from XML, user needs to set if no .lnk is available
+                                systemShortcut: path,
                                 args: '',
                                 workingDir: '',
                                 iconPath: ''

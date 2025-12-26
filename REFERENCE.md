@@ -92,7 +92,7 @@ flowchart LR
    ```
 3. The script performs:
    - Pre-flight checks (Windows edition, SYSTEM context via SID S-1-5-18, WMI availability)
-   - Creates shortcuts in `C:\ProgramData\KioskShortcuts\` for Start menu pins
+   - Creates shortcuts in `%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\` for Start menu pins
    - Applies configuration via WMI (`MDM_AssignedAccess`)
    - Generates JSON log file with timestamps and execution details
 4. Reboot
@@ -115,7 +115,7 @@ flowchart LR
 | "Operation cancelled due to restrictions" | Win32 app blocked by RestrictRun registry | Use Edge kiosk mode or ensure all required executables are allowed |
 | Kiosk not applying after reboot | Invalid XML or insufficient privileges | Validate XML in tool; ensure script ran as SYSTEM |
 | Configuration partially applied | XML namespace mismatch | Regenerate XML; check Windows version compatibility |
-| Start menu pins not appearing | Shortcut file missing or invalid path | Verify shortcuts exist at paths in StartPins JSON; use PowerShell script to auto-create |
+| Start menu pins not appearing | Shortcut file missing or invalid path | Verify shortcuts exist in the Start Menu Programs folder and match paths in StartPins JSON; use PowerShell script to auto-create |
 | Edge not launching in kiosk mode | Missing Edge components in allowed apps | Add Edge via preset button (includes msedge.exe and proxy) |
 | Auto-launch app not starting | App not in AllowedApps list | Ensure the auto-launch app is also added to the allowed applications list |
 | SYSTEM context check fails | Script not running as SYSTEM | Use `psexec -i -s` to run PowerShell as SYSTEM |
@@ -227,7 +227,7 @@ Get-StartApps | Format-Table Name, AppID
 
 ## StartPins JSON Format (Windows 11)
 
-The StartPins element uses JSON to define pinned shortcuts. Three formats are supported:
+The StartPins element uses JSON to define pinned shortcuts. Desktop shortcuts must point to .lnk files in the Start Menu Programs folder. Three formats are supported:
 
 ```json
 {
@@ -236,7 +236,7 @@ The StartPins element uses JSON to define pinned shortcuts. Three formats are su
     {"packagedAppId": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App"},
 
     // Desktop apps - use desktopAppLink with .lnk path
-    {"desktopAppLink": "C:\\ProgramData\\KioskShortcuts\\Notepad.lnk"},
+    {"desktopAppLink": "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Notepad.lnk"},
 
     // Edge pinned sites - use secondaryTile
     {"secondaryTile": {
