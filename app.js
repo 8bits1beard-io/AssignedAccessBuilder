@@ -452,6 +452,12 @@ function isHelperExecutable(value) {
            lowerValue.includes('crashhandler');
 }
 
+function shouldSkipAutoLaunch(app) {
+    if (!app) return true;
+    if (app.skipAutoLaunch) return true;
+    return isHelperExecutable(app.value);
+}
+
 function updateAutoLaunchSelector() {
     const select = dom.get('autoLaunchApp');
     const currentValue = select.value;
@@ -462,7 +468,7 @@ function updateAutoLaunchSelector() {
     // Add allowed apps as options (skip helper executables)
     state.allowedApps.forEach((app, index) => {
         // Skip helper executables - they shouldn't be auto-launched
-        if (isHelperExecutable(app.value)) {
+        if (shouldSkipAutoLaunch(app)) {
             return;
         }
 
@@ -481,7 +487,9 @@ function updateAutoLaunchSelector() {
     });
 
     // Restore selection if still valid
-    if (currentValue !== '' && state.allowedApps[parseInt(currentValue)]) {
+    if (currentValue !== '' &&
+        state.allowedApps[parseInt(currentValue)] &&
+        !shouldSkipAutoLaunch(state.allowedApps[parseInt(currentValue)])) {
         select.value = currentValue;
     } else {
         select.value = '';
@@ -556,6 +564,9 @@ function addAllowedApp(app, options = {}) {
     if (options.skipAutoPin || entry.skipAutoPin) {
         entry.skipAutoPin = true;
     }
+    if (options.skipAutoLaunch || entry.skipAutoLaunch) {
+        entry.skipAutoLaunch = true;
+    }
 
     state.allowedApps.push(entry);
 
@@ -579,7 +590,7 @@ function ensureEdgeDependencies(app) {
         const edgeApp = appPresets.apps[key];
         if (!edgeApp) return;
         const isDependency = key !== 'edge';
-        addAllowedApp(edgeApp, { skipAutoPin: isDependency });
+        addAllowedApp(edgeApp, { skipAutoPin: isDependency, skipAutoLaunch: isDependency });
     });
 }
 
@@ -611,12 +622,12 @@ function addCommonApp(appKey) {
     if (groups[appKey]) {
         groups[appKey].forEach(key => {
             const app = apps[key];
-            addAllowedApp(app, { skipAutoPin: app?.skipAutoPin });
+            addAllowedApp(app, { skipAutoPin: app?.skipAutoPin, skipAutoLaunch: app?.skipAutoLaunch });
         });
     } else {
         // Single app
         const app = apps[appKey];
-        addAllowedApp(app, { skipAutoPin: app?.skipAutoPin });
+        addAllowedApp(app, { skipAutoPin: app?.skipAutoPin, skipAutoLaunch: app?.skipAutoLaunch });
     }
 
     renderAppList();
