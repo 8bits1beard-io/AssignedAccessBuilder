@@ -268,6 +268,7 @@ const actionHandlers = {
     downloadPowerShell,
     downloadShortcutsScript,
     downloadStartPinsJson,
+    downloadStartLayoutXml,
     handleImport,
     copyProfileId
 };
@@ -1377,6 +1378,34 @@ function downloadStartPinsJson() {
 
     const content = JSON.stringify(pinsJson, null, 2);
     downloadFile(content, getConfigFileName('startpins.json'), 'application/json');
+}
+
+function downloadStartLayoutXml() {
+    if (!showValidation()) {
+        if (!confirm('Configuration has errors. Download anyway?')) return;
+    }
+
+    const layoutXml = buildStartLayoutXml();
+    if (!layoutXml) {
+        if (!confirm('No Start menu pins configured. Download empty Start layout anyway?')) return;
+    }
+
+    const content = layoutXml || `<?xml version="1.0" encoding="utf-8"?>\n` +
+        `<LayoutModificationTemplate Version="1"\n` +
+        `    xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification"\n` +
+        `    xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout"\n` +
+        `    xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout">\n` +
+        `    <LayoutOptions StartTileGroupCellWidth="6"/>\n` +
+        `    <DefaultLayoutOverride>\n` +
+        `        <StartLayoutCollection>\n` +
+        `            <defaultlayout:StartLayout GroupCellWidth="6">\n` +
+        `                <start:Group Name="Kiosk"/>\n` +
+        `            </defaultlayout:StartLayout>\n` +
+        `        </StartLayoutCollection>\n` +
+        `    </DefaultLayoutOverride>\n` +
+        `</LayoutModificationTemplate>`;
+
+    downloadFile(content, getConfigFileName('startlayout.xml'), 'application/xml');
 }
 
 function generateReadme() {

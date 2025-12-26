@@ -179,6 +179,55 @@ function buildStartPinsJson() {
     };
 }
 
+function buildStartLayoutXml() {
+    const pins = state.startPins;
+    if (pins.length === 0) {
+        return null;
+    }
+
+    const tiles = [];
+    let col = 0;
+    let row = 0;
+    const maxCols = 6;
+
+    pins.forEach(pin => {
+        let tile = '';
+        if (pin.pinType === 'packagedAppId' && pin.packagedAppId) {
+            tile = `<start:Tile Size="2x2" Column="${col}" Row="${row}" AppUserModelID="${escapeXml(pin.packagedAppId)}" />`;
+        } else if (pin.pinType === 'secondaryTile' && pin.packagedAppId) {
+            tile = `<start:Tile Size="2x2" Column="${col}" Row="${row}" AppUserModelID="${escapeXml(pin.packagedAppId)}" />`;
+        } else {
+            const linkPath = pin.systemShortcut || `%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\${pin.name}.lnk`;
+            tile = `<start:DesktopApplicationTile Size="2x2" Column="${col}" Row="${row}" DesktopApplicationLinkPath="${escapeXml(linkPath)}" />`;
+        }
+
+        tiles.push(tile);
+
+        col += 2;
+        if (col >= maxCols) {
+            col = 0;
+            row += 2;
+        }
+    });
+
+    return `<?xml version="1.0" encoding="utf-8"?>\n` +
+`<LayoutModificationTemplate Version="1"\n` +
+`    xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification"\n` +
+`    xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout"\n` +
+`    xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout">\n` +
+`    <LayoutOptions StartTileGroupCellWidth="6"/>\n` +
+`    <DefaultLayoutOverride>\n` +
+`        <StartLayoutCollection>\n` +
+`            <defaultlayout:StartLayout GroupCellWidth="6">\n` +
+`                <start:Group Name="Kiosk">\n` +
+`                    ${tiles.join('\n                    ')}\n` +
+`                </start:Group>\n` +
+`            </defaultlayout:StartLayout>\n` +
+`        </StartLayoutCollection>\n` +
+`    </DefaultLayoutOverride>\n` +
+`</LayoutModificationTemplate>`;
+}
+
 function generateAccountConfig() {
     let xml = '';
     const profileId = dom.get('profileId').value;
