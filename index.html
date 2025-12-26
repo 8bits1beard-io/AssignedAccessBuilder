@@ -618,40 +618,46 @@
                                     <strong>Note:</strong> Common pins use default installation paths. If an app is installed in a custom location, use "Add Custom Shortcut" above instead.
                                 </p>
                                 <div role="group" aria-labelledby="commonPins-label">
-                                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <div style="flex: 1; min-width: 200px;">
-                                            <label for="browserPinMode" style="font-size: 0.75rem; color: var(--text-secondary);">Browser Mode</label>
-                                            <select id="browserPinMode" data-change="updateBrowserPinModeUI" style="width: 100%;">
-                                                <option value="standard">Standard</option>
-                                                <option value="kioskFullscreen">Kiosk Fullscreen</option>
-                                                <option value="kioskPublic">Kiosk Public Browsing (Edge)</option>
-                                                <option value="private">Private/Incognito</option>
-                                            </select>
-                                        </div>
-                                        <div id="browserPinSourceConfig" style="flex: 2; min-width: 260px;">
-                                            <label for="browserPinSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Kiosk Source</label>
-                                            <div style="display: flex; gap: 8px; align-items: center;">
-                                                <select id="browserPinSourceType" data-change="updateBrowserPinSourceUI" style="width: 140px;">
-                                                    <option value="url">Web URL</option>
-                                                    <option value="file">Local File</option>
+                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
+                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
+                                        <button type="button" class="btn-secondary btn-small" data-action="selectBrowserPin" data-arg="edge" data-browser-pin="edge" aria-pressed="false">Edge</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="selectBrowserPin" data-arg="chrome" data-browser-pin="chrome" aria-pressed="false">Chrome</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="selectBrowserPin" data-arg="firefox" data-browser-pin="firefox" aria-pressed="false">Firefox</button>
+                                    </div>
+                                    <div id="browserPinConfig" class="hidden" aria-hidden="true" style="margin-bottom: 12px;">
+                                        <p class="hint" style="margin-bottom: 8px;">
+                                            <strong>Tip:</strong> Kiosk modes require a URL or local file. Public browsing applies to Edge only; other browsers use fullscreen kiosk.
+                                        </p>
+                                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
+                                            <div style="flex: 1; min-width: 200px;">
+                                                <label for="browserPinMode" style="font-size: 0.75rem; color: var(--text-secondary);">Browser Mode</label>
+                                                <select id="browserPinMode" data-change="updateBrowserPinModeUI" style="width: 100%;">
+                                                    <option value="standard">Standard</option>
+                                                    <option value="kioskFullscreen">Kiosk Fullscreen</option>
+                                                    <option value="kioskPublic">Kiosk Public Browsing (Edge)</option>
+                                                    <option value="private">Private/Incognito</option>
                                                 </select>
-                                                <div id="browserPinUrlConfig" style="flex: 1;">
-                                                    <input type="text" id="browserPinUrl" placeholder="https://example.com" style="width: 100%;">
-                                                </div>
-                                                <div id="browserPinFileConfig" class="hidden" style="flex: 1;" aria-hidden="true">
-                                                    <input type="text" id="browserPinFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                                            </div>
+                                            <div id="browserPinSourceConfig" style="flex: 2; min-width: 260px;">
+                                                <label for="browserPinSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Kiosk Source</label>
+                                                <div style="display: flex; gap: 8px; align-items: center;">
+                                                    <select id="browserPinSourceType" data-change="updateBrowserPinSourceUI" style="width: 140px;">
+                                                        <option value="url">Web URL</option>
+                                                        <option value="file">Local File</option>
+                                                    </select>
+                                                    <div id="browserPinUrlConfig" style="flex: 1;">
+                                                        <input type="text" id="browserPinUrl" placeholder="https://example.com" style="width: 100%;">
+                                                    </div>
+                                                    <div id="browserPinFileConfig" class="hidden" style="flex: 1;" aria-hidden="true">
+                                                        <input type="text" id="browserPinFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <p class="hint" style="margin-bottom: 8px;">
-                                        <strong>Tip:</strong> Kiosk modes require a URL or local file. Public browsing applies to Edge only; other browsers use fullscreen kiosk.
-                                    </p>
-                                    <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
-                                        <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">Browsers:</strong>
-                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="edge">Edge</button>
-                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="chrome">Chrome</button>
-                                        <button type="button" class="btn-secondary btn-small" data-action="addCommonPin" data-arg="firefox">Firefox</button>
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            <span id="browserPinSelectedName" style="font-size: 0.75rem; color: var(--text-secondary);">Select a browser to configure</span>
+                                            <button type="button" class="btn-primary btn-small" data-action="addSelectedBrowserPin" id="addBrowserPinBtn" disabled>Add Browser Pin</button>
+                                        </div>
                                     </div>
                                     <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px;">
                                         <strong style="width: 100%; font-size: 0.8rem; color: var(--text-secondary);">System Utilities:</strong>

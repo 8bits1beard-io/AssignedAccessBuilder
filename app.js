@@ -261,6 +261,8 @@ const actionHandlers = {
     syncAutoPins,
     updateBrowserPinModeUI,
     updateBrowserPinSourceUI,
+    selectBrowserPin,
+    addSelectedBrowserPin,
     copyXml,
     downloadXml,
     downloadPowerShell,
@@ -366,6 +368,48 @@ function updateBrowserPinModeUI() {
     if (needsSource) {
         updateBrowserPinSourceUI();
     }
+}
+
+let selectedBrowserPinKey = null;
+
+function selectBrowserPin(pinKey) {
+    selectedBrowserPinKey = pinKey;
+    updateBrowserPinSelectionUI();
+    updateBrowserPinModeUI();
+    updateBrowserPinSelectionUI();
+}
+
+function updateBrowserPinSelectionUI() {
+    const config = dom.get('browserPinConfig');
+    const selectedName = dom.get('browserPinSelectedName');
+    const addButton = dom.get('addBrowserPinBtn');
+
+    if (!config || !selectedName || !addButton) return;
+
+    const hasSelection = Boolean(selectedBrowserPinKey);
+    config.classList.toggle('hidden', !hasSelection);
+    config.setAttribute('aria-hidden', !hasSelection);
+
+    if (hasSelection) {
+        const presetName = pinPresets?.pins?.[selectedBrowserPinKey]?.name;
+        selectedName.textContent = `Selected: ${presetName || selectedBrowserPinKey}`;
+    } else {
+        selectedName.textContent = 'Select a browser to configure';
+    }
+
+    addButton.disabled = !hasSelection;
+
+    document.querySelectorAll('[data-browser-pin]').forEach(button => {
+        button.setAttribute('aria-pressed', button.dataset.browserPin === selectedBrowserPinKey ? 'true' : 'false');
+    });
+}
+
+function addSelectedBrowserPin() {
+    if (!selectedBrowserPinKey) {
+        alert('Select a browser first.');
+        return;
+    }
+    addCommonPin(selectedBrowserPinKey);
 }
 
 function getEdgeUrl() {

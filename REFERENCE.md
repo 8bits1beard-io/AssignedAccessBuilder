@@ -36,6 +36,7 @@ Detailed documentation for AssignedAccess XML Builder.
 4. Add Start menu pins:
    - Use preset shortcuts (27+ available) or create custom pins
    - Each pin needs: Name, Target path, optional arguments/icon
+   - For browser pins, select a browser first, configure mode/source, then click **Add Browser Pin**
 5. Configure system restrictions:
    - **Taskbar**: Show or hide
    - **File Explorer**: None, Downloads only, Removable drives, or Full access
