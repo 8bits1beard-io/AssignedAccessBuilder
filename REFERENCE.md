@@ -116,7 +116,7 @@ flowchart LR
 | Kiosk not applying after reboot | Invalid XML or insufficient privileges | Validate XML in tool; ensure script ran as SYSTEM |
 | Configuration partially applied | XML namespace mismatch | Regenerate XML; check Windows version compatibility |
 | Start menu pins not appearing | Shortcut file missing or invalid path | Verify shortcuts exist in the Start Menu Programs folder and match paths in StartPins JSON; use PowerShell script to auto-create |
-| Edge not launching in kiosk mode | Missing Edge components in allowed apps | Add Edge via preset button (includes msedge.exe and proxy) |
+| Edge not launching in kiosk mode | Missing Edge components in allowed apps | Add Edge via preset button (includes msedge.exe, msedge_proxy.exe, and the Edge packaged app ID) |
 | Auto-launch app not starting | App not in AllowedApps list | Ensure the auto-launch app is also added to the allowed applications list |
 | SYSTEM context check fails | Script not running as SYSTEM | Use `psexec -i -s` to run PowerShell as SYSTEM |
 | "Unsupported edition" error | Windows Home edition | Kiosk mode requires Pro, Enterprise, or Education |
@@ -163,6 +163,13 @@ Edge Chromium (the current version of Edge) is a **desktop application**, not a 
 | `--kiosk-idle-timeout-minutes=N` | Reset to home URL after N minutes of inactivity |
 
 > **Note:** Both kiosk types automatically run as InPrivate sessions. The `--inprivate` flag is not needed.
+
+### Edge Allowed Apps for Secondary Tiles
+
+When using Edge StartPins secondary tiles, include all required Edge entries in the allowed apps list:
+- `%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe`
+- `%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge_proxy.exe`
+- `Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App`
 
 ---
 

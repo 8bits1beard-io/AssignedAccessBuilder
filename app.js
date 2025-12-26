@@ -545,16 +545,54 @@ function updateMultiEdgeSourceUI() {
 /* ============================================================================
    App List Management (Multi-App Mode)
    ============================================================================ */
+function addAllowedApp(app, options = {}) {
+    if (!app || !app.value) return false;
+
+    if (state.allowedApps.find(a => a.value === app.value)) {
+        return false;
+    }
+
+    const entry = { ...app };
+    if (options.skipAutoPin || entry.skipAutoPin) {
+        entry.skipAutoPin = true;
+    }
+
+    state.allowedApps.push(entry);
+
+    if (dom.get('autoPinAllowed')?.checked && !entry.skipAutoPin) {
+        ensurePinForAllowedApp(entry);
+    }
+
+    return true;
+}
+
+function ensureEdgeDependencies(app) {
+    if (!appPresets?.apps) return;
+
+    const value = (app.value || '').toLowerCase();
+    const isEdgeValue = isEdgeApp(app.value) ||
+        value === 'microsoft.microsoftedge.stable_8wekyb3d8bbwe!app';
+
+    if (!isEdgeValue) return;
+
+    ['edge', 'edgeProxy', 'edgeAppId'].forEach(key => {
+        const edgeApp = appPresets.apps[key];
+        if (!edgeApp) return;
+        const isDependency = key !== 'edge';
+        addAllowedApp(edgeApp, { skipAutoPin: isDependency });
+    });
+}
+
 function addApp() {
     const type = dom.get('addAppType').value;
     const value = dom.get('addAppValue').value.trim();
 
     if (!value) return;
 
-    state.allowedApps.push({ type, value });
+    const added = addAllowedApp({ type, value });
     dom.get('addAppValue').value = '';
-    if (dom.get('autoPinAllowed')?.checked) {
-        ensurePinForAllowedApp({ type, value });
+    if (added) {
+        ensureEdgeDependencies({ type, value });
     }
     renderAppList();
     updateAutoLaunchSelector();
@@ -569,29 +607,20 @@ function addCommonApp(appKey) {
 
     const apps = appPresets.apps;
     const groups = appPresets.groups;
-    const beforeCount = state.allowedApps.length;
-
     // Check if this key has a group (multiple apps to add)
     if (groups[appKey]) {
         groups[appKey].forEach(key => {
             const app = apps[key];
-            if (app && !state.allowedApps.find(a => a.value === app.value)) {
-                state.allowedApps.push({ ...app });
-            }
+            addAllowedApp(app, { skipAutoPin: app?.skipAutoPin });
         });
     } else {
         // Single app
         const app = apps[appKey];
-        if (app && !state.allowedApps.find(a => a.value === app.value)) {
-            state.allowedApps.push({ ...app });
-        }
+        addAllowedApp(app, { skipAutoPin: app?.skipAutoPin });
     }
 
     renderAppList();
     updateAutoLaunchSelector();
-    if (dom.get('autoPinAllowed')?.checked && state.allowedApps.length !== beforeCount) {
-        state.allowedApps.slice(beforeCount).forEach(app => ensurePinForAllowedApp(app));
-    }
     updatePreview();
 }
 
