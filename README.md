@@ -90,7 +90,6 @@ flowchart TD
 - Real-time XML validation with contextual tooltips
 - PowerShell deploy script with JSON logging
 - Shortcut-only script for Start Menu pins (Intune/OMA-URI scenarios)
-- StartPins JSON download for Intune Start layout scenarios
 - Start layout XML download for Intune file uploads
 - Import/export XML configurations
 - Tabbed deployment guide (Intune, PowerShell, PPKG)
