@@ -655,6 +655,11 @@ function addApp() {
     updatePreview();
 }
 
+function normalizeAutoPinKey(value) {
+    if (!value) return '';
+    return value.trim().toLowerCase();
+}
+
 function addCommonApp(appKey) {
     if (!appPresets) {
         console.error('App presets not loaded');
@@ -820,6 +825,8 @@ function addCommonPin(pinKey) {
 
 function ensurePinForAllowedApp(app) {
     if (!app || !app.value) return;
+    const autoKey = normalizeAutoPinKey(app.value);
+    if (state.autoPinExclusions.includes(autoKey)) return;
 
     const existing = state.startPins.some(pin => {
         if (pin.pinType === 'packagedAppId') {
@@ -834,7 +841,9 @@ function ensurePinForAllowedApp(app) {
         state.startPins.push({
             name: app.value,
             pinType: 'packagedAppId',
-            packagedAppId: app.value
+            packagedAppId: app.value,
+            autoPinned: true,
+            autoPinSource: app.value
         });
         return;
     }
@@ -845,12 +854,21 @@ function ensurePinForAllowedApp(app) {
         target: app.value,
         args: '',
         workingDir: '',
-        iconPath: ''
+        iconPath: '',
+        autoPinned: true,
+        autoPinSource: app.value
     });
 }
 
 function syncAutoPins() {
     if (!dom.get('autoPinAllowed')?.checked) {
+        const beforeCount = state.startPins.length;
+        state.startPins = state.startPins.filter(pin => !pin.autoPinned);
+        state.autoPinExclusions = [];
+        if (state.startPins.length !== beforeCount) {
+            renderPinList();
+            updatePreview();
+        }
         return;
     }
 
@@ -860,6 +878,13 @@ function syncAutoPins() {
 }
 
 function removePin(index) {
+    const removedPin = state.startPins[index];
+    if (removedPin?.autoPinned && removedPin.autoPinSource) {
+        const autoKey = normalizeAutoPinKey(removedPin.autoPinSource);
+        if (autoKey && !state.autoPinExclusions.includes(autoKey)) {
+            state.autoPinExclusions.push(autoKey);
+        }
+    }
     state.startPins.splice(index, 1);
     renderPinList();
     updatePreview();

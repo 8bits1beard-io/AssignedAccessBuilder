@@ -37,6 +37,7 @@ Detailed documentation for AssignedAccess XML Builder.
    - Use preset shortcuts (27+ available) or create custom pins
    - Each pin needs: Name, Target path, optional arguments/icon
    - For browser pins, select a browser first, configure mode/source, then click **Add Browser Pin**
+   - Auto-pin adds allowed apps as pins; removing an auto-pin keeps it removed while auto-pin stays enabled
 5. Configure system restrictions:
    - **Taskbar**: Show or hide
    - **File Explorer**: None, Downloads only, Removable drives, or Full access
