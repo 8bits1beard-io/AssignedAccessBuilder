@@ -267,6 +267,7 @@ const actionHandlers = {
     downloadXml,
     downloadPowerShell,
     downloadShortcutsScript,
+    downloadStartPinsJson,
     handleImport,
     copyProfileId
 };
@@ -1361,6 +1362,21 @@ foreach ($sc in $shortcuts) {
 `;
 
     downloadFile(ps1, getConfigFileName('shortcuts.ps1'), 'text/plain');
+}
+
+function downloadStartPinsJson() {
+    if (!showValidation()) {
+        if (!confirm('Configuration has errors. Download anyway?')) return;
+    }
+
+    let pinsJson = buildStartPinsJson();
+    if (!pinsJson) {
+        if (!confirm('No Start menu pins configured. Download empty StartPins JSON anyway?')) return;
+        pinsJson = { pinnedList: [] };
+    }
+
+    const content = JSON.stringify(pinsJson, null, 2);
+    downloadFile(content, getConfigFileName('startpins.json'), 'application/json');
 }
 
 function generateReadme() {

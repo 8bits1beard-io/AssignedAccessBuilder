@@ -263,6 +263,8 @@ The StartPins element uses JSON to define pinned shortcuts. Desktop shortcuts mu
 }
 ```
 
+**StartPins JSON Download:** Use **Download StartPins JSON** to export the pinned list for Intune Settings Catalog / Start layout scenarios.
+
 ---
 
 ## Resources

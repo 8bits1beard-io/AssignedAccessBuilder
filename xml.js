@@ -136,31 +136,8 @@ function generateMultiAppProfile() {
 
     // Start Pins (Windows 11)
     // Supports three pin types: packagedAppId (UWP), desktopAppLink (.lnk), secondaryTile (Edge URLs)
-    if (state.startPins.length > 0) {
-        const pinsJson = {
-            pinnedList: state.startPins.map(p => {
-                // UWP/Store apps use packagedAppId
-                if (p.pinType === 'packagedAppId' && p.packagedAppId) {
-                    return { packagedAppId: p.packagedAppId };
-                }
-                // Edge with specific URL uses secondaryTile
-                if (p.pinType === 'secondaryTile' && p.packagedAppId) {
-                    return {
-                        secondaryTile: {
-                            tileId: p.tileId || `MSEdge._pin_${p.name.replace(/[^a-zA-Z0-9]/g, '')}`,
-                            arguments: p.args || '',
-                            displayName: p.name,
-                            packagedAppId: p.packagedAppId
-                        }
-                    };
-                }
-                // Win32 apps use desktopAppLink (.lnk shortcut)
-                // Use system shortcut if available, otherwise Start Menu Programs path
-                return {
-                    desktopAppLink: p.systemShortcut || `%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\${p.name}.lnk`
-                };
-            })
-        };
+    const pinsJson = buildStartPinsJson();
+    if (pinsJson) {
         xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
     }
 
@@ -169,6 +146,37 @@ function generateMultiAppProfile() {
     xml += `            <Taskbar ShowTaskbar="${showTaskbar}"/>\n`;
 
     return xml;
+}
+
+function buildStartPinsJson() {
+    if (state.startPins.length === 0) {
+        return null;
+    }
+
+    return {
+        pinnedList: state.startPins.map(p => {
+            // UWP/Store apps use packagedAppId
+            if (p.pinType === 'packagedAppId' && p.packagedAppId) {
+                return { packagedAppId: p.packagedAppId };
+            }
+            // Edge with specific URL uses secondaryTile
+            if (p.pinType === 'secondaryTile' && p.packagedAppId) {
+                return {
+                    secondaryTile: {
+                        tileId: p.tileId || `MSEdge._pin_${p.name.replace(/[^a-zA-Z0-9]/g, '')}`,
+                        arguments: p.args || '',
+                        displayName: p.name,
+                        packagedAppId: p.packagedAppId
+                    }
+                };
+            }
+            // Win32 apps use desktopAppLink (.lnk shortcut)
+            // Use system shortcut if available, otherwise Start Menu Programs path
+            return {
+                desktopAppLink: p.systemShortcut || `%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\${p.name}.lnk`
+            };
+        })
+    };
 }
 
 function generateAccountConfig() {
