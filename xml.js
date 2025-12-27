@@ -7,7 +7,7 @@ function generateXml() {
     let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
     xml += `<AssignedAccessConfiguration\n`;
     xml += `    xmlns="http://schemas.microsoft.com/AssignedAccess/2017/config"\n`;
-    xml += `    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201901/config"\n`;
+    xml += `    xmlns:rs5="http://schemas.microsoft.com/AssignedAccess/201810/config"\n`;
     xml += `    xmlns:v3="http://schemas.microsoft.com/AssignedAccess/2020/config"\n`;
     xml += `    xmlns:v4="http://schemas.microsoft.com/AssignedAccess/2021/config"\n`;
     xml += `    xmlns:v5="http://schemas.microsoft.com/AssignedAccess/2022/config">\n`;
@@ -141,14 +141,14 @@ function generateMultiAppProfile() {
         xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
     }
 
+    // Taskbar
+    const showTaskbar = dom.get('showTaskbar').checked;
+    xml += `            <Taskbar ShowTaskbar="${showTaskbar}"/>\n`;
+
     const taskbarLayoutXml = buildTaskbarLayoutXml();
     if (taskbarLayoutXml) {
         xml += `            <v5:TaskbarLayout><![CDATA[${taskbarLayoutXml}]]></v5:TaskbarLayout>\n`;
     }
-
-    // Taskbar
-    const showTaskbar = dom.get('showTaskbar').checked;
-    xml += `            <Taskbar ShowTaskbar="${showTaskbar}"/>\n`;
 
     return xml;
 }
