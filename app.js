@@ -602,6 +602,10 @@ function selectBrowserPin(pinKey) {
     updateBrowserPinModeUI();
     updateBrowserPinSelectionUI();
     updateEdgeTileSourceUI();
+    const taskbarSyncToggle = dom.get('taskbarSyncPins');
+    if (taskbarSyncToggle) {
+        taskbarSyncToggle.checked = state.taskbarSyncStartPins;
+    }
     updateTaskbarSyncUI();
 }
 
