@@ -606,7 +606,7 @@
                                         </div>
                                     </div>
                                     <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
-                                        Note: If icon path is specified, you are responsible for ensuring the icon file exists at that path.
+                                        Note: Provide the icon file on the target device. This tool creates shortcuts but does not supply icon files.
                                     </div>
                                     <button type="button" class="btn-primary" data-action="addPin" style="align-self: flex-start;">Add Shortcut</button>
                                 </div>
@@ -858,7 +858,7 @@
                             <div class="form-group">
                                 <div class="checkbox-group">
                                     <span class="toggle-switch">
-                                        <input type="checkbox" id="taskbarSyncPins" checked data-change="updateTaskbarSyncUI" aria-describedby="taskbarSyncPins-tooltip">
+                                        <input type="checkbox" id="taskbarSyncPins" data-change="updateTaskbarSyncUI" aria-describedby="taskbarSyncPins-tooltip">
                                         <span class="toggle-slider" aria-hidden="true"></span>
                                     </span>
                                     <label for="taskbarSyncPins" class="with-tooltip">
@@ -873,7 +873,7 @@
                                 <label class="with-tooltip">
                                     Add Taskbar Pin
                                     <button type="button" class="tooltip-icon" aria-label="Help for Taskbar Pins" aria-describedby="taskbarPins-tooltip">?</button>
-                                    <span class="tooltip-content" id="taskbarPins-tooltip" role="tooltip">Taskbar pins support packaged app IDs (AUMID) or Start Menu shortcut paths (.lnk).</span>
+                                    <span class="tooltip-content" id="taskbarPins-tooltip" role="tooltip">Taskbar pins support packaged app IDs (AUMID) or Start Menu shortcut paths (.lnk). Icon paths are only used for shortcuts you create.</span>
                                 </label>
                                 <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
                                     <div style="display: flex; gap: 8px;">
@@ -892,6 +892,13 @@
                                     <div>
                                         <label for="taskbarPinValue" style="font-size: 0.75rem; color: var(--text-secondary);">Value *</label>
                                         <input type="text" id="taskbarPinValue" placeholder="%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label for="taskbarPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional, shortcuts only)</label>
+                                        <input type="text" id="taskbarPinIconPath" placeholder="C:\\path\\to\\icon.ico" style="width: 100%;">
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
+                                        Note: Provide the icon file on the target device. This tool creates shortcuts but does not supply icon files.
                                     </div>
                                     <button type="button" class="btn-primary" data-action="addTaskbarPin" style="align-self: flex-start;">Add Taskbar Pin</button>
                                 </div>
@@ -923,6 +930,10 @@
                                     <div>
                                         <label for="editTaskbarPinValue" style="font-size: 0.75rem; color: var(--text-secondary);">Value *</label>
                                         <input type="text" id="editTaskbarPinValue" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label for="editTaskbarPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path (optional, shortcuts only)</label>
+                                        <input type="text" id="editTaskbarPinIconPath" style="width: 100%;">
                                     </div>
                                     <div style="display: flex; gap: 8px;">
                                         <button type="button" class="btn-primary btn-small" data-action="saveTaskbarPin">Save Changes</button>

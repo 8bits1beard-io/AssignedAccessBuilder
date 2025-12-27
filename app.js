@@ -431,7 +431,8 @@ function updateTaskbarSyncUI() {
                 pinType: pin.pinType,
                 packagedAppId: pin.packagedAppId,
                 systemShortcut: pin.systemShortcut,
-                target: pin.target
+                target: pin.target,
+                iconPath: pin.iconPath
             }));
     }
 
@@ -508,13 +509,15 @@ function addTaskbarPin() {
         pinType: type === 'packagedAppId' ? 'packagedAppId' : 'desktopAppLink',
         packagedAppId: type === 'packagedAppId' ? value : '',
         systemShortcut: type === 'desktopAppLink' ? value : '',
-        target: ''
+        target: '',
+        iconPath: type === 'desktopAppLink' ? dom.get('taskbarPinIconPath').value.trim() : ''
     };
 
     state.taskbarPins.push(pin);
 
     dom.get('taskbarPinName').value = '';
     dom.get('taskbarPinValue').value = '';
+    dom.get('taskbarPinIconPath').value = '';
 
     renderTaskbarPinList();
     updatePreview();
@@ -531,6 +534,7 @@ function editTaskbarPin(index) {
     dom.get('editTaskbarPinValue').value = pin.pinType === 'packagedAppId'
         ? (pin.packagedAppId || '')
         : (pin.systemShortcut || pin.target || '');
+    dom.get('editTaskbarPinIconPath').value = pin.iconPath || '';
 
     dom.get('taskbarEditPanel').classList.remove('hidden');
 }
@@ -554,6 +558,7 @@ function saveTaskbarPin() {
     pin.packagedAppId = type === 'packagedAppId' ? value : '';
     pin.systemShortcut = type === 'desktopAppLink' ? value : '';
     pin.target = '';
+    pin.iconPath = type === 'packagedAppId' ? '' : dom.get('editTaskbarPinIconPath').value.trim();
 
     renderTaskbarPinList();
     updatePreview();
@@ -1624,6 +1629,7 @@ function downloadShortcutsScript() {
     // Generate shortcuts JSON for PowerShell
     // Exclude: UWP apps (packagedAppId - no .lnk needed), system shortcuts (already exist)
     const shortcutsJson = JSON.stringify(state.startPins
+        .concat(state.taskbarPins || [])
         .filter(p => p.pinType !== 'packagedAppId' && !p.systemShortcut)
         .map(p => ({
             Name: p.name || '',

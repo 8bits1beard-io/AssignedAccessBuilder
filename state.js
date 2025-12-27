@@ -30,7 +30,7 @@ const state = {
     startPins: [],            // For multi-app and restricted modes: array of {name, target, args, workingDir, iconPath}
     autoPinExclusions: [],    // Allowed app values that should not be auto-pinned
     taskbarPins: [],          // For taskbar layout: array of {name, pinType, packagedAppId, systemShortcut}
-    taskbarSyncStartPins: true,
+    taskbarSyncStartPins: false,
     autoLaunchApp: null,      // Index into allowedApps array, or null (for multi-app/restricted)
     multiAppEdgeConfig: {     // Edge kiosk config for multi-app/restricted mode
         url: '',
