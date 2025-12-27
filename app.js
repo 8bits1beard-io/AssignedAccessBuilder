@@ -1363,7 +1363,9 @@ foreach ($sc in $shortcuts) {
 }
 `;
 
-    downloadFile(ps1, getConfigFileName('shortcuts.ps1'), 'text/plain');
+    const configName = dom.get('configName').value.trim();
+    const suffix = configName ? configName.replace(/\s+/g, '-').replace(/[<>:"/\\|?*]/g, '') : 'Config';
+    downloadFile(ps1, `CreateShortcuts_${suffix}.ps1`, 'text/plain');
 }
 
 function downloadStartLayoutXml() {
@@ -1391,7 +1393,9 @@ function downloadStartLayoutXml() {
         `    </DefaultLayoutOverride>\n` +
         `</LayoutModificationTemplate>`;
 
-    downloadFile(content, getConfigFileName('startlayout.xml'), 'application/xml');
+    const configName = dom.get('configName').value.trim();
+    const suffix = configName ? configName.replace(/\s+/g, '-').replace(/[<>:"/\\|?*]/g, '') : 'Config';
+    downloadFile(content, `StartLayout_${suffix}.xml`, 'application/xml');
 }
 
 function generateReadme() {
@@ -1560,6 +1564,10 @@ function handleImport(event) {
 function parseAndLoadXml(xmlString) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlString, 'text/xml');
+    const root = doc.documentElement;
+    if (!root || root.localName !== 'AssignedAccessConfiguration') {
+        throw new Error('Only AssignedAccess configuration XML files are supported.');
+    }
 
     // Profile ID
     const profile = doc.querySelector('Profile');
