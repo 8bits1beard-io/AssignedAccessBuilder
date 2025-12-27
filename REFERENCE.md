@@ -268,6 +268,7 @@ The StartPins element uses JSON to define pinned shortcuts. Desktop shortcuts mu
 
 **Start Layout XML Download:** Use **Download Start Layout XML** to export a LayoutModification XML file for Intune Start layout file uploads.
 
+
 ---
 
 ## Resources

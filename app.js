@@ -1457,6 +1457,7 @@ function downloadStartLayoutXml() {
     downloadFile(content, `StartLayout_${suffix}.xml`, 'application/xml');
 }
 
+
 function generateReadme() {
     const configName = dom.get('configName').value.trim();
     const profileId = dom.get('profileId').value || '(not set)';

@@ -141,6 +141,11 @@ function generateMultiAppProfile() {
         xml += `            <v5:StartPins><![CDATA[${JSON.stringify(pinsJson)}]]></v5:StartPins>\n`;
     }
 
+    const taskbarLayoutXml = buildTaskbarLayoutXml();
+    if (taskbarLayoutXml) {
+        xml += `            <v5:TaskbarLayout><![CDATA[${taskbarLayoutXml}]]></v5:TaskbarLayout>\n`;
+    }
+
     // Taskbar
     const showTaskbar = dom.get('showTaskbar').checked;
     xml += `            <Taskbar ShowTaskbar="${showTaskbar}"/>\n`;
@@ -225,6 +230,43 @@ function buildStartLayoutXml() {
 `            </defaultlayout:StartLayout>\n` +
 `        </StartLayoutCollection>\n` +
 `    </DefaultLayoutOverride>\n` +
+`</LayoutModificationTemplate>`;
+}
+
+function buildTaskbarLayoutXml() {
+    if (state.startPins.length === 0) {
+        return null;
+    }
+
+    const entries = state.startPins.map(pin => {
+        if (pin.pinType === 'desktopAppLink') {
+            const linkPath = pin.systemShortcut || `%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\${pin.name}.lnk`;
+            return `<taskbar:DesktopApp DesktopApplicationLinkPath="${escapeXml(linkPath)}"/>`;
+        }
+        if (pin.pinType === 'packagedAppId' && pin.packagedAppId) {
+            return `<taskbar:DesktopApp DesktopApplicationID="${escapeXml(pin.packagedAppId)}"/>`;
+        }
+        return '';
+    }).filter(Boolean);
+
+    if (entries.length === 0) {
+        return null;
+    }
+
+    return `<?xml version="1.0" encoding="utf-8"?>\n` +
+`<LayoutModificationTemplate\n` +
+`    xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification"\n` +
+`    xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout"\n` +
+`    xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout"\n` +
+`    xmlns:taskbar="http://schemas.microsoft.com/Start/2014/TaskbarLayout"\n` +
+`    Version="1">\n` +
+`    <CustomTaskbarLayoutCollection>\n` +
+`        <defaultlayout:TaskbarLayout>\n` +
+`            <taskbar:TaskbarPinList>\n` +
+`                ${entries.join('\n                ')}\n` +
+`            </taskbar:TaskbarPinList>\n` +
+`        </defaultlayout:TaskbarLayout>\n` +
+`    </CustomTaskbarLayoutCollection>\n` +
 `</LayoutModificationTemplate>`;
 }
 
