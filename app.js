@@ -2319,6 +2319,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateTabVisibility();
     updatePreview();
 
+    const konamiSequence = [
+        'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+        'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+        'KeyB', 'KeyA'
+    ];
+    let konamiIndex = 0;
+    document.addEventListener('keydown', (event) => {
+        const expectedKey = konamiSequence[konamiIndex];
+        if (event.code === expectedKey) {
+            konamiIndex++;
+            if (konamiIndex === konamiSequence.length) {
+                window.location.href = 'https://hirejoshua.com';
+                konamiIndex = 0;
+            }
+            return;
+        }
+        konamiIndex = event.code === konamiSequence[0] ? 1 : 0;
+    });
+
     document.addEventListener('click', (event) => {
         const target = event.target.closest('[data-action]');
         if (!target) return;
