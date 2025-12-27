@@ -234,11 +234,12 @@ function buildStartLayoutXml() {
 }
 
 function buildTaskbarLayoutXml() {
-    if (state.startPins.length === 0) {
+    const sourcePins = state.taskbarSyncStartPins ? state.startPins : state.taskbarPins;
+    if (!sourcePins || sourcePins.length === 0) {
         return null;
     }
 
-    const entries = state.startPins.map(pin => {
+    const entries = sourcePins.map(pin => {
         if (pin.pinType === 'desktopAppLink') {
             const linkPath = pin.systemShortcut || `%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\${pin.name}.lnk`;
             return `<taskbar:DesktopApp DesktopApplicationLinkPath="${escapeXml(linkPath)}"/>`;

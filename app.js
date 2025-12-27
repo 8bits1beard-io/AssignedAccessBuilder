@@ -262,6 +262,7 @@ const actionHandlers = {
     updateBrowserPinModeUI,
     updateBrowserPinSourceUI,
     updateEdgeTileSourceUI,
+    updateTaskbarSyncUI,
     selectBrowserPin,
     addSelectedBrowserPin,
     editPin,
@@ -269,6 +270,13 @@ const actionHandlers = {
     cancelEditPin,
     movePinUp,
     movePinDown,
+    addTaskbarPin,
+    editTaskbarPin,
+    saveTaskbarPin,
+    cancelTaskbarPinEdit,
+    removeTaskbarPin,
+    moveTaskbarPinUp,
+    moveTaskbarPinDown,
     copyXml,
     downloadXml,
     downloadPowerShell,
@@ -391,8 +399,197 @@ function updateBrowserPinModeUI() {
     }
 }
 
+function updateTaskbarSyncUI() {
+    const isSynced = dom.get('taskbarSyncPins')?.checked;
+    state.taskbarSyncStartPins = Boolean(isSynced);
+    const config = dom.get('taskbarLayoutConfig');
+    const list = dom.get('taskbarPinList');
+    const addPanel = dom.get('taskbarAddPanel');
+    const editPanel = dom.get('taskbarEditPanel');
+
+    if (config) {
+        config.classList.toggle('hidden', isSynced);
+        config.setAttribute('aria-hidden', isSynced ? 'true' : 'false');
+    }
+    if (list) {
+        list.setAttribute('aria-hidden', isSynced ? 'true' : 'false');
+    }
+    if (addPanel) {
+        addPanel.classList.toggle('hidden', isSynced);
+        addPanel.setAttribute('aria-hidden', isSynced ? 'true' : 'false');
+    }
+    if (editPanel) {
+        editPanel.classList.toggle('hidden', isSynced);
+        editPanel.setAttribute('aria-hidden', isSynced ? 'true' : 'false');
+    }
+
+    if (isSynced) {
+        state.taskbarPins = state.startPins
+            .filter(pin => pin.pinType === 'desktopAppLink' || pin.pinType === 'packagedAppId')
+            .map(pin => ({
+                name: pin.name || '',
+                pinType: pin.pinType,
+                packagedAppId: pin.packagedAppId,
+                systemShortcut: pin.systemShortcut,
+                target: pin.target
+            }));
+    }
+
+    renderTaskbarPinList();
+    updatePreview();
+}
+
+function renderTaskbarPinList() {
+    const list = dom.get('taskbarPinList');
+    const count = dom.get('taskbarPinCount');
+    if (!list || !count) return;
+
+    const pins = state.taskbarSyncStartPins ? state.startPins : state.taskbarPins;
+    const filteredPins = pins.filter(pin => pin.pinType === 'desktopAppLink' || pin.pinType === 'packagedAppId');
+
+    count.textContent = filteredPins.length;
+
+    if (filteredPins.length === 0) {
+        list.innerHTML = '<div class="empty-list" role="listitem">No taskbar pins configured</div>';
+        return;
+    }
+
+    list.innerHTML = filteredPins.map((pin, i) => {
+        const isUwp = pin.pinType === 'packagedAppId';
+        const displayTarget = isUwp
+            ? pin.packagedAppId
+            : (pin.systemShortcut || pin.target || '(no shortcut path)');
+        const warningStyle = !isUwp && !pin.systemShortcut && !pin.target
+            ? 'color: var(--error-color, #e74c3c);'
+            : 'color: var(--text-secondary);';
+        const actionsDisabled = state.taskbarSyncStartPins ? 'disabled' : '';
+        return `
+        <div class="app-item" role="listitem">
+            <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+                <span style="font-weight: 500;">${escapeXml(pin.name || 'Unnamed')}</span>
+                <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(displayTarget)}">${escapeXml(displayTarget)}</span>
+            </div>
+            <div class="pin-actions">
+                <button type="button" class="btn-icon btn-small" data-action="moveTaskbarPinUp" data-arg="${i}" aria-label="Move ${escapeXml(pin.name || 'pin')} up" ${actionsDisabled} ${i === 0 ? 'disabled' : ''}>
+                    <span aria-hidden="true">↑</span>
+                </button>
+                <button type="button" class="btn-icon btn-small" data-action="moveTaskbarPinDown" data-arg="${i}" aria-label="Move ${escapeXml(pin.name || 'pin')} down" ${actionsDisabled} ${i === filteredPins.length - 1 ? 'disabled' : ''}>
+                    <span aria-hidden="true">↓</span>
+                </button>
+                <button type="button" class="btn-icon btn-small" data-action="editTaskbarPin" data-arg="${i}" aria-label="Edit ${escapeXml(pin.name || 'pin')}" ${actionsDisabled}>
+                    <span aria-hidden="true">✎</span>
+                </button>
+                <button type="button" class="remove-btn" data-action="removeTaskbarPin" data-arg="${i}" aria-label="Remove ${escapeXml(pin.name || 'pin')}" ${actionsDisabled}>
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </div>
+        </div>
+    `;
+    }).join('');
+}
+
+function addTaskbarPin() {
+    if (state.taskbarSyncStartPins) {
+        alert('Disable auto-sync to add custom taskbar pins.');
+        return;
+    }
+
+    const name = dom.get('taskbarPinName').value.trim();
+    const type = dom.get('taskbarPinType').value;
+    const value = dom.get('taskbarPinValue').value.trim();
+
+    if (!name || !value) {
+        alert('Taskbar pin name and value are required.');
+        return;
+    }
+
+    const pin = {
+        name: name,
+        pinType: type === 'packagedAppId' ? 'packagedAppId' : 'desktopAppLink',
+        packagedAppId: type === 'packagedAppId' ? value : '',
+        systemShortcut: type === 'desktopAppLink' ? value : '',
+        target: ''
+    };
+
+    state.taskbarPins.push(pin);
+
+    dom.get('taskbarPinName').value = '';
+    dom.get('taskbarPinValue').value = '';
+
+    renderTaskbarPinList();
+    updatePreview();
+}
+
+function editTaskbarPin(index) {
+    if (state.taskbarSyncStartPins) return;
+    const pin = state.taskbarPins[index];
+    if (!pin) return;
+    editingTaskbarPinIndex = index;
+
+    dom.get('editTaskbarPinName').value = pin.name || '';
+    dom.get('editTaskbarPinType').value = pin.pinType || 'desktopAppLink';
+    dom.get('editTaskbarPinValue').value = pin.pinType === 'packagedAppId'
+        ? (pin.packagedAppId || '')
+        : (pin.systemShortcut || pin.target || '');
+
+    dom.get('taskbarEditPanel').classList.remove('hidden');
+}
+
+function saveTaskbarPin() {
+    if (editingTaskbarPinIndex === null) return;
+    const pin = state.taskbarPins[editingTaskbarPinIndex];
+    if (!pin) return;
+
+    const name = dom.get('editTaskbarPinName').value.trim();
+    const type = dom.get('editTaskbarPinType').value;
+    const value = dom.get('editTaskbarPinValue').value.trim();
+
+    if (!name || !value) {
+        alert('Taskbar pin name and value are required.');
+        return;
+    }
+
+    pin.name = name;
+    pin.pinType = type === 'packagedAppId' ? 'packagedAppId' : 'desktopAppLink';
+    pin.packagedAppId = type === 'packagedAppId' ? value : '';
+    pin.systemShortcut = type === 'desktopAppLink' ? value : '';
+    pin.target = '';
+
+    renderTaskbarPinList();
+    updatePreview();
+    cancelTaskbarPinEdit();
+}
+
+function cancelTaskbarPinEdit() {
+    editingTaskbarPinIndex = null;
+    dom.get('taskbarEditPanel').classList.add('hidden');
+}
+
+function removeTaskbarPin(index) {
+    if (state.taskbarSyncStartPins) return;
+    state.taskbarPins.splice(index, 1);
+    renderTaskbarPinList();
+    updatePreview();
+}
+
+function moveTaskbarPinUp(index) {
+    if (state.taskbarSyncStartPins || index <= 0) return;
+    const [pin] = state.taskbarPins.splice(index, 1);
+    state.taskbarPins.splice(index - 1, 0, pin);
+    renderTaskbarPinList();
+    updatePreview();
+}
+
+function moveTaskbarPinDown(index) {
+    if (state.taskbarSyncStartPins || index >= state.taskbarPins.length - 1) return;
+    const [pin] = state.taskbarPins.splice(index, 1);
+    state.taskbarPins.splice(index + 1, 0, pin);
+    renderTaskbarPinList();
+    updatePreview();
+}
 let selectedBrowserPinKey = null;
 let editingPinIndex = null;
+let editingTaskbarPinIndex = null;
 
 function selectBrowserPin(pinKey) {
     selectedBrowserPinKey = pinKey;
@@ -400,6 +597,7 @@ function selectBrowserPin(pinKey) {
     updateBrowserPinModeUI();
     updateBrowserPinSelectionUI();
     updateEdgeTileSourceUI();
+    updateTaskbarSyncUI();
 }
 
 function updateBrowserPinSelectionUI() {
@@ -1096,6 +1294,9 @@ function updatePreview() {
     dom.get('xmlPreview').textContent = xml;
     showValidation();
     updateSummary();
+    if (state.taskbarSyncStartPins) {
+        renderTaskbarPinList();
+    }
 }
 
 /* ============================================================================

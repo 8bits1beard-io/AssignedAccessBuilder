@@ -851,6 +851,87 @@
                             </div>
                         </div>
                     </fieldset>
+
+                    <fieldset class="section">
+                        <legend class="section-header">Taskbar Layout (Optional)</legend>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <span class="toggle-switch">
+                                        <input type="checkbox" id="taskbarSyncPins" checked data-change="updateTaskbarSyncUI" aria-describedby="taskbarSyncPins-tooltip">
+                                        <span class="toggle-slider" aria-hidden="true"></span>
+                                    </span>
+                                    <label for="taskbarSyncPins" class="with-tooltip">
+                                        Sync Taskbar Pins with Start Menu Pins
+                                        <button type="button" class="tooltip-icon" aria-label="Help for Taskbar Sync" aria-describedby="taskbarSyncPins-tooltip">?</button>
+                                        <span class="tooltip-content" id="taskbarSyncPins-tooltip" role="tooltip">When enabled, taskbar pins are built from Start menu pins. Secondary tiles are excluded. Disable to configure taskbar pins separately.</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div id="taskbarLayoutConfig" class="form-group hidden" aria-hidden="true">
+                                <label class="with-tooltip">
+                                    Add Taskbar Pin
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Taskbar Pins" aria-describedby="taskbarPins-tooltip">?</button>
+                                    <span class="tooltip-content" id="taskbarPins-tooltip" role="tooltip">Taskbar pins support packaged app IDs (AUMID) or Start Menu shortcut paths (.lnk).</span>
+                                </label>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="taskbarPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
+                                            <input type="text" id="taskbarPinName" placeholder="e.g., File Explorer" style="width: 100%;">
+                                        </div>
+                                        <div style="width: 180px;">
+                                            <label for="taskbarPinType" style="font-size: 0.75rem; color: var(--text-secondary);">Type</label>
+                                            <select id="taskbarPinType" style="width: 100%;">
+                                                <option value="desktopAppLink">Shortcut Path (.lnk)</option>
+                                                <option value="packagedAppId">Packaged App ID</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="taskbarPinValue" style="font-size: 0.75rem; color: var(--text-secondary);">Value *</label>
+                                        <input type="text" id="taskbarPinValue" placeholder="%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\Microsoft Edge.lnk" style="width: 100%;">
+                                    </div>
+                                    <button type="button" class="btn-primary" data-action="addTaskbarPin" style="align-self: flex-start;">Add Taskbar Pin</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label id="taskbarPinList-label">Taskbar Pins (<span id="taskbarPinCount" aria-live="polite">0</span>)</label>
+                                <div class="app-list" id="taskbarPinList" role="list" aria-labelledby="taskbarPinList-label" aria-live="polite">
+                                    <div class="empty-list" role="listitem">No taskbar pins configured</div>
+                                </div>
+                            </div>
+
+                            <div id="taskbarEditPanel" class="form-group hidden" aria-live="polite">
+                                <label>Edit Taskbar Pin</label>
+                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px;">
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="editTaskbarPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
+                                            <input type="text" id="editTaskbarPinName" style="width: 100%;">
+                                        </div>
+                                        <div style="width: 180px;">
+                                            <label for="editTaskbarPinType" style="font-size: 0.75rem; color: var(--text-secondary);">Type</label>
+                                            <select id="editTaskbarPinType" style="width: 100%;">
+                                                <option value="desktopAppLink">Shortcut Path (.lnk)</option>
+                                                <option value="packagedAppId">Packaged App ID</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label for="editTaskbarPinValue" style="font-size: 0.75rem; color: var(--text-secondary);">Value *</label>
+                                        <input type="text" id="editTaskbarPinValue" style="width: 100%;">
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn-primary btn-small" data-action="saveTaskbarPin">Save Changes</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="cancelTaskbarPinEdit">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
                     </div>
                     <!-- End System Tab -->
 
