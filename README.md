@@ -94,6 +94,8 @@ flowchart TD
 - Import/export XML configurations
 - Tabbed deployment guide (Intune, PowerShell, PPKG)
 
+Note: Intune’s Settings Catalog kiosk allow-list is AUMID-based only. Use OMA-URI AssignedAccess CSP when you need Win32 apps like `osk.exe` or `sndvol.exe`.
+
 Note: If Windows blocks a downloaded script, right-click the `.ps1` file, choose **Properties**, then **Unblock**.
 
 ### Accessibility

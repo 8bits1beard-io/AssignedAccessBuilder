@@ -102,6 +102,8 @@ function updateSummary() {
         accountSummary = groupName ? `User Group (${groupName}${typeLabel})` : 'User Group';
     } else if (state.accountType === 'global') {
         accountSummary = 'Global Profile (All non-admin users)';
+    } else if (state.accountType === 'auto') {
+        accountSummary = displayName ? `Auto Logon (${displayName})` : 'Auto Logon (Managed)';
     }
 
     const rows = [

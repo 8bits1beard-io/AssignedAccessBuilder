@@ -85,6 +85,9 @@ flowchart LR
 | Data type | String |
 | Value | *Paste generated XML* |
 
+**Why OMA-URI over the Settings Catalog kiosk template?**
+The Settings Catalog multi-app kiosk allow-list is AUMID-based and does not support Win32 `DesktopAppPath` entries. Use OMA-URI when you need Win32 apps like `C:\Windows\System32\osk.exe` or `C:\Windows\System32\sndvol.exe`.
+
 ### PowerShell Script
 
 1. Click **Download Deploy Script**
@@ -122,7 +125,7 @@ flowchart LR
 | "Operation cancelled due to restrictions" | Win32 app blocked by RestrictRun registry | Use Edge kiosk mode or ensure all required executables are allowed |
 | Kiosk not applying after reboot | Invalid XML or insufficient privileges | Validate XML in tool; ensure script ran as SYSTEM |
 | Configuration partially applied | XML namespace mismatch | Regenerate XML; check Windows version compatibility |
-| Start menu pins not appearing | Shortcut file missing or invalid path | Verify shortcuts exist in the Start Menu Programs folder and match paths in StartPins JSON; use PowerShell script to auto-create |
+| Start menu pins not appearing | Shortcut file missing or invalid path | Verify shortcuts exist in the Start Menu Programs folder and match paths in StartPins JSON; use the deploy or shortcut-only script to auto-create |
 | Edge not launching in kiosk mode | Missing Edge components in allowed apps | Add Edge via preset button (includes msedge.exe, msedge_proxy.exe, and the Edge packaged app ID) |
 | Auto-launch app not starting | App not in AllowedApps list | Ensure the auto-launch app is also added to the allowed applications list |
 | SYSTEM context check fails | Script not running as SYSTEM | Use `psexec -i -s` to run PowerShell as SYSTEM |
