@@ -2331,12 +2331,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         runActions(target.dataset.change, target, event);
     });
 
-    const lastUpdatedEl = dom.get('lastUpdated');
-    if (lastUpdatedEl) {
-        const modified = new Date(document.lastModified);
-        lastUpdatedEl.textContent = formatLastUpdated(modified);
-    }
-
     updateBrowserPinModeUI();
 
     // Add tooltip positioning on hover/focus
