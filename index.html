@@ -19,13 +19,14 @@
             </h1>
             <nav class="header-actions" aria-label="Main actions">
                 <button type="button" class="btn-secondary" data-action="loadPreset" data-arg="blank">New</button>
-                <button type="button" class="btn-secondary" data-action="importXml">Import XML</button>
+                <button type="button" class="btn-secondary" data-action="importXml" title="Assigned Access XML only">Import XML</button>
                 <button type="button" class="btn-secondary" data-action="showDeployHelp">Deploy Guide</button>
                 <button type="button" class="theme-toggle" data-action="toggleTheme" aria-label="Toggle light mode" title="Toggle light mode">
                     <span aria-hidden="true">&#9728;</span>
                 </button>
             </nav>
         </div>
+        <div class="header-tagline">Build kiosk experiences, not XML.</div>
     </header>
 
     <main id="main-content" class="container layout">
@@ -48,6 +49,7 @@
                 <div class="tab-panels">
                     <!-- Setup Tab -->
                     <div class="tab-content active" role="tabpanel" id="tab-setup" aria-labelledby="tab-btn-setup">
+                        <p class="section-hint">Step 1: Choose kiosk mode, set profile details, then pick the account type.</p>
                         <!-- Kiosk Mode -->
                         <fieldset class="section">
                     <legend class="section-header">Kiosk Mode</legend>
@@ -169,6 +171,7 @@
 
                     <!-- Application Tab -->
                     <div class="tab-content" role="tabpanel" id="tab-application" aria-labelledby="tab-btn-application">
+                        <p class="section-hint">Step 2: Add allowed apps and configure auto-launch if needed.</p>
                 <!-- Single-App Configuration -->
                 <div id="singleAppConfig">
                     <fieldset class="section">
@@ -554,6 +557,7 @@
 
                     <!-- Start Menu Tab (Multi-App only) -->
                     <div class="tab-content" role="tabpanel" id="tab-startmenu" aria-labelledby="tab-btn-startmenu">
+                    <p class="section-hint">Step 3: Add Start menu pins and optional shortcuts.</p>
                     <fieldset class="section">
                         <legend class="section-header">Start Menu Pins</legend>
                         <div class="section-content">
@@ -568,11 +572,12 @@
                                         <button type="button" class="tooltip-icon" aria-label="Help for Auto-pin Allowed Apps" aria-describedby="autoPinAllowed-tooltip">?</button>
                                         <span class="tooltip-content" id="autoPinAllowed-tooltip" role="tooltip">When enabled, new allowed apps are automatically added as Start menu pins. You can remove individual pins, and turning this off removes auto-added pins.</span>
                                     </label>
+                                    <div class="inline-note">Tip: Turn this off if you want full control of pins.</div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="with-tooltip">
-                                    Add Custom Shortcut
+                                    Add Start Menu Shortcut
                                     <button type="button" class="tooltip-icon" aria-label="Help for Add Shortcut" aria-describedby="addShortcut-tooltip">?</button>
                                     <span class="tooltip-content" id="addShortcut-tooltip" role="tooltip">Create shortcuts that will be pinned to the Start menu. The deployment script creates .lnk files in the Start Menu Programs folder.</span>
                                 </label>
@@ -610,7 +615,7 @@
 
                             <div class="form-group">
                                 <label id="commonPins-label" class="with-tooltip">
-                                    Common Pins
+                                    Quick Add Pins
                                     <button type="button" class="tooltip-icon" aria-label="Help for Common Pins" aria-describedby="commonPins-tooltip">?</button>
                                     <span class="tooltip-content" id="commonPins-tooltip" role="tooltip">Quick-add common shortcuts with pre-configured targets. Make sure the corresponding app is also in your Allowed Applications list.</span>
                                 </label>
@@ -639,7 +644,7 @@
                                                 </select>
                                             </div>
                                             <div id="browserPinSourceConfig" style="flex: 2; min-width: 260px;">
-                                                <label for="browserPinSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Kiosk Source</label>
+                                                <label for="browserPinSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Content Source</label>
                                                 <div style="display: flex; gap: 8px; align-items: center;">
                                                     <select id="browserPinSourceType" data-change="updateBrowserPinSourceUI" style="width: 140px;">
                                                         <option value="url">Web URL</option>
@@ -714,6 +719,7 @@
 
                     <!-- System Tab (Multi-App only) -->
                     <div class="tab-content" role="tabpanel" id="tab-system" aria-labelledby="tab-btn-system">
+                    <p class="section-hint">Step 4: Choose taskbar visibility and File Explorer restrictions.</p>
                     <fieldset class="section">
                         <legend class="section-header">Taskbar &amp; File Explorer</legend>
                         <div class="section-content">
@@ -751,7 +757,8 @@
                     <!-- End System Tab -->
 
                     <div class="tab-content" role="tabpanel" id="tab-summary" aria-labelledby="tab-btn-summary">
-                        <fieldset class="section">
+                    <p class="section-hint">Step 5: Review the summary and export your configuration.</p>
+                    <fieldset class="section">
                             <legend class="section-header">Configuration Summary</legend>
                             <div class="section-content">
                                 <div class="status info">

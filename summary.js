@@ -114,7 +114,7 @@ function updateSummary() {
         { label: 'Start Menu Pins', value: formatStartPinsSummary() },
         { label: 'Auto Logon', value: autoLogon ? 'Yes' : 'No' },
         { label: 'Auto Logon Username', value: autoLogon ? escapeXml(displayName || 'Managed kiosk account') : 'N/A' },
-        { label: 'Auto-Start App', value: escapeXml(formatAutoLaunchSummary()) }
+        { label: 'Auto-Launch App', value: escapeXml(formatAutoLaunchSummary()) }
     ];
 
     summaryGrid.innerHTML = rows.map(row => `

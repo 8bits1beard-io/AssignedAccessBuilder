@@ -236,6 +236,13 @@ header h1 span.subtitle {
     font-size: 0.9rem;
 }
 
+.header-tagline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    letter-spacing: 0.2px;
+    margin-bottom: 8px;
+}
+
 .header-actions {
     display: flex;
     gap: 10px;
@@ -294,6 +301,18 @@ h2.panel-header {
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-top: 4px;
+}
+
+.section-hint {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+}
+
+.inline-note {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
 }
 
 input[type="text"],
