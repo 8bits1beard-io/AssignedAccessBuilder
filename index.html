@@ -613,6 +613,45 @@
                             </div>
 
                             <div class="form-group">
+                                <label class="with-tooltip">
+                                    Edge Site Tile (Secondary Tile)
+                                    <button type="button" class="tooltip-icon" aria-label="Help for Edge Site Tile" aria-describedby="edgeTile-tooltip">?</button>
+                                    <span class="tooltip-content" id="edgeTile-tooltip" role="tooltip">Creates a Start menu tile that opens a specific site in Edge. Requires the Edge packaged app ID and msedge.exe in Allowed Apps.</span>
+                                </label>
+                                <div style="display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--bg-tertiary); border-radius: 6px;">
+                                    <div style="display: flex; gap: 8px;">
+                                        <div style="flex: 1;">
+                                            <label for="edgeTileName" style="font-size: 0.75rem; color: var(--text-secondary);">Tile Name *</label>
+                                            <input type="text" id="edgeTileName" placeholder="e.g., Company Portal" style="width: 100%;">
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <label for="edgeTileId" style="font-size: 0.75rem; color: var(--text-secondary);">Tile ID (optional)</label>
+                                            <input type="text" id="edgeTileId" placeholder="e.g., CompanyPortal" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <div style="min-width: 140px;">
+                                            <label for="edgeTileSourceType" style="font-size: 0.75rem; color: var(--text-secondary);">Content Source</label>
+                                            <select id="edgeTileSourceType" data-change="updateEdgeTileSourceUI" style="width: 100%;">
+                                                <option value="url">Web URL</option>
+                                                <option value="file">Local File</option>
+                                            </select>
+                                        </div>
+                                        <div id="edgeTileUrlConfig" style="flex: 1;">
+                                            <input type="text" id="edgeTileUrl" placeholder="https://example.com" style="width: 100%;">
+                                        </div>
+                                        <div id="edgeTileFileConfig" class="hidden" style="flex: 1;" aria-hidden="true">
+                                            <input type="text" id="edgeTileFilePath" placeholder="C:\\Kiosk\\index.html" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--text-secondary); font-style: italic;">
+                                        Note: Secondary tiles require the Edge packaged app ID in Allowed Apps.
+                                    </div>
+                                    <button type="button" class="btn-primary" data-action="addEdgeSecondaryTile" style="align-self: flex-start;">Add Edge Site Tile</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
                                 <label id="commonPins-label" class="with-tooltip">
                                     Quick Add Pins
                                     <button type="button" class="tooltip-icon" aria-label="Help for Common Pins" aria-describedby="commonPins-tooltip">?</button>

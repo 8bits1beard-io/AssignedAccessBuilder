@@ -261,6 +261,7 @@ const actionHandlers = {
     syncAutoPins,
     updateBrowserPinModeUI,
     updateBrowserPinSourceUI,
+    updateEdgeTileSourceUI,
     selectBrowserPin,
     addSelectedBrowserPin,
     copyXml,
@@ -268,6 +269,7 @@ const actionHandlers = {
     downloadPowerShell,
     downloadShortcutsScript,
     downloadStartLayoutXml,
+    addEdgeSecondaryTile,
     handleImport,
     copyProfileId
 };
@@ -359,6 +361,18 @@ function updateBrowserPinSourceUI() {
     fileConfig.setAttribute('aria-hidden', sourceType !== 'file');
 }
 
+function updateEdgeTileSourceUI() {
+    const sourceType = dom.get('edgeTileSourceType').value;
+    const urlConfig = dom.get('edgeTileUrlConfig');
+    const fileConfig = dom.get('edgeTileFileConfig');
+
+    urlConfig.classList.toggle('hidden', sourceType !== 'url');
+    fileConfig.classList.toggle('hidden', sourceType !== 'file');
+
+    urlConfig.setAttribute('aria-hidden', sourceType !== 'url');
+    fileConfig.setAttribute('aria-hidden', sourceType !== 'file');
+}
+
 function updateBrowserPinModeUI() {
     const mode = dom.get('browserPinMode').value;
     const sourceConfig = dom.get('browserPinSourceConfig');
@@ -379,6 +393,7 @@ function selectBrowserPin(pinKey) {
     updateBrowserPinSelectionUI();
     updateBrowserPinModeUI();
     updateBrowserPinSelectionUI();
+    updateEdgeTileSourceUI();
 }
 
 function updateBrowserPinSelectionUI() {
@@ -430,6 +445,16 @@ function getBrowserPinLaunchUrl() {
         sourceType,
         dom.get('browserPinUrl').value.trim(),
         dom.get('browserPinFilePath').value,
+        ''
+    );
+}
+
+function getEdgeTileLaunchUrl() {
+    const sourceType = dom.get('edgeTileSourceType').value;
+    return buildLaunchUrl(
+        sourceType,
+        dom.get('edgeTileUrl').value.trim(),
+        dom.get('edgeTileFilePath').value,
         ''
     );
 }
@@ -824,6 +849,38 @@ function addCommonPin(pinKey) {
     }
 }
 
+function addEdgeSecondaryTile() {
+    const name = dom.get('edgeTileName').value.trim();
+    const url = getEdgeTileLaunchUrl();
+    const tileId = dom.get('edgeTileId').value.trim();
+
+    if (!name || !url) {
+        alert('Edge tile name and URL/file path are required.');
+        return;
+    }
+
+    if (state.startPins.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+        alert('A pin with this name already exists.');
+        return;
+    }
+
+    state.startPins.push({
+        name: name,
+        pinType: 'secondaryTile',
+        packagedAppId: 'Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App',
+        args: url,
+        tileId: tileId || ''
+    });
+
+    dom.get('edgeTileName').value = '';
+    dom.get('edgeTileUrl').value = '';
+    dom.get('edgeTileFilePath').value = '';
+    dom.get('edgeTileId').value = '';
+
+    renderPinList();
+    updatePreview();
+}
+
 function ensurePinForAllowedApp(app) {
     if (!app || !app.value) return;
     const autoKey = normalizeAutoPinKey(app.value);
@@ -906,10 +963,12 @@ function renderPinList() {
         const isUwp = pin.pinType === 'packagedAppId';
         const displayTarget = isUwp
             ? pin.packagedAppId
-            : (pin.target ? truncate(pin.target, 40)
-                : (pin.systemShortcut ? truncate(pin.systemShortcut, 40) : '(no target - click to edit)'));
+            : (pin.pinType === 'secondaryTile'
+                ? (pin.args || pin.packagedAppId || 'Edge site tile')
+                : (pin.target ? truncate(pin.target, 40)
+                    : (pin.systemShortcut ? truncate(pin.systemShortcut, 40) : '(no target - click to edit)')));
         const hasArgs = pin.args ? ` (${truncate(pin.args, 20)})` : '';
-        const missingTarget = !isUwp && !pin.target && !pin.systemShortcut;
+        const missingTarget = !isUwp && pin.pinType === 'desktopAppLink' && !pin.target && !pin.systemShortcut;
         const warningStyle = missingTarget ? 'color: var(--error-color, #e74c3c);' : 'color: var(--text-secondary);';
         const typeLabel = isUwp ? '<span style="background: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; margin-left: 6px;">UWP</span>' : '';
         return `

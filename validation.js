@@ -74,7 +74,7 @@ function validate() {
                 errs.push('At least one allowed app is required');
             }
 
-            const missingTargets = state.startPins.filter(p => p.pinType !== 'packagedAppId' && !p.target && !p.systemShortcut);
+            const missingTargets = state.startPins.filter(p => p.pinType === 'desktopAppLink' && !p.target && !p.systemShortcut);
             if (missingTargets.length > 0) {
                 errs.push(`${missingTargets.length} shortcut(s) missing target path: ${missingTargets.map(p => p.name).join(', ')}`);
             }
