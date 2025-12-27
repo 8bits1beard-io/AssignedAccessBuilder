@@ -264,6 +264,11 @@ const actionHandlers = {
     updateEdgeTileSourceUI,
     selectBrowserPin,
     addSelectedBrowserPin,
+    editPin,
+    saveEditPin,
+    cancelEditPin,
+    movePinUp,
+    movePinDown,
     copyXml,
     downloadXml,
     downloadPowerShell,
@@ -387,6 +392,7 @@ function updateBrowserPinModeUI() {
 }
 
 let selectedBrowserPinKey = null;
+let editingPinIndex = null;
 
 function selectBrowserPin(pinKey) {
     selectedBrowserPinKey = pinKey;
@@ -881,6 +887,93 @@ function addEdgeSecondaryTile() {
     updatePreview();
 }
 
+function editPin(index) {
+    const pin = state.startPins[index];
+    if (!pin) return;
+    editingPinIndex = index;
+
+    dom.get('editPinName').value = pin.name || '';
+    dom.get('editPinType').textContent = pin.pinType || 'desktopAppLink';
+
+    dom.get('editDesktopFields').classList.toggle('hidden', pin.pinType !== 'desktopAppLink');
+    dom.get('editPackagedFields').classList.toggle('hidden', pin.pinType !== 'packagedAppId');
+    dom.get('editSecondaryFields').classList.toggle('hidden', pin.pinType !== 'secondaryTile');
+
+    if (pin.pinType === 'desktopAppLink') {
+        dom.get('editPinTarget').value = pin.target || '';
+        dom.get('editPinArgs').value = pin.args || '';
+        dom.get('editPinWorkingDir').value = pin.workingDir || '';
+        dom.get('editPinIconPath').value = pin.iconPath || '';
+        dom.get('editPinShortcutPath').value = pin.systemShortcut || '';
+    } else if (pin.pinType === 'packagedAppId') {
+        dom.get('editPinPackagedAppId').value = pin.packagedAppId || '';
+    } else if (pin.pinType === 'secondaryTile') {
+        dom.get('editTileId').value = pin.tileId || '';
+        dom.get('editTileUrl').value = pin.args || '';
+        dom.get('editTilePackagedAppId').value = pin.packagedAppId || 'Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App';
+    }
+
+    dom.get('pinEditPanel').classList.remove('hidden');
+}
+
+function cancelEditPin() {
+    editingPinIndex = null;
+    dom.get('pinEditPanel').classList.add('hidden');
+}
+
+function saveEditPin() {
+    if (editingPinIndex === null) return;
+    const pin = state.startPins[editingPinIndex];
+    if (!pin) return;
+
+    const name = dom.get('editPinName').value.trim();
+    if (!name) {
+        alert('Pin name is required.');
+        return;
+    }
+
+    pin.name = name;
+
+    if (pin.pinType === 'desktopAppLink') {
+        pin.target = dom.get('editPinTarget').value.trim();
+        pin.args = dom.get('editPinArgs').value.trim();
+        pin.workingDir = dom.get('editPinWorkingDir').value.trim();
+        pin.iconPath = dom.get('editPinIconPath').value.trim();
+        pin.systemShortcut = dom.get('editPinShortcutPath').value.trim();
+    } else if (pin.pinType === 'packagedAppId') {
+        pin.packagedAppId = dom.get('editPinPackagedAppId').value.trim();
+    } else if (pin.pinType === 'secondaryTile') {
+        pin.tileId = dom.get('editTileId').value.trim();
+        const url = dom.get('editTileUrl').value.trim();
+        if (!url) {
+            alert('Tile URL or file path is required.');
+            return;
+        }
+        pin.args = url;
+        pin.packagedAppId = dom.get('editTilePackagedAppId').value.trim() || 'Microsoft.MicrosoftEdge.Stable_8wekyb3d8bbwe!App';
+    }
+
+    renderPinList();
+    updatePreview();
+    cancelEditPin();
+}
+
+function movePinUp(index) {
+    if (index <= 0) return;
+    const [pin] = state.startPins.splice(index, 1);
+    state.startPins.splice(index - 1, 0, pin);
+    renderPinList();
+    updatePreview();
+}
+
+function movePinDown(index) {
+    if (index >= state.startPins.length - 1) return;
+    const [pin] = state.startPins.splice(index, 1);
+    state.startPins.splice(index + 1, 0, pin);
+    renderPinList();
+    updatePreview();
+}
+
 function ensurePinForAllowedApp(app) {
     if (!app || !app.value) return;
     const autoKey = normalizeAutoPinKey(app.value);
@@ -977,9 +1070,20 @@ function renderPinList() {
                 <span style="font-weight: 500;">${escapeXml(pin.name)}${typeLabel}${missingTarget ? ' <span style="color: var(--error-color, #e74c3c);" title="Target path required">⚠</span>' : ''}</span>
                 <span style="font-size: 0.75rem; ${warningStyle} overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeXml(displayTarget)}${escapeXml(hasArgs)}">${escapeXml(displayTarget)}${escapeXml(hasArgs)}</span>
             </div>
-            <button type="button" class="remove-btn" data-action="removePin" data-arg="${i}" aria-label="Remove ${escapeXml(pin.name)}">
-                <span aria-hidden="true">✕</span>
-            </button>
+            <div class="pin-actions">
+                <button type="button" class="btn-icon btn-small" data-action="movePinUp" data-arg="${i}" aria-label="Move ${escapeXml(pin.name)} up" ${i === 0 ? 'disabled' : ''}>
+                    <span aria-hidden="true">↑</span>
+                </button>
+                <button type="button" class="btn-icon btn-small" data-action="movePinDown" data-arg="${i}" aria-label="Move ${escapeXml(pin.name)} down" ${i === state.startPins.length - 1 ? 'disabled' : ''}>
+                    <span aria-hidden="true">↓</span>
+                </button>
+                <button type="button" class="btn-icon btn-small" data-action="editPin" data-arg="${i}" aria-label="Edit ${escapeXml(pin.name)}">
+                    <span aria-hidden="true">✎</span>
+                </button>
+                <button type="button" class="remove-btn" data-action="removePin" data-arg="${i}" aria-label="Remove ${escapeXml(pin.name)}">
+                    <span aria-hidden="true">✕</span>
+                </button>
+            </div>
         </div>
     `}).join('');
 }

@@ -750,6 +750,66 @@
                                     <div class="empty-list" role="listitem">No pins added yet</div>
                                 </div>
                             </div>
+
+                            <div id="pinEditPanel" class="form-group hidden" aria-live="polite">
+                                <label>Edit Pin <span id="editPinType" style="font-weight: 400; color: var(--text-secondary);"></span></label>
+                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--bg-tertiary); border-radius: 6px;">
+                                    <div>
+                                        <label for="editPinName" style="font-size: 0.75rem; color: var(--text-secondary);">Name *</label>
+                                        <input type="text" id="editPinName" style="width: 100%;">
+                                    </div>
+                                    <div id="editDesktopFields">
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="flex: 2;">
+                                                <label for="editPinTarget" style="font-size: 0.75rem; color: var(--text-secondary);">Target Path</label>
+                                                <input type="text" id="editPinTarget" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <label for="editPinArgs" style="font-size: 0.75rem; color: var(--text-secondary);">Arguments</label>
+                                                <input type="text" id="editPinArgs" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                            <div style="flex: 1;">
+                                                <label for="editPinWorkingDir" style="font-size: 0.75rem; color: var(--text-secondary);">Working Directory</label>
+                                                <input type="text" id="editPinWorkingDir" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <label for="editPinIconPath" style="font-size: 0.75rem; color: var(--text-secondary);">Icon Path</label>
+                                                <input type="text" id="editPinIconPath" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <label for="editPinShortcutPath" style="font-size: 0.75rem; color: var(--text-secondary);">Shortcut Path (.lnk)</label>
+                                            <input type="text" id="editPinShortcutPath" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div id="editPackagedFields" class="hidden">
+                                        <label for="editPinPackagedAppId" style="font-size: 0.75rem; color: var(--text-secondary);">Packaged App ID</label>
+                                        <input type="text" id="editPinPackagedAppId" style="width: 100%;">
+                                    </div>
+                                    <div id="editSecondaryFields" class="hidden">
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="flex: 1;">
+                                                <label for="editTileId" style="font-size: 0.75rem; color: var(--text-secondary);">Tile ID</label>
+                                                <input type="text" id="editTileId" style="width: 100%;">
+                                            </div>
+                                            <div style="flex: 2;">
+                                                <label for="editTileUrl" style="font-size: 0.75rem; color: var(--text-secondary);">URL or file path</label>
+                                                <input type="text" id="editTileUrl" style="width: 100%;">
+                                            </div>
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <label for="editTilePackagedAppId" style="font-size: 0.75rem; color: var(--text-secondary);">Edge Packaged App ID</label>
+                                            <input type="text" id="editTilePackagedAppId" style="width: 100%;">
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn-primary btn-small" data-action="saveEditPin">Save Changes</button>
+                                        <button type="button" class="btn-secondary btn-small" data-action="cancelEditPin">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </fieldset>
                     </div>
